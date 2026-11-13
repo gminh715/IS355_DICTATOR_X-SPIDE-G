@@ -1,0 +1,6 @@
+stage,n_contracts,n_errors,error_rate_pct,error_causes,median_ms,mean_ms,p95_ms,max_ms,total_s,cpu_info,ram_gb,python_version,notes
+disasm,7446,0,0.0,none,3.9031,6.0046,14.622,88.9289,44.7105,12th Gen Intel(R) Core(TM) i5-12450H (12 logical threads),15.63,3.12.13,truncated_push_contracts=554;invalid_opcode_contracts=1163
+bigram,7446,0,0.0,none,3.6109,4.4239,10.8777,29.0995,32.9405,12th Gen Intel(R) Core(TM) i5-12450H (12 logical threads),15.63,3.12.13,stores sparse norm & raw relative frequencies; top-k=200 fit in-fold
+gstat,7446,0,0.0,none,1.9146,2.4737,5.647,59.6125,18.4188,12th Gen Intel(R) Core(TM) i5-12450H (12 logical threads),15.63,3.12.13,16 transition-graph descriptors including /L normalized variants
+gsem,7446,0,0.0,none,6.6402,8.5986,18.6743,103.0384,64.0254,12th Gen Intel(R) Core(TM) i5-12450H (12 logical threads),15.63,3.12.13,15 CFG descriptors; unresolved_jump_ratio>0.50: 526/7446 (7.06%)
+end_to_end,7446,0,0.0,none,16.584,21.7947,60.2126,164.3111,162.283,12th Gen Intel(R) Core(TM) i5-12450H (12 logical threads),15.63,3.12.13,full S_code runtime extraction cost per contract
