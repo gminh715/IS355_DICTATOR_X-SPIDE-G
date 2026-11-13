@@ -3,8 +3,9 @@
 .env.*
 !.env.example
 
-# Raw datasets with unverified redistribution licenses (commit manifest.json & scripts only)
+# Raw & derived large datasets (reproducible via manifest.json + python -m src.data.pipeline)
 data/raw/
+data/processed/
 *.zip
 
 # Local draft backups

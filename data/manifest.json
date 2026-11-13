@@ -1,0 +1,222 @@
+{
+  "schema_version": "1.0",
+  "generated_at_utc": "2026-11-13T03:34:10Z",
+  "notes": "Raw files under data/raw/ are excluded from Git via .gitignore; verify checksums with this manifest.",
+  "sources": {
+    "x_spide": {
+      "name": "X-SPIDE Official Source Code and Dataset",
+      "url": "https://github.com/LucaPennella/x-spide-smart-ponzi-detection.git",
+      "commit": "dcf6027c2bd15cb1833cca3fc86265df4394b05a",
+      "downloaded_at_utc": "2026-11-13T03:34:10Z",
+      "license": "LICENSE: MIT License",
+      "local_dir": "data/raw/x-spide",
+      "files": [
+        {
+          "path": "code/1009_best_features_SHAP.ipynb",
+          "size_bytes": 33011,
+          "sha256": "7d271bdbda34d3af9a0f0e5ab71898d9ee115594dc0310f463e62fd9fe707310"
+        },
+        {
+          "path": "code/2210_Model_Selection.ipynb",
+          "size_bytes": 549896,
+          "sha256": "fd1aea13cf17cbff9f8f8043e1f97a6fd3b3f77c2c560a6efae3daa23fb50696"
+        },
+        {
+          "path": "code/2510_best_features_model.ipynb",
+          "size_bytes": 237888,
+          "sha256": "6711b1e175910aeb648d1931879bd606638c958032145966847ce9e1a06ecea6"
+        },
+        {
+          "path": "code/2710_best_features_SHAP.ipynb",
+          "size_bytes": 2090925,
+          "sha256": "2c2ad5c5d5e1e585260806daf9a9ce9921c7a993990a4f32e2db77417cf263b2"
+        },
+        {
+          "path": "code/Bytecode_list_Script.ipynb",
+          "size_bytes": 64124,
+          "sha256": "b4f74b78838a770c23a6b44411ff32575a14e172aa26831f8c99bf82badf7df2"
+        },
+        {
+          "path": "code/readme.md",
+          "size_bytes": 1323,
+          "sha256": "7927ada41a7e385c21b70a4cfc42727c7c5bf5a2b87d872f57b0e66107949381"
+        },
+        {
+          "path": "code/Script_Account_Features.ipynb",
+          "size_bytes": 509974,
+          "sha256": "cb961d3f0a6188e2472b43bb55f4b73dac7782d5045ac887f0206f057fa724bc"
+        },
+        {
+          "path": "code/Script_Code_Features.ipynb",
+          "size_bytes": 37613,
+          "sha256": "f2a3ae77e86f73f4c791aa93115c48eb9a58133eb85f9bb67003450234cec103"
+        },
+        {
+          "path": "dataset/address_without_byt.csv",
+          "size_bytes": 9423,
+          "sha256": "2b269b8d1bda46f1dd012f7c3dca9a1c803c575790765ac9c7b8402c3d663371"
+        },
+        {
+          "path": "dataset/bytecode_list.zip",
+          "size_bytes": 15666667,
+          "sha256": "8785e28ac8ee54fc26dfe2f8d76158c67fd0362ed34f85300809b012d72e4b0c"
+        },
+        {
+          "path": "dataset/bytecode_opcode_8k.csv",
+          "size_bytes": 2930900,
+          "sha256": "e6d867b93040908158d6fcd1a4bc4e9b55f9bf3f9bb3cc66360f456df49af008"
+        },
+        {
+          "path": "dataset/Contract Adresses.csv",
+          "size_bytes": 350340,
+          "sha256": "26dfd59dc6334405384fb2e02e4d747efabccd877db75a9de556e6b6d8890783"
+        },
+        {
+          "path": "dataset/depl_bytecode_list.zip",
+          "size_bytes": 13366628,
+          "sha256": "23b9f59e3b963e74bf50ff62b71f2cee1c6d4188d567887703df96a42fc8a394"
+        },
+        {
+          "path": "dataset/DS_deployed_bytecode.csv",
+          "size_bytes": 3520600,
+          "sha256": "73e182618d267390521bcdf9390a186b8389335220c8f3c6bef90ddff94500d8"
+        },
+        {
+          "path": "dataset/DS_full_bytecode.csv",
+          "size_bytes": 3538228,
+          "sha256": "4d379f8593d9392c0b98864d9c96cdd1bb7a3878cf1949951167affa66b8b085"
+        },
+        {
+          "path": "dataset/duplicate_bytecode.csv",
+          "size_bytes": 586286,
+          "sha256": "ae6e41a168abace25e1ad495295dd9cdca34162712ddef2b0da381f2463655ef"
+        },
+        {
+          "path": "dataset/duplicate_bytecode_join_addr.csv",
+          "size_bytes": 2114113,
+          "sha256": "e7f9c3475716eb37fa066910eb2bebd4e3557e3acb81d4d5c827c2b99c6ff195"
+        },
+        {
+          "path": "dataset/README.md",
+          "size_bytes": 2900,
+          "sha256": "58d1384888301e963686a72001655540828cf0e97e09bcf27c728b65e8731a1a"
+        },
+        {
+          "path": "LICENSE",
+          "size_bytes": 1091,
+          "sha256": "f60a4088019afee4589026ebd7ef8a261ead8f6dec012dfaac040d030678adc7"
+        },
+        {
+          "path": "miscellaneous/Query_Data_Validation",
+          "size_bytes": 1038,
+          "sha256": "41e20de547870c4a1c42bdd01e1b810e90adb242fcf98d4966fdd9602c53f6b0"
+        },
+        {
+          "path": "miscellaneous/readme.md",
+          "size_bytes": 699,
+          "sha256": "a6a956d159888516405e230490cf4eca59cd051b0660d8b4625c01e32f1590db"
+        },
+        {
+          "path": "miscellaneous/Smart_Contract_Misclassified.txt",
+          "size_bytes": 1696,
+          "sha256": "440c307a7cd7c0138504c22ed264e2573c4d79852f6af440daa43c56ad4667bf"
+        },
+        {
+          "path": "miscellaneous/x-spide-pipeline.png",
+          "size_bytes": 124142,
+          "sha256": "41d602b9b5eb1cba15c3683ea2892279178a150e41a1075d3eb9e25c0532f4f8"
+        },
+        {
+          "path": "old_scripts/1706_best_features_SHAP.ipynb",
+          "size_bytes": 1128436,
+          "sha256": "a3a0e0683b750f2475a3f321b8cae90a313790c4eb8aadd711c9aff04aef35a4"
+        },
+        {
+          "path": "old_scripts/2206_best_features_model.ipynb",
+          "size_bytes": 149765,
+          "sha256": "7537ce6a8043cd349736c0d6b1cee35b3648bb0227aed597001c1506fd9ba3f3"
+        },
+        {
+          "path": "old_scripts/2206_Model_Selection.ipynb",
+          "size_bytes": 88806,
+          "sha256": "ace263c2e05ecee1fb49b5dd57ec7db719a56efe82c9d8010a59626cbedb1edd"
+        },
+        {
+          "path": "old_scripts/readme.me",
+          "size_bytes": 88,
+          "sha256": "1297e91f0569b91a68cff3d4150af67869e13536d448a482ce6a12477b27d106"
+        },
+        {
+          "path": "old_scripts/Smart_Contract_Misclassified_old.txt",
+          "size_bytes": 4591,
+          "sha256": "7b4c40c7c420538d0a5d185b9708181a413a607e083bf6cc1a1d720ea562a45b"
+        },
+        {
+          "path": "README.md",
+          "size_bytes": 3108,
+          "sha256": "87ae0dadd1a1a37ec937e00d46c9c4a8bbbf78def7606404c9bc149048b3fd28"
+        }
+      ]
+    },
+    "ponziguard": {
+      "name": "PonziGuard / XBlock Dataset",
+      "url": "https://github.com/PonziDetection/PonziGuard/tree/main/dataset",
+      "commit": "e748f4621d2778f82e05df54bfe59721d54dbd14",
+      "downloaded_at_utc": "2026-11-13T03:34:10Z",
+      "license": "unspecified (do not redistribute raw files)",
+      "local_dir": "data/raw/ponziguard",
+      "extracted_counts": {
+        "Ponzi": 476,
+        "non-Ponzi": 2632
+      },
+      "files": [
+        {
+          "path": "Ponzi.zip",
+          "url": "https://raw.githubusercontent.com/PonziDetection/PonziGuard/e748f4621d2778f82e05df54bfe59721d54dbd14/dataset/Ponzi.zip",
+          "size_bytes": 421262,
+          "sha256": "cb6431c4847e37bd6a5c616d1208d5c84084b6c4a1ae1872f62e9050e282f9eb"
+        },
+        {
+          "path": "non-Ponzi.zip",
+          "url": "https://raw.githubusercontent.com/PonziDetection/PonziGuard/e748f4621d2778f82e05df54bfe59721d54dbd14/dataset/non-Ponzi.zip",
+          "size_bytes": 4459521,
+          "sha256": "d3a610ee7c446707c562128b72ff90014327e0699ba384d1c4053a6a1bb7240a"
+        },
+        {
+          "path": "README.md",
+          "url": "https://raw.githubusercontent.com/PonziDetection/PonziGuard/e748f4621d2778f82e05df54bfe59721d54dbd14/README.md",
+          "size_bytes": 3514,
+          "sha256": "a3cf8916155d0ca84c9038f5a565d27b8eb1b6371edde2bf835af11b507cd3bf"
+        }
+      ]
+    },
+    "blockchain_unica": {
+      "name": "Blockchain@Unica Ethereum Ponzi Address List",
+      "url": "https://github.com/blockchain-unica/ethereum-ponzi/blob/master/ponzi-addresses.csv",
+      "commit": "e083ce720f934e17ea1fe9124b0ea874aa042bf",
+      "downloaded_at_utc": "2026-11-13T03:34:10Z",
+      "license": "LICENSE: GNU GENERAL PUBLIC LICENSE",
+      "local_dir": "data/raw/unica",
+      "files": [
+        {
+          "path": "ponzi-addresses.csv",
+          "url": "https://raw.githubusercontent.com/blockchain-unica/ethereum-ponzi/master/ponzi-addresses.csv",
+          "size_bytes": 10173,
+          "sha256": "306af856423eae51128ecafe295c8fe3b613d81dddcae8333b7820c8bab755f9"
+        },
+        {
+          "path": "LICENSE",
+          "url": "https://raw.githubusercontent.com/blockchain-unica/ethereum-ponzi/master/LICENSE",
+          "size_bytes": 35149,
+          "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+        },
+        {
+          "path": "README.md",
+          "url": "https://raw.githubusercontent.com/blockchain-unica/ethereum-ponzi/master/README.md",
+          "size_bytes": 328,
+          "sha256": "bfd35d16782972cc9d2f2c855dac4aca8bb56ace8c9c16d282b405748f523a39"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,10 @@
+[project]
+name = "x-spide-g"
+version = "0.1.0"
+description = "Graph-Enhanced Explainable Ponzi Detection and On-Chain Risk Attestation for Ethereum Smart Contracts"
+readme = "README.md"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

@@ -1,0 +1,386 @@
+{
+  "generated_at_utc": "2026-11-13T06:36:23Z",
+  "xspide_commit": "dcf6027c2bd15cb1833cca3fc86265df4394b05a",
+  "s_code_ponzi": 880,
+  "r1_triggered": false,
+  "schema_summary": [
+    {
+      "file": "DS_deployed_bytecode.csv",
+      "rows": 7446,
+      "cols": 101,
+      "ponzi": 880,
+      "non_ponzi": 6566,
+      "unique_valid_addrs": 7446,
+      "label_conflicts": 0
+    },
+    {
+      "file": "DS_full_bytecode.csv",
+      "rows": 7446,
+      "cols": 101,
+      "ponzi": 880,
+      "non_ponzi": 6566,
+      "unique_valid_addrs": 7446,
+      "label_conflicts": 0
+    },
+    {
+      "file": "bytecode_opcode_8k.csv",
+      "rows": 7962,
+      "cols": 102,
+      "ponzi": 934,
+      "non_ponzi": 7028,
+      "unique_valid_addrs": 7962,
+      "label_conflicts": 0
+    },
+    {
+      "file": "address_without_byt.csv",
+      "rows": 209,
+      "cols": 2,
+      "ponzi": 0,
+      "non_ponzi": 0,
+      "unique_valid_addrs": 209,
+      "label_conflicts": 0
+    }
+  ],
+  "coverage_table": [
+    {
+      "class_name": "Ponzi (`1`)",
+      "s_full": 880,
+      "s_code": 880,
+      "coverage_pct": 100.0,
+      "xspide_repo": 880,
+      "rpc_latest": 0,
+      "missing": 0
+    },
+    {
+      "class_name": "non-Ponzi (`0`)",
+      "s_full": 6566,
+      "s_code": 6566,
+      "coverage_pct": 100.0,
+      "xspide_repo": 6566,
+      "rpc_latest": 0,
+      "missing": 0
+    }
+  ],
+  "live_rpc_audit": {
+    "ponzi_checked": 880,
+    "ponzi_alive": 880,
+    "ponzi_0x_pct": 0.0,
+    "nonponzi_checked": 880,
+    "nonponzi_alive": 880,
+    "nonponzi_0x_pct": 0.0,
+    "missing_8k_total": 308,
+    "missing_8k_ponzi": 42,
+    "missing_8k_nonponzi": 266,
+    "missing_8k_rpc_alive": 0
+  },
+  "ks_8k_kept_vs_dropped": [
+    {
+      "feature": "balance",
+      "n_kept": 7446,
+      "n_excluded": 516,
+      "median_kept": 0.0,
+      "median_excluded": 0.0,
+      "ks_stat": 0.10863644597692534,
+      "p_value": 2.0462341266780844e-05
+    },
+    {
+      "feature": "lifetime",
+      "n_kept": 7446,
+      "n_excluded": 516,
+      "median_kept": 15.0,
+      "median_excluded": 2.0,
+      "ks_stat": 0.13841363241696808,
+      "p_value": 1.583375310546183e-08
+    },
+    {
+      "feature": "tx_in",
+      "n_kept": 7446,
+      "n_excluded": 516,
+      "median_kept": 11.0,
+      "median_excluded": 6.0,
+      "ks_stat": 0.198278769934224,
+      "p_value": 4.2760574958902774e-17
+    },
+    {
+      "feature": "tx_out",
+      "n_kept": 7446,
+      "n_excluded": 516,
+      "median_kept": 0.0,
+      "median_excluded": 1.0,
+      "ks_stat": 0.24667528687167772,
+      "p_value": 2.4967966244338937e-26
+    },
+    {
+      "feature": "investment_in",
+      "n_kept": 7446,
+      "n_excluded": 516,
+      "median_kept": 0.0,
+      "median_excluded": 1.0,
+      "ks_stat": 0.09171773201156858,
+      "p_value": 0.0005525187638296865
+    },
+    {
+      "feature": "payment_out",
+      "n_kept": 7446,
+      "n_excluded": 516,
+      "median_kept": 0.0,
+      "median_excluded": 1.0,
+      "ks_stat": 0.12116385260698737,
+      "p_value": 1.2424212111533516e-06
+    },
+    {
+      "feature": "paid_rate",
+      "n_kept": 7446,
+      "n_excluded": 516,
+      "median_kept": 0.0,
+      "median_excluded": 0.25,
+      "ks_stat": 0.14119021294404988,
+      "p_value": 7.426398636937328e-09
+    }
+  ],
+  "metadata_counts": {
+    "true": {
+      "total": 6417,
+      "ponzi": 595,
+      "non_ponzi": 5822
+    },
+    "false": {
+      "total": 1029,
+      "ponzi": 285,
+      "non_ponzi": 744
+    },
+    "none": {
+      "total": 0,
+      "ponzi": 0,
+      "non_ponzi": 0
+    }
+  },
+  "clones_exact": {
+    "group_col": "group_exact",
+    "total_groups": 6145,
+    "singletons": 5696,
+    "size_2_5": 393,
+    "size_6_plus": 56,
+    "max_size": 91,
+    "mixed_label_groups_count": 10,
+    "mixed_label_groups": [
+      {
+        "group_id": "exact_00479",
+        "total": 7,
+        "ponzi": 6,
+        "non_ponzi": 1
+      },
+      {
+        "group_id": "exact_01037",
+        "total": 2,
+        "ponzi": 1,
+        "non_ponzi": 1
+      },
+      {
+        "group_id": "exact_01307",
+        "total": 7,
+        "ponzi": 6,
+        "non_ponzi": 1
+      },
+      {
+        "group_id": "exact_01603",
+        "total": 2,
+        "ponzi": 1,
+        "non_ponzi": 1
+      },
+      {
+        "group_id": "exact_01774",
+        "total": 2,
+        "ponzi": 1,
+        "non_ponzi": 1
+      },
+      {
+        "group_id": "exact_01880",
+        "total": 2,
+        "ponzi": 1,
+        "non_ponzi": 1
+      },
+      {
+        "group_id": "exact_01900",
+        "total": 3,
+        "ponzi": 2,
+        "non_ponzi": 1
+      },
+      {
+        "group_id": "exact_02260",
+        "total": 8,
+        "ponzi": 7,
+        "non_ponzi": 1
+      },
+      {
+        "group_id": "exact_03841",
+        "total": 5,
+        "ponzi": 1,
+        "non_ponzi": 4
+      },
+      {
+        "group_id": "exact_03955",
+        "total": 4,
+        "ponzi": 3,
+        "non_ponzi": 1
+      }
+    ],
+    "ponzi_in_multi": 225,
+    "total_ponzi": 880,
+    "ponzi_in_multi_pct": 25.568181818181817,
+    "non_ponzi_in_multi": 1525,
+    "non_ponzi_in_multi_pct": 23.22570819372525
+  },
+  "clones_near": {
+    "group_col": "group_near",
+    "total_groups": 4711,
+    "singletons": 3825,
+    "size_2_5": 762,
+    "size_6_plus": 124,
+    "max_size": 99,
+    "mixed_label_groups_count": 24,
+    "mixed_label_groups": [
+      {
+        "group_id": "near_00093",
+        "total": 14,
+        "ponzi": 6,
+        "non_ponzi": 8
+      },
+      {
+        "group_id": "near_00126",
+        "total": 4,
+        "ponzi": 3,
+        "non_ponzi": 1
+      },
+      {
+        "group_id": "near_00144",
+        "total": 15,
+        "ponzi": 14,
+        "non_ponzi": 1
+      },
+      {
+        "group_id": "near_00207",
+        "total": 2,
+        "ponzi": 1,
+        "non_ponzi": 1
+      },
+      {
+        "group_id": "near_00260",
+        "total": 7,
+        "ponzi": 6,
+        "non_ponzi": 1
+      },
+      {
+        "group_id": "near_00297",
+        "total": 9,
+        "ponzi": 1,
+        "non_ponzi": 8
+      },
+      {
+        "group_id": "near_00641",
+        "total": 12,
+        "ponzi": 9,
+        "non_ponzi": 3
+      },
+      {
+        "group_id": "near_01003",
+        "total": 5,
+        "ponzi": 1,
+        "non_ponzi": 4
+      },
+      {
+        "group_id": "near_01094",
+        "total": 2,
+        "ponzi": 1,
+        "non_ponzi": 1
+      },
+      {
+        "group_id": "near_01229",
+        "total": 7,
+        "ponzi": 6,
+        "non_ponzi": 1
+      },
+      {
+        "group_id": "near_01289",
+        "total": 9,
+        "ponzi": 8,
+        "non_ponzi": 1
+      },
+      {
+        "group_id": "near_01380",
+        "total": 3,
+        "ponzi": 1,
+        "non_ponzi": 2
+      },
+      {
+        "group_id": "near_01393",
+        "total": 7,
+        "ponzi": 6,
+        "non_ponzi": 1
+      },
+      {
+        "group_id": "near_01488",
+        "total": 5,
+        "ponzi": 1,
+        "non_ponzi": 4
+      },
+      {
+        "group_id": "near_01523",
+        "total": 2,
+        "ponzi": 1,
+        "non_ponzi": 1
+      }
+    ],
+    "ponzi_in_multi": 520,
+    "total_ponzi": 880,
+    "ponzi_in_multi_pct": 59.09090909090909,
+    "non_ponzi_in_multi": 3101,
+    "non_ponzi_in_multi_pct": 47.22814498933902
+  },
+  "overlap": {
+    "unica": {
+      "raw_rows": 184,
+      "unique_addresses": 182,
+      "address_overlap": 161,
+      "address_overlap_labels": {
+        "1": 161
+      },
+      "address_disjoint": 21,
+      "disjoint_live_code_checked": 13,
+      "disjoint_code_hash_overlap": 3,
+      "disjoint_group_near_overlap": 4
+    },
+    "ponziguard": {
+      "ponzi_sol_total": 139,
+      "ponzi_sol_addr_overlap": 122,
+      "ponzi_sol_remaining": 17,
+      "ponzi_bins": {
+        "total_bins": 95,
+        "valid_hex": 95,
+        "extracted_runtime": 89,
+        "code_hash_overlap": 78,
+        "group_near_overlap": 78,
+        "remaining_rows": 11,
+        "remaining_unique_hashes": 10
+      },
+      "non_ponzi_bins": {
+        "total_bins": 1312,
+        "valid_hex": 1306,
+        "extracted_runtime": 1291,
+        "code_hash_overlap": 1174,
+        "group_near_overlap": 1194,
+        "remaining_rows": 97,
+        "remaining_unique_hashes": 97
+      },
+      "result_verified_total": 50,
+      "result_verified_addr_overlap": 43,
+      "decision": "SANITY_CHECK_ONLY (Risk R6 triggered)"
+    }
+  },
+  "splits_summary": [
+    "`S_code_group_near_seed{42..46}_fold{0..4}.json`: **25** files (`StratifiedGroupKFold(5)` \u00d7 5 repeats on `group_near`, `|S_code|=7446`).",
+    "`S_code_group_exact_seed{42..46}_fold{0..4}.json`: **25** files (for sensitivity analysis `S1`).",
+    "`S_full_E0_random_seed42_fold{0..4}.json`: **5** files (for `E0` paper-style random baseline reference only, `|S_full|=7446`).",
+    "`S_code_temporal_holdout.json` (`S3`): **not generated** \u2014 `block_number` is absent in X-SPIDE CSV/archives and Google BigQuery credentials (`bq_available=False`) are not configured locally."
+  ]
+}
