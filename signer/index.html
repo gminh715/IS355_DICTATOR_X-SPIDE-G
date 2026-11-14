@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>X-SPIDE-G Client-Side Auditor Signer (ethers.js v6 + MetaMask)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --ok: #22c55e;
+      --err: #ef4444;
+    }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 28px;
+    }
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+    }
+    h1 { margin-top: 0; font-size: 1.35rem; color: var(--accent); }
+    .badge {
+      display: inline-block;
+      background: #0284c7;
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 10px 14px;
+      align-items: center;
+      margin: 16px 0;
+    }
+    label { color: var(--muted); font-size: 0.9rem; font-weight: 600; }
+    input, select {
+      width: 100%;
+      box-sizing: border-box;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 0.85rem;
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    button {
+      background: var(--accent);
+      color: #0f172a;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: #475569;
+      color: var(--text);
+    }
+    .status-box {
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: 8px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <span class="badge">ZERO SERVER PRIVATE KEYS · CLIENT-SIDE METAMASK SIGNER</span>
+    <h1>X-SPIDE-G RiskAttestationRegistry Client Signer (ethers.js v6)</h1>
+    <p style="color: var(--muted); font-size: 0.9rem;">
+      All transaction signing occurs strictly inside your browser wallet (MetaMask / EIP-1193).
+      Private keys are never transmitted to or stored on the Streamlit server.
+    </p>
+
+    <div class="grid">
+      <label for="action">Action</label>
+      <select id="action">
+        <option value="register_case">register_case (Auditor Case Registration)</option>
+        <option value="attest">attest (k-of-n Auditor Attestation)</option>
+      </select>
+
+      <label for="contract">Registry Address</label>
+      <input id="contract" type="text" placeholder="0x..." />
+
+      <label for="chain_id">Target Chain ID</label>
+      <input id="chain_id" type="number" value="11155111" />
+
+      <label for="case_id">case_id (bytes32)</label>
+      <input id="case_id" type="text" placeholder="0x..." />
+
+      <label for="subject">subject (address)</label>
+      <input id="subject" type="text" placeholder="0x..." />
+
+      <label for="subject_chain_id">subject_chain_id</label>
+      <input id="subject_chain_id" type="number" value="1" />
+
+      <label for="evidence_hash">evidence_hash (bytes32)</label>
+      <input id="evidence_hash" type="text" placeholder="0x..." />
+
+      <label for="model_version_hash">model_version_hash</label>
+      <input id="model_version_hash" type="text" placeholder="0x..." />
+
+      <label for="evidence_uri">evidence_uri (String[128])</label>
+      <input id="evidence_uri" type="text" placeholder="ipfs://bafkrei..." maxlength="128" />
+
+      <label for="decision">decision (uint8)</label>
+      <select id="decision">
+        <option value="1">1 = Approve (Concur with ML Risk Assessment)</option>
+        <option value="2">2 = Reject (Reject ML Risk Assessment)</option>
+        <option value="3">3 = NeedsReview (Flag for Deeper Manual Audit)</option>
+      </select>
+
+      <label for="reason_hash">reason_hash (bytes32)</label>
+      <input id="reason_hash" type="text" value="0x0000000000000000000000000000000000000000000000000000000000000000" />
+    </div>
+
+    <div class="actions">
+      <button id="btnConnect" class="secondary" type="button">1. Connect MetaMask</button>
+      <button id="btnSignSend" type="button">2. Sign &amp; Broadcast Transaction</button>
+    </div>
+
+    <div id="status" class="status-box">Status: Waiting for wallet connection...</div>
+  </div>
+
+  <script>
+    const REGISTRY_ABI = [
+      "function register_case(bytes32 case_id, address subject, uint256 subject_chain_id, bytes32 evidence_hash, bytes32 model_version_hash, string evidence_uri) external",
+      "function attest(bytes32 case_id, uint8 decision, bytes32 reason_hash) external",
+      "function is_auditor(address arg0) external view returns (bool)",
+      "function threshold() external view returns (uint256)"
+    ];
+
+    const fields = [
+      "action", "contract", "chain_id", "case_id", "subject",
+      "subject_chain_id", "evidence_hash", "model_version_hash",
+      "evidence_uri", "decision", "reason_hash"
+    ];
+
+    function populateFromQuery() {
+      const params = new URLSearchParams(window.location.search);
+      for (const key of fields) {
+        if (params.has(key) && params.get(key)) {
+          const el = document.getElementById(key);
+          if (el) el.value = params.get(key);
+        }
+      }
+    }
+
+    function setStatus(msg) {
+      document.getElementById("status").textContent = msg;
+    }
+
+    let provider = null;
+    let signer = null;
+
+    async function connectWallet() {
+      if (!window.ethereum) {
+        setStatus("Error: MetaMask (window.ethereum) not detected in this browser.");
+        return false;
+      }
+      provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = await provider.getSigner();
+      const addr = await signer.getAddress();
+      const net = await provider.getNetwork();
+      setStatus(`Connected Auditor Wallet: ${addr}\nConnected Chain ID: ${net.chainId.toString()}`);
+      return true;
+    }
+
+    async function signAndSend() {
+      try {
+        if (!signer) {
+          const ok = await connectWallet();
+          if (!ok) return;
+        }
+        const net = await provider.getNetwork();
+        const targetChainId = BigInt(document.getElementById("chain_id").value || "11155111");
+        if (net.chainId !== targetChainId) {
+          setStatus(`Error: Connected chainId (${net.chainId}) does not match target chainId (${targetChainId}). Please switch network in MetaMask.`);
+          return;
+        }
+
+        const contractAddr = document.getElementById("contract").value.trim();
+        const contract = new ethers.Contract(contractAddr, REGISTRY_ABI, signer);
+        const action = document.getElementById("action").value;
+        const caseId = document.getElementById("case_id").value.trim();
+
+        setStatus(`Awaiting signature in MetaMask for ${action}...`);
+        let tx;
+        if (action === "register_case") {
+          const subject = document.getElementById("subject").value.trim();
+          const subjectChainId = BigInt(document.getElementById("subject_chain_id").value || "1");
+          const evHash = document.getElementById("evidence_hash").value.trim();
+          const modHash = document.getElementById("model_version_hash").value.trim();
+          const evUri = document.getElementById("evidence_uri").value.trim();
+          tx = await contract.register_case(caseId, subject, subjectChainId, evHash, modHash, evUri);
+        } else {
+          const decision = parseInt(document.getElementById("decision").value, 10);
+          const reasonHash = document.getElementById("reason_hash").value.trim();
+          tx = await contract.attest(caseId, decision, reasonHash);
+        }
+
+        setStatus(`Transaction broadcasted!\ntx_hash: ${tx.hash}\nWaiting for 1 confirmation...`);
+        const receipt = await tx.wait(1);
+        setStatus(
+          `Confirmed in block ${receipt.blockNumber}!\n` +
+          `tx_hash: ${receipt.hash}\n` +
+          `gas_used: ${receipt.gasUsed.toString()}\n` +
+          `Copy tx_hash back into Streamlit Page 3 to inspect the receipt.`
+        );
+      } catch (err) {
+        setStatus(`Transaction failed or rejected:\n${err && err.message ? err.message : String(err)}`);
+      }
+    }
+
+    document.getElementById("btnConnect").addEventListener("click", connectWallet);
+    document.getElementById("btnSignSend").addEventListener("click", signAndSend);
+    populateFromQuery();
+  </script>
+</body>
+</html>

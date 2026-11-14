@@ -1,0 +1,217 @@
+{
+  "vectors": [
+    {
+      "vector_id": "V1",
+      "evidence": {
+        "schema_version": "1.0",
+        "source_chain_id": 1,
+        "subject_address": "0x2c2e3baa2191cf325a28a01ff42340f2ae677572",
+        "code_hash": "0x7c3b756e6191107ef3a87a518f7267392eb829ce4fbc831318b5569a75d1d767",
+        "dataset_id": "xspide_s_code",
+        "sample_id": "xspide_00439",
+        "feature_schema_hash": "0xac12b3e03d1418790a091bd61a5ed919344863ff97ce781b874ebc463f843c01",
+        "model_version_hash": "0x5d00194582127b30dabce1702fb84502d52eef96c5045ea090a738b6fe5796b5",
+        "score": "0.998390",
+        "threshold": "0.256746",
+        "predicted_label": 1,
+        "shap_top_k": [
+          {
+            "feature": "SLOAD",
+            "feature_value": "0.039295",
+            "rank": 1,
+            "shap_value": "1.745616"
+          },
+          {
+            "feature": "CALLDATALOAD",
+            "feature_value": "0.004334",
+            "rank": 2,
+            "shap_value": "1.051203"
+          },
+          {
+            "feature": "CALL",
+            "feature_value": "0.002311",
+            "rank": 3,
+            "shap_value": "0.841226"
+          },
+          {
+            "feature": "SSTORE",
+            "feature_value": "0.013002",
+            "rank": 4,
+            "shap_value": "0.808246"
+          },
+          {
+            "feature": "paid_one",
+            "feature_value": "0.838700",
+            "rank": 5,
+            "shap_value": "0.723112"
+          },
+          {
+            "feature": "CODECOPY",
+            "feature_value": "0.005779",
+            "rank": 6,
+            "shap_value": "0.660052"
+          },
+          {
+            "feature": "JUMPDEST",
+            "feature_value": "0.029182",
+            "rank": 7,
+            "shap_value": "0.595264"
+          },
+          {
+            "feature": "SHA3",
+            "feature_value": "0.005779",
+            "rank": 8,
+            "shap_value": "0.506009"
+          },
+          {
+            "feature": "GAS",
+            "feature_value": "0.000000",
+            "rank": 9,
+            "shap_value": "0.493139"
+          },
+          {
+            "feature": "EXTCODESIZE",
+            "feature_value": "0.000000",
+            "rank": 10,
+            "shap_value": "0.468132"
+          }
+        ],
+        "shap_digest": "0x35f38faaf1607ac5e73ec7fe0febae0c6907915fa6e8557ef84be0883df44094",
+        "run_id": "0xc630d2c779b4a96d680630c2f0ff19c35d8089cd6be311a744152690ee52ea49",
+        "created_at_utc": "2026-11-14T06:00:00Z"
+      },
+      "expected_canonical_json": "{\"code_hash\":\"0x7c3b756e6191107ef3a87a518f7267392eb829ce4fbc831318b5569a75d1d767\",\"created_at_utc\":\"2026-11-14T06:00:00Z\",\"dataset_id\":\"xspide_s_code\",\"feature_schema_hash\":\"0xac12b3e03d1418790a091bd61a5ed919344863ff97ce781b874ebc463f843c01\",\"model_version_hash\":\"0x5d00194582127b30dabce1702fb84502d52eef96c5045ea090a738b6fe5796b5\",\"predicted_label\":1,\"run_id\":\"0xc630d2c779b4a96d680630c2f0ff19c35d8089cd6be311a744152690ee52ea49\",\"sample_id\":\"xspide_00439\",\"schema_version\":\"1.0\",\"score\":\"0.998390\",\"shap_digest\":\"0x35f38faaf1607ac5e73ec7fe0febae0c6907915fa6e8557ef84be0883df44094\",\"shap_top_k\":[{\"feature\":\"SLOAD\",\"feature_value\":\"0.039295\",\"rank\":1,\"shap_value\":\"1.745616\"},{\"feature\":\"CALLDATALOAD\",\"feature_value\":\"0.004334\",\"rank\":2,\"shap_value\":\"1.051203\"},{\"feature\":\"CALL\",\"feature_value\":\"0.002311\",\"rank\":3,\"shap_value\":\"0.841226\"},{\"feature\":\"SSTORE\",\"feature_value\":\"0.013002\",\"rank\":4,\"shap_value\":\"0.808246\"},{\"feature\":\"paid_one\",\"feature_value\":\"0.838700\",\"rank\":5,\"shap_value\":\"0.723112\"},{\"feature\":\"CODECOPY\",\"feature_value\":\"0.005779\",\"rank\":6,\"shap_value\":\"0.660052\"},{\"feature\":\"JUMPDEST\",\"feature_value\":\"0.029182\",\"rank\":7,\"shap_value\":\"0.595264\"},{\"feature\":\"SHA3\",\"feature_value\":\"0.005779\",\"rank\":8,\"shap_value\":\"0.506009\"},{\"feature\":\"GAS\",\"feature_value\":\"0.000000\",\"rank\":9,\"shap_value\":\"0.493139\"},{\"feature\":\"EXTCODESIZE\",\"feature_value\":\"0.000000\",\"rank\":10,\"shap_value\":\"0.468132\"}],\"source_chain_id\":1,\"subject_address\":\"0x2c2e3baa2191cf325a28a01ff42340f2ae677572\",\"threshold\":\"0.256746\"}",
+      "expected_evidence_hash": "0x85735f60024fc7bbacddac210914de35a7e2c2717ec8164a57efa4eb570fce12",
+      "expected_case_id": "0xfa9e0beeb4c5ca65a7656d89ecb4b41f9c323c33acc14df01c00f32bca197605",
+      "expected_ipfs_cidv1": "bafkreigkr36fnz4iy3x3d3vtklibevktpsqa5quqcnmieptsqciimes63m"
+    },
+    {
+      "vector_id": "V2",
+      "evidence": {
+        "schema_version": "1.0",
+        "source_chain_id": 1,
+        "subject_address": "0x0006157838d5a6b33ab66588a6a693a57c869999",
+        "code_hash": "0x5e2dc4ab48ddd128ff37517d7f5993680da12e21a0cc29b25cbed15f7fd24bde",
+        "dataset_id": "xspide_s_code",
+        "sample_id": "xspide_00000",
+        "feature_schema_hash": "0xac12b3e03d1418790a091bd61a5ed919344863ff97ce781b874ebc463f843c01",
+        "model_version_hash": "0x5d00194582127b30dabce1702fb84502d52eef96c5045ea090a738b6fe5796b5",
+        "score": "0.000061",
+        "threshold": "0.256746",
+        "predicted_label": 0,
+        "shap_top_k": [
+          {
+            "feature": "CALL",
+            "feature_value": "0.000000",
+            "rank": 1,
+            "shap_value": "-1.064060"
+          },
+          {
+            "feature": "AND",
+            "feature_value": "0.000000",
+            "rank": 2,
+            "shap_value": "0.859725"
+          },
+          {
+            "feature": "SLOAD",
+            "feature_value": "0.000000",
+            "rank": 3,
+            "shap_value": "-0.739093"
+          },
+          {
+            "feature": "CALLVALUE",
+            "feature_value": "0.000000",
+            "rank": 4,
+            "shap_value": "-0.664625"
+          },
+          {
+            "feature": "CALLDATASIZE",
+            "feature_value": "0.000000",
+            "rank": 5,
+            "shap_value": "-0.570503"
+          },
+          {
+            "feature": "SSTORE",
+            "feature_value": "0.000000",
+            "rank": 6,
+            "shap_value": "-0.505656"
+          },
+          {
+            "feature": "MLOAD",
+            "feature_value": "0.000000",
+            "rank": 7,
+            "shap_value": "0.461816"
+          },
+          {
+            "feature": "CALLDATALOAD",
+            "feature_value": "0.000000",
+            "rank": 8,
+            "shap_value": "0.409980"
+          },
+          {
+            "feature": "LT",
+            "feature_value": "0.000000",
+            "rank": 9,
+            "shap_value": "-0.392308"
+          },
+          {
+            "feature": "MUL",
+            "feature_value": "0.000000",
+            "rank": 10,
+            "shap_value": "-0.317939"
+          }
+        ],
+        "shap_digest": "0xdde82202b387b776b178b6c5a82630d3ba44ca5a375c8e9068039a1abf4de30a",
+        "run_id": "0x5438caf56d00c71a536c77fb472d58a57bb5d098b1be8447601353ddbe378f12",
+        "created_at_utc": "2026-11-14T06:05:00Z"
+      },
+      "expected_canonical_json": "{\"code_hash\":\"0x5e2dc4ab48ddd128ff37517d7f5993680da12e21a0cc29b25cbed15f7fd24bde\",\"created_at_utc\":\"2026-11-14T06:05:00Z\",\"dataset_id\":\"xspide_s_code\",\"feature_schema_hash\":\"0xac12b3e03d1418790a091bd61a5ed919344863ff97ce781b874ebc463f843c01\",\"model_version_hash\":\"0x5d00194582127b30dabce1702fb84502d52eef96c5045ea090a738b6fe5796b5\",\"predicted_label\":0,\"run_id\":\"0x5438caf56d00c71a536c77fb472d58a57bb5d098b1be8447601353ddbe378f12\",\"sample_id\":\"xspide_00000\",\"schema_version\":\"1.0\",\"score\":\"0.000061\",\"shap_digest\":\"0xdde82202b387b776b178b6c5a82630d3ba44ca5a375c8e9068039a1abf4de30a\",\"shap_top_k\":[{\"feature\":\"CALL\",\"feature_value\":\"0.000000\",\"rank\":1,\"shap_value\":\"-1.064060\"},{\"feature\":\"AND\",\"feature_value\":\"0.000000\",\"rank\":2,\"shap_value\":\"0.859725\"},{\"feature\":\"SLOAD\",\"feature_value\":\"0.000000\",\"rank\":3,\"shap_value\":\"-0.739093\"},{\"feature\":\"CALLVALUE\",\"feature_value\":\"0.000000\",\"rank\":4,\"shap_value\":\"-0.664625\"},{\"feature\":\"CALLDATASIZE\",\"feature_value\":\"0.000000\",\"rank\":5,\"shap_value\":\"-0.570503\"},{\"feature\":\"SSTORE\",\"feature_value\":\"0.000000\",\"rank\":6,\"shap_value\":\"-0.505656\"},{\"feature\":\"MLOAD\",\"feature_value\":\"0.000000\",\"rank\":7,\"shap_value\":\"0.461816\"},{\"feature\":\"CALLDATALOAD\",\"feature_value\":\"0.000000\",\"rank\":8,\"shap_value\":\"0.409980\"},{\"feature\":\"LT\",\"feature_value\":\"0.000000\",\"rank\":9,\"shap_value\":\"-0.392308\"},{\"feature\":\"MUL\",\"feature_value\":\"0.000000\",\"rank\":10,\"shap_value\":\"-0.317939\"}],\"source_chain_id\":1,\"subject_address\":\"0x0006157838d5a6b33ab66588a6a693a57c869999\",\"threshold\":\"0.256746\"}",
+      "expected_evidence_hash": "0x027fddd5a018db09de0bdda52125bb8c351319d7059a409af4a26824c6d90db8",
+      "expected_case_id": "0xdcaa857754af6e0cf67d7aa7fae0eaf2535ce34d16da98ff6c61fd8810bff0d6",
+      "expected_ipfs_cidv1": "bafkreien7yy2ybjewcs5wwg7zwsrtap3nidw6qwdoiekwu2xatfxdue25u"
+    },
+    {
+      "vector_id": "V3",
+      "evidence": {
+        "schema_version": "1.0",
+        "source_chain_id": 1,
+        "subject_address": "0x1111111111111111111111111111111111111111",
+        "code_hash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "dataset_id": "xspide_s_code",
+        "sample_id": "boundary_test_9999",
+        "feature_schema_hash": "0xac12b3e03d1418790a091bd61a5ed919344863ff97ce781b874ebc463f843c01",
+        "model_version_hash": "0x5d00194582127b30dabce1702fb84502d52eef96c5045ea090a738b6fe5796b5",
+        "score": "0.873421",
+        "threshold": "0.256746",
+        "predicted_label": 1,
+        "shap_top_k": [
+          {
+            "feature": "CALL",
+            "feature_value": "0.084120",
+            "rank": 1,
+            "shap_value": "0.412300"
+          },
+          {
+            "feature": "investment_to_contract/tx_in",
+            "feature_value": "0.910000",
+            "rank": 2,
+            "shap_value": "0.298110"
+          },
+          {
+            "feature": "lifetime",
+            "feature_value": "12400.000000",
+            "rank": 3,
+            "shap_value": "-0.051200"
+          }
+        ],
+        "shap_digest": "0xa94d72fd3f8b53d2bcabeee5b4f8a553eb0265fa61ccb18b57c4097d829b5a59",
+        "run_id": "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "created_at_utc": "2026-11-14T06:10:00Z"
+      },
+      "expected_canonical_json": "{\"code_hash\":\"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"created_at_utc\":\"2026-11-14T06:10:00Z\",\"dataset_id\":\"xspide_s_code\",\"feature_schema_hash\":\"0xac12b3e03d1418790a091bd61a5ed919344863ff97ce781b874ebc463f843c01\",\"model_version_hash\":\"0x5d00194582127b30dabce1702fb84502d52eef96c5045ea090a738b6fe5796b5\",\"predicted_label\":1,\"run_id\":\"0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"sample_id\":\"boundary_test_9999\",\"schema_version\":\"1.0\",\"score\":\"0.873421\",\"shap_digest\":\"0xa94d72fd3f8b53d2bcabeee5b4f8a553eb0265fa61ccb18b57c4097d829b5a59\",\"shap_top_k\":[{\"feature\":\"CALL\",\"feature_value\":\"0.084120\",\"rank\":1,\"shap_value\":\"0.412300\"},{\"feature\":\"investment_to_contract/tx_in\",\"feature_value\":\"0.910000\",\"rank\":2,\"shap_value\":\"0.298110\"},{\"feature\":\"lifetime\",\"feature_value\":\"12400.000000\",\"rank\":3,\"shap_value\":\"-0.051200\"}],\"source_chain_id\":1,\"subject_address\":\"0x1111111111111111111111111111111111111111\",\"threshold\":\"0.256746\"}",
+      "expected_evidence_hash": "0xd17700f50b52ca2625a9711d2d144f08cc720b28f0d6863d8f0ebb5c28838cb4",
+      "expected_case_id": "0x73d796298ceed4ea2cab84783d989df52286dbe71ce5468d5b1b2223c2791497",
+      "expected_ipfs_cidv1": "bafkreidqg764ye36fgvuth4sjla6xiq53wfaggidzewedddvax275ftcuu"
+    }
+  ]
+}
