@@ -1,12 +1,12 @@
 {
   "entries": {
     "0x4f059ee606addf455d91f363dd2d2017e92b7bdcde58a7ca30730b3d8e053311": {
-      "backup_uri": "git://bf1029c8ea1dfb298f9ba02840e3bd264c0a1c84/evidence/0x4f059ee606addf455d91f363dd2d2017e92b7bdcde58a7ca30730b3d8e053311.json",
+      "backup_uri": "git://c70e0157cbf11e7c26ee1e1774bb1dfb9e46db71/evidence/0x4f059ee606addf455d91f363dd2d2017e92b7bdcde58a7ca30730b3d8e053311.json",
       "case_id": "0x4f059ee606addf455d91f363dd2d2017e92b7bdcde58a7ca30730b3d8e053311",
       "cid": "bafkreih23hlqee2yymwc7pa3obzpx6lyqpfmvkaphxgswpoy57pdnjhxhu",
       "evidence_hash": "0x8d13b1201fa73ff33261d0beebb571e2f2e3cef1a59f076504e8bc14952653f9",
       "evidence_uri": "ipfs://bafkreih23hlqee2yymwc7pa3obzpx6lyqpfmvkaphxgswpoy57pdnjhxhu",
-      "git_commit": "bf1029c8ea1dfb298f9ba02840e3bd264c0a1c84",
+      "git_commit": "c70e0157cbf11e7c26ee1e1774bb1dfb9e46db71",
       "git_rel_path": "evidence/0x4f059ee606addf455d91f363dd2d2017e92b7bdcde58a7ca30730b3d8e053311.json",
       "pin_detail": "Kubo unreachable (HTTPConnectionPool(host='127.0.0.1', port=5001): Max retries exceeded with url: /api/v0/add?pin=true&cid-version=1&raw-leaves=true (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=5001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\")))",
       "pin_status": "local_content_addressed_unpinned",
@@ -14,7 +14,23 @@
       "sample_id": "xspide_00000",
       "score": "0.000061",
       "subject_address": "0x0006157838d5a6b33ab66588a6a693a57c869999",
-      "updated_at_utc": "2026-11-14T08:56:59Z"
+      "updated_at_utc": "2026-11-14T10:25:03Z"
+    },
+    "0x5b7624e00332bf67a30b0f9957113f45481522a21707a396f0d60ace93bb842a": {
+      "backup_uri": "git://c70e0157cbf11e7c26ee1e1774bb1dfb9e46db71/evidence/0x5b7624e00332bf67a30b0f9957113f45481522a21707a396f0d60ace93bb842a.json",
+      "case_id": "0x5b7624e00332bf67a30b0f9957113f45481522a21707a396f0d60ace93bb842a",
+      "cid": "bafkreif6ynchymu5qlpfxtuc5zlgb2tcw4pc5tdthqyzqdmmo63ojkdvau",
+      "evidence_hash": "0x406e33f11d983c4fdf7b0f05987079f80e3087ee8a2815c37dd96cc6838bd606",
+      "evidence_uri": "ipfs://bafkreif6ynchymu5qlpfxtuc5zlgb2tcw4pc5tdthqyzqdmmo63ojkdvau",
+      "git_commit": "c70e0157cbf11e7c26ee1e1774bb1dfb9e46db71",
+      "git_rel_path": "evidence/0x5b7624e00332bf67a30b0f9957113f45481522a21707a396f0d60ace93bb842a.json",
+      "pin_detail": "Kubo unreachable (HTTPConnectionPool(host='127.0.0.1', port=5001): Max retries exceeded with url: /api/v0/add?pin=true&cid-version=1&raw-leaves=true (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=5001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\")))",
+      "pin_status": "local_content_addressed_unpinned",
+      "predicted_label": 1,
+      "sample_id": "xspide_00439",
+      "score": "0.998390",
+      "subject_address": "0x2c2e3baa2191cf325a28a01ff42340f2ae677572",
+      "updated_at_utc": "2026-11-14T10:31:17Z"
     },
     "0x8f7a3ab788942c1ac1a68a6a6db5cfa2626d46db2da50d750e7151f55e22d609": {
       "backup_uri": "git://bf1029c8ea1dfb298f9ba02840e3bd264c0a1c84/evidence/0x8f7a3ab788942c1ac1a68a6a6db5cfa2626d46db2da50d750e7151f55e22d609.json",
@@ -33,12 +49,12 @@
       "updated_at_utc": "2026-11-14T08:59:49Z"
     },
     "0xb729b0df407bfb67a240a1c670521a197c95658cd19cdf75b7722d7432bcff79": {
-      "backup_uri": "git://bf1029c8ea1dfb298f9ba02840e3bd264c0a1c84/evidence/0xb729b0df407bfb67a240a1c670521a197c95658cd19cdf75b7722d7432bcff79.json",
+      "backup_uri": "git://c70e0157cbf11e7c26ee1e1774bb1dfb9e46db71/evidence/0xb729b0df407bfb67a240a1c670521a197c95658cd19cdf75b7722d7432bcff79.json",
       "case_id": "0xb729b0df407bfb67a240a1c670521a197c95658cd19cdf75b7722d7432bcff79",
       "cid": "bafkreical6tchiqavroqofexqaev6ojqvvd6ehi2gbm45mcug25dc3n7hy",
       "evidence_hash": "0xecb7f565108faf3e2553e1bc735ba9cf1a3de666a21543cd67b299f728cbf0f2",
       "evidence_uri": "ipfs://bafkreical6tchiqavroqofexqaev6ojqvvd6ehi2gbm45mcug25dc3n7hy",
-      "git_commit": "bf1029c8ea1dfb298f9ba02840e3bd264c0a1c84",
+      "git_commit": "c70e0157cbf11e7c26ee1e1774bb1dfb9e46db71",
       "git_rel_path": "evidence/0xb729b0df407bfb67a240a1c670521a197c95658cd19cdf75b7722d7432bcff79.json",
       "pin_detail": "Kubo unreachable (HTTPConnectionPool(host='127.0.0.1', port=5001): Max retries exceeded with url: /api/v0/add?pin=true&cid-version=1&raw-leaves=true (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=5001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\")))",
       "pin_status": "local_content_addressed_unpinned",
@@ -46,7 +62,7 @@
       "sample_id": "xspide_00439",
       "score": "0.998390",
       "subject_address": "0x2c2e3baa2191cf325a28a01ff42340f2ae677572",
-      "updated_at_utc": "2026-11-14T08:56:55Z"
+      "updated_at_utc": "2026-11-14T10:25:00Z"
     }
   },
   "schema_version": "1.0"

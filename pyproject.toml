@@ -1,9 +1,53 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "x-spide-g"
-version = "0.1.0"
+version = "1.0.0"
 description = "Graph-Enhanced Explainable Ponzi Detection and On-Chain Risk Attestation for Ethereum Smart Contracts"
 readme = "README.md"
 requires-python = ">=3.12"
+dependencies = [
+    "cbor2==6.2.1",
+    "datasketch==2.0.0",
+    "eth-account==0.14.0",
+    "eth-tester==0.14.0b1",
+    "eth-utils==6.0.0",
+    "eth_abi==6.0.0",
+    "fastparquet==2026.9.0",
+    "joblib==1.6.0",
+    "lightgbm==4.7.0",
+    "matplotlib==3.11.2",
+    "networkx==3.7",
+    "numpy==2.5.4",
+    "optuna==5.0.0",
+    "pandas==3.1.1",
+    "py-evm==0.12.1b1",
+    "pyarrow==26.0.1",
+    "python-dotenv==1.2.4",
+    "requests==2.34.2",
+    "scikit-learn==1.9.1",
+    "scipy==1.18.1",
+    "shap==0.54.1",
+    "streamlit==1.67.0",
+    "web3==8.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "hypothesis==6.170.15",
+    "pytest==9.2.0",
+    "pytest-cov==7.1.0",
+]
+reports = [
+    "python-docx==1.2.0",
+    "python-pptx==1.0.2",
+    "pywin32==312 ; sys_platform == 'win32'",
+]
+
+[tool.setuptools.packages.find]
+include = ["src*", "scripts*", "app*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

@@ -20,6 +20,10 @@ X-SPIDE-G reproduces the X-SPIDE LightGBM Ethereum Ponzi detector under strict C
 - Phase 5 Contract Spec, Security Review, Coverage & Deployments: [docs/contract_spec.md](docs/contract_spec.md) · [docs/security_review.md](docs/security_review.md) · [reports/contract_coverage.md](reports/contract_coverage.md) · [deployments.json](deployments.json)
 - Phase 6 Canonical Evidence & DApp Spec: [docs/evidence_schema_v1.md](docs/evidence_schema_v1.md) · [app/streamlit_app.py](app/streamlit_app.py) · [signer/index.html](signer/index.html) · [tests/evidence/vectors.json](tests/evidence/vectors.json)
 - Phase 7 On-Chain Evaluation (`E5`) Report & Data: [reports/rq3_onchain.md](reports/rq3_onchain.md) · [results/E5_gas.csv](results/E5_gas.csv) · [results/E5_latency.csv](results/E5_latency.csv) · [results/E5_summary.json](results/E5_summary.json) · [figures/gas_vs_batch.png](figures/gas_vs_batch.png)
+- Phase 8 Final Synthesis, Reproducibility & Defense Package:
+  - Final Report: [4_DICTATOR_IS355_Final_Report.pdf](4_DICTATOR_IS355_Final_Report.pdf) · [4_DICTATOR_IS355_Final_Report.docx](4_DICTATOR_IS355_Final_Report.docx) · [reports/final_report.md](reports/final_report.md)
+  - Presentation & Live Demo: [4_DICTATOR_IS355_Final_Presentation.pdf](4_DICTATOR_IS355_Final_Presentation.pdf) · [4_DICTATOR_IS355_Final_Presentation.pptx](4_DICTATOR_IS355_Final_Presentation.pptx) · [demo/X-SPIDE-G_demo.mp4](demo/X-SPIDE-G_demo.mp4) · [reports/demo_script.md](reports/demo_script.md) · [demo/screenshots/](demo/screenshots)
+  - Traceability & Defense Q&A: [results/traceability_matrix.csv](results/traceability_matrix.csv) · [reports/traceability_matrix.md](reports/traceability_matrix.md) · [reports/defense_qa.md](reports/defense_qa.md)
 - Frozen Baseline Model Card: [models/baseline_v1/model_card.json](models/baseline_v1/model_card.json)
 
 ## Repository Status
@@ -32,7 +36,7 @@ X-SPIDE-G reproduces the X-SPIDE LightGBM Ethereum Ponzi detector under strict C
 - **Phase 5 (Vyper Smart Contracts, Security Review & Deployments):** Completed — compiled Vyper `0.4.3` contracts (`D1`: `contracts/RiskAttestationRegistry.vy`, `D2`: `contracts/variants/D2_EventOnly.vy`, `D3`: `contracts/variants/D3_MerkleBatch.vy`) + artifacts (`contracts/artifacts/`), `docs/contract_spec.md`, `docs/security_review.md`, `reports/contract_coverage.md`, `ape-config.yaml`, `.env.example`, and `scripts/{deploy_contracts,verify_contracts}.py`. All `34` contract tests (`T1`–`T12`, `100%` revert-branch coverage across `D1` 16/16, `D2` 16/16, `D3` 14/14, Hypothesis fuzzing + `set_threshold` deferral regression, and deploy/verify script checks) pass on `PyEVMBackend`. Recorded `3`-auditor / `threshold = 2` deployments in [deployments.json](deployments.json) across `local-evm`, `anvil` (`chain_id = 31337` via local `PyEVMBackend` JSON-RPC bridge because native `anvil.exe` is blocked by Windows Application Control and Docker Desktop is offline), live `sepolia` (`D1`, `D2`, `D3` `"Pass - Verified"` on Etherscan v2, `owner_type = "eoa_demo_limit"`), and live `arbitrum-sepolia` (`D1`, `D3` `"Pass - Verified"` on Etherscan v2 / Arbiscan Sepolia, `owner_type = "eoa_demo_limit"`).
 - **Phase 6 (Canonical Evidence Bundle & Streamlit DApp + MetaMask Signer):** Completed — `docs/evidence_schema_v1.md`, `src/evidence/{canonical,storage,inference,chain_client}.py`, deterministic CIDv1 + Git mirror persistence (`evidence/<case_id>.json`, `evidence/cid_index.json`; offline Kubo falls back to `local_content_addressed_unpinned`), 4-page Streamlit DApp (`app/streamlit_app.py`), static `ethers.js v6` + MetaMask signer (`signer/index.html`, `signer/vendor/ethers.umd.min.js`), local PyEVM JSON-RPC bridge (`scripts/local_rpc_server.py`), launcher (`scripts/run_dapp.py`), E2E demo (`scripts/run_phase6_e2e_demo.py`), and `tests/evidence/` (`7` tests covering 3 canonical test vectors, tamper sensitivity, security boundaries, and full Anvil E2E flow). Note: live `sepolia` auditor addresses currently hold `0 ETH`, so live `sepolia` write signing uses the browser MetaMask signer once funded via faucet; read-only verification on `sepolia` is live.
 - **Phase 7 (On-Chain Evaluation `E5`, Gas/Latency/Security & Trade-Offs):** Completed — `src/contracts/e5_benchmark.py`, `scripts/run_phase7_e5.py`, `results/E5_gas.csv`, `results/E5_latency.csv`, `results/E5_summary.json`, `figures/gas_vs_batch.png`, `reports/rq3_onchain.md`, and `tests/contracts/test_{e5_benchmark,phase7_outputs}.py`. Measured deterministic Cancun `PyEVMBackend` gas (`D1` finalized case `427,461` **FAIL** vs `250,000` ceiling; `D2` `294,706`, `-31.06%`; `D3` amortized `3,574.53` at $N=100$ and `357.46` at $N=1000$ **PASS** vs `10,000` ceiling), live `sepolia` EIP-8037 & `arbitrum-sepolia` spot-checks, fixed-date Ethereum Mainnet USD cost anchoring (`0.084427 gwei`, `ETH = $1,900.68`, `2026-11-14`), `30` sequential `attest` latency transactions per live testnet (`sepolia` median `1.00` block / `10.357 s` **PASS**; `arbitrum-sepolia` median `1.226 s`), live Sepolia `T1`/`T6`/`T8` revert/verification proofs without mutating main `D1`, and qualitative non-head-to-head comparison against `ProvAuditChain`.
-- **Phase 8 (Final Synthesis, Reproducibility & Defense):** Pending execution following exit-criteria gates (see [KE_HOACH_THUC_HIEN_X-SPIDE-G.md](KE_HOACH_THUC_HIEN_X-SPIDE-G.md)).
+- **Phase 8 (Final Synthesis, Reproducibility & Defense):** Completed (`v1.0-final`) — generated [4_DICTATOR_IS355_Final_Report.docx](4_DICTATOR_IS355_Final_Report.docx)/`.pdf` (18 pages) + [reports/final_report.md](reports/final_report.md), [4_DICTATOR_IS355_Final_Presentation.pptx](4_DICTATOR_IS355_Final_Presentation.pptx)/`.pdf` (14 slides), `1080p` walkthrough video [demo/X-SPIDE-G_demo.mp4](demo/X-SPIDE-G_demo.mp4) (`03:34`), `10` verified DApp screenshots (`demo/screenshots/`), [reports/demo_script.md](reports/demo_script.md), `39`-row traceability matrix ([results/traceability_matrix.csv](results/traceability_matrix.csv) / [reports/traceability_matrix.md](reports/traceability_matrix.md)), all `8` `Phụ lục D` Q&As ([reports/defense_qa.md](reports/defense_qa.md)), pinned [requirements.txt](requirements.txt) + [pyproject.toml](pyproject.toml) + [Makefile](Makefile) + [scripts/run_all.py](scripts/run_all.py), clean-clone `E1` + contract test verification, and Phase 8 deliverable tests.
 
 ## Deployed Contracts (`deployments.json`)
 
@@ -47,10 +51,24 @@ X-SPIDE-G reproduces the X-SPIDE LightGBM Ethereum Ponzi detector under strict C
 
 *(Live `sepolia` and `arbitrum-sepolia` deployments use EOA owner `0x950e0416b13153d542d07Bf7f9AB586B0e903465`, recorded as `owner_type = "eoa_demo_limit"`, with `3` auditors and `threshold = 2`.)*
 
-## Verification Commands
+## Reproducibility & Clean-Clone Verification
 
 ```powershell
+# 1. Install pinned dependencies into a fresh Python 3.12 environment
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install -e . --no-deps
+
+# 2. Clean-clone bootstrap: download public X-SPIDE datasets, verify manifest, rebuild processed parquet, reproduce E1, and run contract/evidence tests
+.\.venv\Scripts\python.exe -m scripts.run_all --mode clean-clone
+
+# 3. Full artifact & offline suite verification (non-destructive: preserves live Sepolia/Arbitrum E5 metrics)
+.\.venv\Scripts\python.exe -m scripts.run_all --mode verify
+
+# 4. Run full automated test suite
 .\.venv\Scripts\python.exe -m pytest -v
+
+# Individual phase & DApp commands
 .\.venv\Scripts\python.exe -m pytest tests/evidence -v
 .\.venv\Scripts\python.exe -m pytest tests/contracts --cov=src/contracts --cov-report=term-missing -v
 .\.venv\Scripts\python.exe -m scripts.run_phase7_e5 --skip-live
