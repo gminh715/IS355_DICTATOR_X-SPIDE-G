@@ -41,7 +41,7 @@
   3. No party can retroactively fabricate or substitute an alternative JSON report without triggering a hash mismatch (`False`).
 
 ### Q7. Could the ML metrics still be inflated by smart-contract clones?
-- **Direct Measurement & Removal (`DATA-03`, `DATA-04`, `RQ1-03`, `SENS-S1`):** Yes—random splits severely overstate performance because `25.57%` (`225/880`) of X-SPIDE Ponzi contracts share **exact** CBOR-stripped bytecodes and **`59.09%` (`520/880`)** fall into MinHash near-clone clusters ($t=0.80$, 5-gram normalized opcodes).
+- **Direct Measurement & Removal (`DATA-03`, `DATA-04`, `RQ1-03`, `SENS-S1`):** Yes—random splits severely overstate performance because `25.57%` (`225/880`) of X-SPIDE Ponzi contracts share **exact** CBOR-stripped bytecodes and **`59.09%` (`520/880`)** fall into MinHash near-clone clusters ($t=0.90$, 5-gram normalized opcodes).
 - **Three-Tier Proof That Leakage Was Eliminated:**
   1. Moving from random 5-fold (`E0 = 0.9149`) to MinHash near-clone 5×5 `StratifiedGroupKFold` (`E1 = 0.8767 ± 0.0254`) removes `-0.0382` PR-AUC (`-0.0471` F1) of artificial inflation (`RQ1-03`).
   2. Sensitivity `S1` proves that weaker **exact-hash** grouping (`group_exact`) still leaks near-clones by `+0.0283` PR-AUC on `E1` (`0.9051` vs `0.8767`) and `+0.0272` on `E4c` (`0.9097` vs `0.8825`, `SENS-S1`).

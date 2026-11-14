@@ -514,9 +514,9 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
         doc,
         f"Bytecode Normalization & Clone Clustering: Stripping Solidity CBOR compiler metadata [13] trimmed {audit['metadata_counts']['true']['total']:,} "
         f"contracts (595 Ponzi / 5,822 non-Ponzi), leaving {audit['metadata_counts']['false']['total']:,} pre-0.4.7 bytecodes without CBOR trailers. "
-        f"Exact SHA-256 clustering produced {ce['total_groups']:,} groups (max size {ce['max_size']}, {ce['mixed_label_groups_count']} mixed-label groups), "
+        f"Exact keccak256 clustering produced {ce['total_groups']:,} groups (max size {ce['max_size']}, {ce['mixed_label_groups_count']} mixed-label groups), "
         f"putting {ce['ponzi_in_multi']}/{ce['total_ponzi']} ({ce['ponzi_in_multi_pct']:.2f}%) Ponzi contracts in multi-member clusters. MinHash LSH "
-        f"clustering on normalized 5-gram opcodes (threshold t=0.80, 128 permutations) collapsed the corpus to {cn['total_groups']:,} near-clone groups "
+        f"clustering on normalized 5-gram opcodes (threshold t=0.90, 128 permutations) collapsed the corpus to {cn['total_groups']:,} near-clone groups "
         f"(max size {cn['max_size']}, {cn['mixed_label_groups_count']} mixed-label clusters), exposing that {cn['ponzi_in_multi']}/{cn['total_ponzi']} "
         f"({cn['ponzi_in_multi_pct']:.2f}%) of Ponzi contracts and {cn['non_ponzi_in_multi_pct']:.2f}% of non-Ponzi contracts share near-duplicate code.",
     )

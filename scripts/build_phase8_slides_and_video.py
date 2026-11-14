@@ -356,7 +356,7 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         5.0,
         1.55,
         "▪ Corpus: 7,446 valid contracts (880 Ponzi)\n"
-        "▪ Near-clone Ponzi rate: 59.09% (MinHash t=0.80)\n"
+        "▪ Near-clone Ponzi rate: 59.09% (MinHash t=0.90)\n"
         "▪ Best Confirmed ML: E4b PR-AUC 0.8995 (+0.0227)\n"
         "▪ On-Chain Batch D3 (N=100): 3,574.53 gas/case (PASS)\n"
         "▪ Verified Networks: Sepolia & Arbitrum Sepolia (v1.0-final)",
@@ -496,7 +496,7 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
     stat_cards = [
         ("7,446", "Valid Contracts (100% Bytecode)", "880 Ponzi · 6,566 Non-Ponzi · 0 conflicts", NAVY),
         ("6,417", "CBOR Trailers Stripped [13]", "1,029 pre-Solidity 0.4.7 unaffected", BLUE_ACCENT),
-        ("59.09%", "Ponzi Near-Clone Rate", "520/880 in MinHash LSH multi-groups (t=0.80)", ORANGE),
+        ("59.09%", "Ponzi Near-Clone Rate", "520/880 in MinHash LSH multi-groups (t=0.90)", ORANGE),
         ("10", "Unique PG Ponzis Left", "78/89 overlapped X-SPIDE -> Risk R6 E6 check", RED),
     ]
     for idx, (num, title, sub, col) in enumerate(stat_cards):
@@ -514,8 +514,8 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         3.95,
         "CLONE CLUSTERING & LABEL CONFLICTS",
         [
-            ("Exact SHA-256 (CBOR-stripped)", "6,145 groups (max size 91); 225/880 (25.57%) Ponzi in multi-groups; 10 mixed-label groups."),
-            ("MinHash LSH (5-gram, t=0.80, 128 perms)", "4,711 near-clone groups (max size 99); 520/880 (59.09%) Ponzi + 47.23% non-Ponzi share near-duplicate code; 24 mixed-label clusters."),
+            ("Exact keccak256 (CBOR-stripped)", "6,145 groups (max size 91); 225/880 (25.57%) Ponzi in multi-groups; 10 mixed-label groups."),
+            ("MinHash LSH (5-gram, t=0.90, 128 perms)", "4,711 near-clone groups (max size 99); 520/880 (59.09%) Ponzi + 47.23% non-Ponzi share near-duplicate code; 24 mixed-label clusters."),
             ("Cross-Dataset Overlap", "Blockchain@Unica overlaps 161/182 addresses; PonziGuard .bin leaves 107 non-overlapping (10 Ponzi / 97 non-Ponzi), forcing Risk R6 downgrade."),
             ("55 Frozen Split Artifacts", "25 S_code_group_near + 25 S_code_group_exact + 5 S_full_E0_random saved in Phase 1."),
         ],
