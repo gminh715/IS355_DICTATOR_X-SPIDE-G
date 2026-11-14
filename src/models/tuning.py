@@ -14,7 +14,7 @@ import lightgbm as lgb
 import numpy as np
 import optuna
 import pandas as pd
-from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.base import BaseEstimator, TransformerMixin, clone
 from sklearn.feature_selection import RFE
 from sklearn.model_selection import StratifiedGroupKFold
 from sklearn.pipeline import Pipeline
@@ -218,6 +218,8 @@ def run_nested_cv_fold(
     n_jobs: int = 3,
     use_rfe: bool = False,
     extra_pipeline_steps: Callable[[optuna.Trial, int], list[tuple[str, Any]]] | None = None,
+    pipeline_pre_steps: tuple[tuple[str, Any], ...] | list[tuple[str, Any]] | None = None,
+    cache_pre_steps: bool = True,
 ) -> tuple[dict[str, Any], Pipeline]:
     """Run inner StratifiedGroupKFold Optuna tuning, OOF F1 thresholding, and outer evaluation."""
     t_start = time.perf_counter()
@@ -236,8 +238,20 @@ def run_nested_cv_fold(
     inner_splits = list(inner_cv.split(np.zeros(len(y_tr)), y_tr, g_tr))
     rfe_cache: dict[str, np.ndarray] = {}
 
+    inner_transformed: dict[int, tuple[Any, Any]] = {}
+    if pipeline_pre_steps is not None and cache_pre_steps and extra_pipeline_steps is None:
+        for s_idx, (in_tr, in_va) in enumerate(inner_splits):
+            X_in_tr = X_tr.iloc[in_tr] if is_df else X_tr[in_tr]
+            X_in_va = X_tr.iloc[in_va] if is_df else X_tr[in_va]
+            pre_pipe = Pipeline([(nm, clone(est)) for nm, est in pipeline_pre_steps])
+            pre_pipe.fit(X_in_tr, y_tr[in_tr])
+            inner_transformed[s_idx] = (pre_pipe.transform(X_in_tr), pre_pipe.transform(X_in_va))
+
     def build_pipe(params: dict[str, Any], trial_obj: optuna.Trial | None = None) -> Pipeline:
         steps: list[tuple[str, Any]] = []
+        if pipeline_pre_steps is not None:
+            for step_name, estimator in pipeline_pre_steps:
+                steps.append((step_name, clone(estimator)))
         if extra_pipeline_steps is not None and trial_obj is not None:
             steps.extend(extra_pipeline_steps(trial_obj, seed))
         if use_rfe:
@@ -266,10 +280,20 @@ def run_nested_cv_fold(
         scores: list[float] = []
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            for in_tr, in_va in inner_splits:
-                X_in_tr = X_tr.iloc[in_tr] if is_df else X_tr[in_tr]
-                X_in_va = X_tr.iloc[in_va] if is_df else X_tr[in_va]
-                pipe = build_pipe(params, trial)
+            for s_idx, (in_tr, in_va) in enumerate(inner_splits):
+                if s_idx in inner_transformed:
+                    X_in_tr, X_in_va = inner_transformed[s_idx]
+                    pipe = make_pipeline_from_params(
+                        params,
+                        random_state=seed,
+                        n_jobs=n_jobs,
+                        use_rfe=use_rfe,
+                        rfe_cache=rfe_cache,
+                    )
+                else:
+                    X_in_tr = X_tr.iloc[in_tr] if is_df else X_tr[in_tr]
+                    X_in_va = X_tr.iloc[in_va] if is_df else X_tr[in_va]
+                    pipe = build_pipe(params, trial)
                 pipe.fit(X_in_tr, y_tr[in_tr])
                 proba = pipe.predict_proba(X_in_va)[:, 1]
                 from sklearn.metrics import average_precision_score
@@ -288,10 +312,20 @@ def run_nested_cv_fold(
     oof_proba = np.zeros(len(y_tr), dtype=float)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        for in_tr, in_va in inner_splits:
-            X_in_tr = X_tr.iloc[in_tr] if is_df else X_tr[in_tr]
-            X_in_va = X_tr.iloc[in_va] if is_df else X_tr[in_va]
-            pipe = build_pipe(best_params)
+        for s_idx, (in_tr, in_va) in enumerate(inner_splits):
+            if s_idx in inner_transformed:
+                X_in_tr, X_in_va = inner_transformed[s_idx]
+                pipe = make_pipeline_from_params(
+                    best_params,
+                    random_state=seed,
+                    n_jobs=n_jobs,
+                    use_rfe=use_rfe,
+                    rfe_cache=rfe_cache,
+                )
+            else:
+                X_in_tr = X_tr.iloc[in_tr] if is_df else X_tr[in_tr]
+                X_in_va = X_tr.iloc[in_va] if is_df else X_tr[in_va]
+                pipe = build_pipe(best_params)
             pipe.fit(X_in_tr, y_tr[in_tr])
             oof_proba[in_va] = pipe.predict_proba(X_in_va)[:, 1]
 
@@ -310,7 +344,7 @@ def run_nested_cv_fold(
     if use_rfe:
         n_selected = int(final_pipe.named_steps["rfe"].support_.sum())
     else:
-        n_selected = int(X.shape[1])
+        n_selected = int(final_pipe.named_steps["clf"].n_features_in_)
 
     row = {
         "experiment": experiment_id,
@@ -356,6 +390,7 @@ def _run_fold_worker(task: dict[str, Any]) -> dict[str, Any]:
         n_inner_splits=task["n_inner_splits"],
         n_jobs=task["lgbm_jobs"],
         use_rfe=task["use_rfe"],
+        pipeline_pre_steps=task.get("pipeline_pre_steps"),
     )
     return row
 
@@ -370,6 +405,7 @@ def run_25fold_experiment(
     n_trials: int = 30,
     n_inner_splits: int = 3,
     use_rfe: bool = False,
+    pipeline_pre_steps: tuple[tuple[str, Any], ...] | list[tuple[str, Any]] | None = None,
     max_workers: int = 4,
     lgbm_jobs: int = 3,
 ) -> pd.DataFrame:
@@ -389,6 +425,7 @@ def run_25fold_experiment(
             "n_trials": n_trials,
             "n_inner_splits": n_inner_splits,
             "use_rfe": use_rfe,
+            "pipeline_pre_steps": pipeline_pre_steps,
             "lgbm_jobs": lgbm_jobs,
         }
         for sp in split_paths
