@@ -161,6 +161,454 @@
         "final_status": 1,
         "verify_evidence_exact": true
       }
+    },
+    "sepolia": {
+      "network": "sepolia",
+      "chain_id": 11155111,
+      "updated_at_utc": "2026-11-14T07:07:03Z",
+      "git_commit": "172b25e78cd1fe0bcb309ec8480d2a78618258c7",
+      "contracts": {
+        "D1": {
+          "contract_name": "RiskAttestationRegistry",
+          "source_path": "contracts/RiskAttestationRegistry.vy",
+          "source_sha256": "cae5e0b9a504f958fe2eb953606461eaad11af9d823d96c5967634d7c5e4ed0f",
+          "vyper_version": "0.4.3",
+          "address": "0x14895F5e1f7F1aC5C58b35dA6d57674Aa5951b77",
+          "deploy_tx_hash": "0x1dce0cc71b3da6589352a103770d76cd8304b2498396477f23a69e48a9015a6d",
+          "deploy_gas_used": 7365849,
+          "block_number": 12131497,
+          "deployer": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
+          "owner": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
+          "owner_type": "eoa_demo_limit",
+          "constructor_arg_initial_owner": "0x0000000000000000000000000000000000000000",
+          "auditor_count": 3,
+          "threshold": 2,
+          "auditors": [
+            "0x6198B988c458DbA3a164929970e2e72AD69dFe02",
+            "0x7E63bA07459d070587a525E68265B9aD4b6dbDD0",
+            "0xEDdE2D7b35C4DC6Ea7862604850530f301Dd5570"
+          ],
+          "pending_owner_setup": false,
+          "intended_auditors": [],
+          "setup_txs": {
+            "add_auditors": [
+              {
+                "auditor": "0x6198B988c458DbA3a164929970e2e72AD69dFe02",
+                "tx_hash": "0xa98614537961a89c17d77329e81cc0c1405b22f1c1fde01aeb046acd74cc62d5",
+                "gas_used": 239469
+              },
+              {
+                "auditor": "0x7E63bA07459d070587a525E68265B9aD4b6dbDD0",
+                "tx_hash": "0x3359aa9dafedd1aadc7adca28e09790e960f836efb87f35a599635cae5aa43bb",
+                "gas_used": 141549
+              },
+              {
+                "auditor": "0xEDdE2D7b35C4DC6Ea7862604850530f301Dd5570",
+                "tx_hash": "0x08ad05eeaec1b8bf66269b47d1de6116f74cc6c255c58283f1f7ee934379ca0a",
+                "gas_used": 141549
+              }
+            ],
+            "set_threshold": {
+              "threshold": 2,
+              "tx_hash": "0x5e45f03f935c144beda71285f2d4836f14e95bc625761e59de7fa7ff78d26e18",
+              "gas_used": 23165
+            }
+          },
+          "verified_explorer": true,
+          "verification_receipt": {
+            "guid": "sacdc9kbykzwrbbmkhuajzzcayy94ban93jpxbiqatntjy2kse",
+            "status_response": {
+              "status": "1",
+              "message": "OK",
+              "result": "Pass - Verified"
+            }
+          }
+        },
+        "D2": {
+          "contract_name": "D2_EventOnly",
+          "source_path": "contracts/variants/D2_EventOnly.vy",
+          "source_sha256": "4de211d0077a415a6e6a035065d00f2ecb6c94d0a304081becfc379326ffb5ad",
+          "vyper_version": "0.4.3",
+          "address": "0x693632c45108A9ca25a7F9d693c00554EeDD1EB1",
+          "deploy_tx_hash": "0xd9387adb0d956d9b978ee0140018ecd93c14449fc31e426a40c7bc5a4f07b5dd",
+          "deploy_gas_used": 7288546,
+          "block_number": 12131502,
+          "deployer": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
+          "owner": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
+          "owner_type": "eoa_demo_limit",
+          "constructor_arg_initial_owner": "0x0000000000000000000000000000000000000000",
+          "auditor_count": 3,
+          "threshold": 2,
+          "auditors": [
+            "0x6198B988c458DbA3a164929970e2e72AD69dFe02",
+            "0x7E63bA07459d070587a525E68265B9aD4b6dbDD0",
+            "0xEDdE2D7b35C4DC6Ea7862604850530f301Dd5570"
+          ],
+          "pending_owner_setup": false,
+          "intended_auditors": [],
+          "setup_txs": {
+            "add_auditors": [
+              {
+                "auditor": "0x6198B988c458DbA3a164929970e2e72AD69dFe02",
+                "tx_hash": "0x7303442776679f5d8c6d2fe18c8decd5d71482f4b4784a3b64f869e148f092dd",
+                "gas_used": 239469
+              },
+              {
+                "auditor": "0x7E63bA07459d070587a525E68265B9aD4b6dbDD0",
+                "tx_hash": "0xc710aaad07d518f571a224120cb6d2c40fd642e5f0276bad539bbb0385f67db1",
+                "gas_used": 141549
+              },
+              {
+                "auditor": "0xEDdE2D7b35C4DC6Ea7862604850530f301Dd5570",
+                "tx_hash": "0x561f78748917c16019121661e30cca2bb0ff7b05715b75c4419a06694a0e47af",
+                "gas_used": 141549
+              }
+            ],
+            "set_threshold": {
+              "threshold": 2,
+              "tx_hash": "0xd7d37199049b4593ad7d3eb86c95b76097aa08ec2d0d0c4a3179609748319176",
+              "gas_used": 23165
+            }
+          },
+          "verified_explorer": true,
+          "verification_receipt": {
+            "guid": "yaarfsbzd4abxmbcnnrnp9av1rl6scxdhre1eiprmxxeeym1h8",
+            "status_response": {
+              "status": "1",
+              "message": "OK",
+              "result": "Pass - Verified"
+            }
+          }
+        },
+        "D3": {
+          "contract_name": "D3_MerkleBatch",
+          "source_path": "contracts/variants/D3_MerkleBatch.vy",
+          "source_sha256": "8430e3fe5b17177bcc97bd316de22d63fecc1aa669c93f917e5352169cc11dc4",
+          "vyper_version": "0.4.3",
+          "address": "0xf04fd7BD0Ee4DBf28d19D7D02988ac01fD989eF2",
+          "deploy_tx_hash": "0xe55a608fa823c532fb435ba2c359a021a85c875cd1ff4228f26ee66e6fd847f8",
+          "deploy_gas_used": 7871789,
+          "block_number": 12131509,
+          "deployer": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
+          "owner": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
+          "owner_type": "eoa_demo_limit",
+          "constructor_arg_initial_owner": "0x0000000000000000000000000000000000000000",
+          "auditor_count": 3,
+          "threshold": 2,
+          "auditors": [
+            "0x6198B988c458DbA3a164929970e2e72AD69dFe02",
+            "0x7E63bA07459d070587a525E68265B9aD4b6dbDD0",
+            "0xEDdE2D7b35C4DC6Ea7862604850530f301Dd5570"
+          ],
+          "pending_owner_setup": false,
+          "intended_auditors": [],
+          "setup_txs": {
+            "add_auditors": [
+              {
+                "auditor": "0x6198B988c458DbA3a164929970e2e72AD69dFe02",
+                "tx_hash": "0xd061800d3157c82b8eae0192d3baa42f217ae13258b635caefe2af08f13d764f",
+                "gas_used": 239469
+              },
+              {
+                "auditor": "0x7E63bA07459d070587a525E68265B9aD4b6dbDD0",
+                "tx_hash": "0xdb3d7b114f9fb12bc6749354623ddf7923cf87ba06437344f588c488880a0526",
+                "gas_used": 141549
+              },
+              {
+                "auditor": "0xEDdE2D7b35C4DC6Ea7862604850530f301Dd5570",
+                "tx_hash": "0xa9323bb2088d4904531bccd45021e36eb1ab0bdd62660a70fc088cfb489dd815",
+                "gas_used": 141549
+              }
+            ],
+            "set_threshold": {
+              "threshold": 2,
+              "tx_hash": "0xe6857969fbb4b837a9839f541a087b647fab5794b0d897799a832b23d40b5d4c",
+              "gas_used": 23165
+            }
+          },
+          "verified_explorer": true,
+          "verification_receipt": {
+            "guid": "adw4ppzeqn7w72yyj69bywrz2rcwg2wkpksi9ebg1ztakirv6g",
+            "status_response": {
+              "status": "1",
+              "message": "OK",
+              "result": "Pass - Verified"
+            }
+          }
+        }
+      }
+    },
+    "anvil": {
+      "network": "anvil",
+      "chain_id": 31337,
+      "updated_at_utc": "2026-11-14T07:10:20Z",
+      "git_commit": "172b25e78cd1fe0bcb309ec8480d2a78618258c7",
+      "contracts": {
+        "D1": {
+          "contract_name": "RiskAttestationRegistry",
+          "source_path": "contracts/RiskAttestationRegistry.vy",
+          "source_sha256": "cae5e0b9a504f958fe2eb953606461eaad11af9d823d96c5967634d7c5e4ed0f",
+          "vyper_version": "0.4.3",
+          "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+          "deploy_tx_hash": "0x06fcfc32425ddaaecf1864c0f2594ed2ccdf691c12b7d27d3c63468c4b00e67f",
+          "deploy_gas_used": 1068183,
+          "block_number": 5,
+          "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "owner_type": "anvil_test_eoa",
+          "constructor_arg_initial_owner": "0x0000000000000000000000000000000000000000",
+          "auditor_count": 3,
+          "threshold": 2,
+          "auditors": [
+            "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+            "0x90F79bf6EB2c4f870365E785982E1f101E93b906"
+          ],
+          "pending_owner_setup": false,
+          "intended_auditors": [],
+          "setup_txs": {
+            "add_auditors": [
+              {
+                "auditor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                "tx_hash": "0x6f5baf365f6a64476910b925c049a98338eef6f173916e4e7c30919f680f9f5d",
+                "gas_used": 69429
+              },
+              {
+                "auditor": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                "tx_hash": "0x10ec89d9124a7513f534c9fdab45f7e7848cabf7229ecb6f40b19e656369da46",
+                "gas_used": 52317
+              },
+              {
+                "auditor": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+                "tx_hash": "0x13884655099cfc37b42b6dcfedbec2e62619c912aaabe0df55c18d3db0000467",
+                "gas_used": 52329
+              }
+            ],
+            "set_threshold": {
+              "threshold": 2,
+              "tx_hash": "0x6389e62c93dd2dc71fab29bb7ec791d9a717ce240d53703bc87e96f95e4cac17",
+              "gas_used": 29165
+            }
+          },
+          "verified_explorer": false
+        },
+        "D2": {
+          "contract_name": "D2_EventOnly",
+          "source_path": "contracts/variants/D2_EventOnly.vy",
+          "source_sha256": "4de211d0077a415a6e6a035065d00f2ecb6c94d0a304081becfc379326ffb5ad",
+          "vyper_version": "0.4.3",
+          "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+          "deploy_tx_hash": "0xe07d75a4b3dd81d1d83c9093a8abf86c10c87bf7a7384ace3a5236f86473b82d",
+          "deploy_gas_used": 1057392,
+          "block_number": 10,
+          "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "owner_type": "anvil_test_eoa",
+          "constructor_arg_initial_owner": "0x0000000000000000000000000000000000000000",
+          "auditor_count": 3,
+          "threshold": 2,
+          "auditors": [
+            "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+            "0x90F79bf6EB2c4f870365E785982E1f101E93b906"
+          ],
+          "pending_owner_setup": false,
+          "intended_auditors": [],
+          "setup_txs": {
+            "add_auditors": [
+              {
+                "auditor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                "tx_hash": "0x6ec1cb6cd8a867a70317cc60bc66df7a54f27dd18334b3a9495e7da72a244f3d",
+                "gas_used": 69429
+              },
+              {
+                "auditor": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                "tx_hash": "0x000c5c51e3540390467b39bdce068820f44712472af7fe2cc76de90ffb9e5b5b",
+                "gas_used": 52317
+              },
+              {
+                "auditor": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+                "tx_hash": "0x1c1ae5c76d322089d63e1111c5f9cc2ec8a1c4b0e2010e8f869ab4a66ddba479",
+                "gas_used": 52329
+              }
+            ],
+            "set_threshold": {
+              "threshold": 2,
+              "tx_hash": "0x0d29314c65d9e658647c1a3b77404906d76cea299f8bad13e26a682185e6294b",
+              "gas_used": 29165
+            }
+          },
+          "verified_explorer": false
+        },
+        "D3": {
+          "contract_name": "D3_MerkleBatch",
+          "source_path": "contracts/variants/D3_MerkleBatch.vy",
+          "source_sha256": "8430e3fe5b17177bcc97bd316de22d63fecc1aa669c93f917e5352169cc11dc4",
+          "vyper_version": "0.4.3",
+          "address": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
+          "deploy_tx_hash": "0x3d6c8c116193765cd9fdb817722fd17b0a1a924e27f3018eaebf3981625c4224",
+          "deploy_gas_used": 1139153,
+          "block_number": 15,
+          "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "owner_type": "anvil_test_eoa",
+          "constructor_arg_initial_owner": "0x0000000000000000000000000000000000000000",
+          "auditor_count": 3,
+          "threshold": 2,
+          "auditors": [
+            "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+            "0x90F79bf6EB2c4f870365E785982E1f101E93b906"
+          ],
+          "pending_owner_setup": false,
+          "intended_auditors": [],
+          "setup_txs": {
+            "add_auditors": [
+              {
+                "auditor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                "tx_hash": "0x6e082685ae6e3393b2e0db06111d1a115bbc55289e63d9b31368cc7c9604675c",
+                "gas_used": 69429
+              },
+              {
+                "auditor": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                "tx_hash": "0x78bf7012de29408fdfbadcccb61424cfa9e7494b4c7993e2340d707fef4776c0",
+                "gas_used": 52317
+              },
+              {
+                "auditor": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+                "tx_hash": "0xde0780321857e860349dcf931a854190096ee43f90fcb4938f81a7a56f8c1216",
+                "gas_used": 52329
+              }
+            ],
+            "set_threshold": {
+              "threshold": 2,
+              "tx_hash": "0x462fcca61847547db43bd0ae1713d0dbb2b6982535554cf7ef766611d65b35ca",
+              "gas_used": 29165
+            }
+          },
+          "verified_explorer": false
+        }
+      }
+    },
+    "arbitrum-sepolia": {
+      "network": "arbitrum-sepolia",
+      "chain_id": 421614,
+      "updated_at_utc": "2026-11-14T07:51:25Z",
+      "git_commit": "172b25e78cd1fe0bcb309ec8480d2a78618258c7",
+      "contracts": {
+        "D1": {
+          "contract_name": "RiskAttestationRegistry",
+          "source_path": "contracts/RiskAttestationRegistry.vy",
+          "source_sha256": "cae5e0b9a504f958fe2eb953606461eaad11af9d823d96c5967634d7c5e4ed0f",
+          "vyper_version": "0.4.3",
+          "address": "0x14895F5e1f7F1aC5C58b35dA6d57674Aa5951b77",
+          "deploy_tx_hash": "0xcbeee4c9ec7666dbe613fe8aefb63bd9494fa4e807bcb3c4e0ed5c369007cbd6",
+          "deploy_gas_used": 1068183,
+          "block_number": 329081866,
+          "deployer": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
+          "owner": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
+          "owner_type": "eoa_demo_limit",
+          "constructor_arg_initial_owner": "0x0000000000000000000000000000000000000000",
+          "auditor_count": 3,
+          "threshold": 2,
+          "auditors": [
+            "0x6198B988c458DbA3a164929970e2e72AD69dFe02",
+            "0x7E63bA07459d070587a525E68265B9aD4b6dbDD0",
+            "0xEDdE2D7b35C4DC6Ea7862604850530f301Dd5570"
+          ],
+          "pending_owner_setup": false,
+          "intended_auditors": [],
+          "setup_txs": {
+            "add_auditors": [
+              {
+                "auditor": "0x6198B988c458DbA3a164929970e2e72AD69dFe02",
+                "tx_hash": "0x1b6fb481f46bfd7bb68f5aaeb487b29a5e2301a8e94289d29d7087b70454ccc3",
+                "gas_used": 69429
+              },
+              {
+                "auditor": "0x7E63bA07459d070587a525E68265B9aD4b6dbDD0",
+                "tx_hash": "0xd54a2b4c528e985b3e9530e0a01847631b11e06b287f3603e1f7da96d5ab465d",
+                "gas_used": 52329
+              },
+              {
+                "auditor": "0xEDdE2D7b35C4DC6Ea7862604850530f301Dd5570",
+                "tx_hash": "0x1e81885ac8c96d1108d5aae200d6392b29aff50269ea38c418fda96cb735fd30",
+                "gas_used": 52329
+              }
+            ],
+            "set_threshold": {
+              "threshold": 2,
+              "tx_hash": "0xcbbe2385cf3fa86fe557ae91ad834f4deeb7e81f6d6271bb4b899e558fb5671a",
+              "gas_used": 29165
+            }
+          },
+          "verified_explorer": true,
+          "verification_receipt": {
+            "guid": "dnjmrkhgecz39a2y5vyatktpz28qyyakbvu1ulxt6tkeeuxkqp",
+            "status_response": {
+              "status": "1",
+              "message": "OK",
+              "result": "Pass - Verified"
+            }
+          }
+        },
+        "D3": {
+          "contract_name": "D3_MerkleBatch",
+          "source_path": "contracts/variants/D3_MerkleBatch.vy",
+          "source_sha256": "8430e3fe5b17177bcc97bd316de22d63fecc1aa669c93f917e5352169cc11dc4",
+          "vyper_version": "0.4.3",
+          "address": "0x693632c45108A9ca25a7F9d693c00554EeDD1EB1",
+          "deploy_tx_hash": "0x5c76e2b67397be6bbed3c6a39b26cad0cae7648b981436e90f9543bd66cf927f",
+          "deploy_gas_used": 1139153,
+          "block_number": 329081934,
+          "deployer": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
+          "owner": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
+          "owner_type": "eoa_demo_limit",
+          "constructor_arg_initial_owner": "0x0000000000000000000000000000000000000000",
+          "auditor_count": 3,
+          "threshold": 2,
+          "auditors": [
+            "0x6198B988c458DbA3a164929970e2e72AD69dFe02",
+            "0x7E63bA07459d070587a525E68265B9aD4b6dbDD0",
+            "0xEDdE2D7b35C4DC6Ea7862604850530f301Dd5570"
+          ],
+          "pending_owner_setup": false,
+          "intended_auditors": [],
+          "setup_txs": {
+            "add_auditors": [
+              {
+                "auditor": "0x6198B988c458DbA3a164929970e2e72AD69dFe02",
+                "tx_hash": "0x81d7e4a6de28abf4ef6e3d3e90999dd7de95b500e05bfc7d2a925d4690bd1906",
+                "gas_used": 69429
+              },
+              {
+                "auditor": "0x7E63bA07459d070587a525E68265B9aD4b6dbDD0",
+                "tx_hash": "0x76c1b9aa1b551c8cc7a14b4ebb9adb9f215115ac6d7bd6bbd7184ed259656dbd",
+                "gas_used": 52329
+              },
+              {
+                "auditor": "0xEDdE2D7b35C4DC6Ea7862604850530f301Dd5570",
+                "tx_hash": "0x45d921018e2e4d4509bd69a351038b15e256b695df2736237f092edbd6db2fcd",
+                "gas_used": 52329
+              }
+            ],
+            "set_threshold": {
+              "threshold": 2,
+              "tx_hash": "0xcd8507291a8ceb1cad1eb5f3c420d5e0da5885de4ea1e45b96bc755505059e1e",
+              "gas_used": 29165
+            }
+          },
+          "verified_explorer": true,
+          "verification_receipt": {
+            "guid": "ix1yduuvnqcrig3fteg15jze4szfavwpsaf3j4hr7yx7hfawcq",
+            "status_response": {
+              "status": "1",
+              "message": "OK",
+              "result": "Pass - Verified"
+            }
+          }
+        }
+      }
     }
   }
 }
