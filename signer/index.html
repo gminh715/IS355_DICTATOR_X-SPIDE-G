@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>X-SPIDE-G · Client-Side MetaMask Signer</title>
+  <script src="./vendor/ethers.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+      --err: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .container { max-width: 860px; margin: 0 auto; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+    h1 { margin: 0 0 6px; font-size: 1.45rem; }
+    h2 { margin: 0 0 12px; font-size: 1.1rem; color: var(--accent); }
+    .subtitle { color: var(--muted); font-size: 0.92rem; margin-bottom: 14px; }
+    .banner {
+      border-left: 4px solid var(--warn);
+      background: rgba(245, 158, 11, 0.12);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+    }
+    label {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    input, select {
+      width: 100%;
+      padding: 9px 10px;
+      background: #0b1220;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.84rem;
+    }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      background: var(--accent);
+      color: #082f49;
+    }
+    button.secondary { background: #334155; color: var(--text); }
+    button.success { background: var(--ok); color: #052e16; }
+    button.warn { background: var(--warn); color: #451a03; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #334155;
+    }
+    .pill.ok { background: rgba(34, 197, 94, 0.2); color: #86efac; }
+    .pill.warn { background: rgba(245, 158, 11, 0.2); color: #fde68a; }
+    .pill.err { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+    pre {
+      background: #0b1220;
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.82rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>X-SPIDE-G · Client-Side Risk Attestation Signer</h1>
+      <div class="subtitle">
+        Static browser signer using <code>ethers.js v6</code> + MetaMask. Private keys never leave your wallet.
+      </div>
+      <div class="banner">
+        <strong>Security Boundary:</strong> Transactions are signed strictly inside MetaMask. Verify the
+        <code>case_id</code>, <code>evidence_hash</code>, <code>evidence_uri</code>, and target network before confirming.
+      </div>
+      <div class="row">
+        <button id="btnConnect">Connect MetaMask</button>
+        <button id="btnSwitchNet" class="secondary" disabled>Switch / Add Target Network</button>
+        <span id="walletBadge" class="pill">Not connected</span>
+        <span id="networkBadge" class="pill">Chain: —</span>
+        <span id="auditorBadge" class="pill">Auditor: unknown</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>1. Registry & Action Parameters</h2>
+      <div class="grid">
+        <div>
+          <label for="action">Action</label>
+          <select id="action">
+            <option value="register_case">register_case (Auditor registers new case)</option>
+            <option value="attest">attest (Auditor submits k-of-n decision)</option>
+          </select>
+        </div>
+        <div>
+          <label for="chainId">Target Chain ID</label>
+          <input id="chainId" type="number" value="11155111" />
+        </div>
+        <div>
+          <label for="contractAddress">Registry Contract Address (D1)</label>
+          <input id="contractAddress" type="text" placeholder="0x..." />
+        </div>
+      </div>
+
+      <div class="grid" style="margin-top: 12px;">
+        <div>
+          <label for="caseId">case_id (bytes32)</label>
+          <input id="caseId" type="text" placeholder="0x..." />
+        </div>
+        <div>
+          <label for="subject">subject (analyzed contract address)</label>
+          <input id="subject" type="text" placeholder="0x..." />
+        </div>
+        <div>
+          <label for="subjectChainId">subject_chain_id</label>
+          <input id="subjectChainId" type="number" value="1" />
+        </div>
+      </div>
+
+      <div class="grid" style="margin-top: 12px;">
+        <div>
+          <label for="evidenceHash">evidence_hash (bytes32)</label>
+          <input id="evidenceHash" type="text" placeholder="0x..." />
+        </div>
+        <div>
+          <label for="modelVersionHash">model_version_hash (bytes32)</label>
+          <input id="modelVersionHash" type="text" placeholder="0x..." />
+        </div>
+        <div>
+          <label for="evidenceUri">evidence_uri (String[128])</label>
+          <input id="evidenceUri" type="text" placeholder="ipfs://bafkrei..." />
+        </div>
+      </div>
+
+      <div class="grid" style="margin-top: 12px;">
+        <div>
+          <label for="decision">decision (for attest)</label>
+          <select id="decision">
+            <option value="1">1 = Approve (concur with ML evidence)</option>
+            <option value="2">2 = Reject (disagree with ML evidence)</option>
+            <option value="3">3 = NeedsReview (flag for review)</option>
+          </select>
+        </div>
+        <div>
+          <label for="reasonHash">reason_hash (bytes32)</label>
+          <input id="reasonHash" type="text" value="0x0000000000000000000000000000000000000000000000000000000000000000" />
+        </div>
+        <div>
+          <label for="reasonText">Optional Reason Note (hashes to reason_hash)</label>
+          <input id="reasonText" type="text" placeholder="Optional note to keccak256..." />
+        </div>
+      </div>
+
+      <div class="row">
+        <button id="btnCheckState" class="secondary">Read On-Chain Case State</button>
+        <button id="btnRegister" class="success">Sign & Send register_case()</button>
+        <button id="btnAttest" class="warn">Sign & Send attest()</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2. Transaction Status & Receipt</h2>
+      <pre id="statusLog">Ready. Connect MetaMask to inspect auditor status and sign transactions.</pre>
+      <div class="row">
+        <button id="btnCopyTx" class="secondary" disabled>Copy Last Tx Hash</button>
+        <span id="explorerLink"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const REGISTRY_ABI = [
+      "function owner() view returns (address)",
+      "function auditor_count() view returns (uint256)",
+      "function threshold() view returns (uint256)",
+      "function is_auditor(address) view returns (bool)",
+      "function verify_evidence(bytes32, bytes32) view returns (bool)",
+      "function get_case(bytes32) view returns (tuple(address subject, uint256 subject_chain_id, bytes32 evidence_hash, bytes32 model_version_hash, address registrant, uint256 created_at, uint256 approve_count, uint256 reject_count, uint256 review_count, uint8 status))",
+      "function register_case(bytes32 case_id, address subject, uint256 subject_chain_id, bytes32 evidence_hash, bytes32 model_version_hash, string evidence_uri)",
+      "function attest(bytes32 case_id, uint8 decision, bytes32 reason_hash)",
+      "event CaseRegistered(bytes32 indexed case_id, address indexed subject, bytes32 evidence_hash, bytes32 model_version_hash, string evidence_uri, address registrant)",
+      "event Attested(bytes32 indexed case_id, address indexed auditor, uint8 decision, uint256 revision, bytes32 reason_hash)",
+      "event StatusChanged(bytes32 indexed case_id, uint8 old_status, uint8 new_status)"
+    ];
+
+    const CHAIN_CONFIGS = {
+      31337: {
+        chainId: "0x7a69",
+        chainName: "X-SPIDE-G Local Anvil (PyEVM)",
+        rpcUrls: ["http://127.0.0.1:8545"],
+        nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+      },
+      11155111: {
+        chainId: "0xaa36a7",
+        chainName: "Sepolia Testnet",
+        rpcUrls: ["https://rpc.sepolia.org"],
+        nativeCurrency: { name: "SepoliaETH", symbol: "ETH", decimals: 18 },
+        blockExplorerUrls: ["https://sepolia.etherscan.io"],
+      },
+      421614: {
+        chainId: "0x66eee",
+        chainName: "Arbitrum Sepolia",
+        rpcUrls: ["https://sepolia-rollup.arbitrum.io/rpc"],
+        nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+        blockExplorerUrls: ["https://sepolia.arbiscan.io"],
+      }
+    };
+
+    const STATUS_NAMES = { 0: "Open", 1: "Approved", 2: "Rejected", 3: "Disputed" };
+
+    let provider = null;
+    let signer = null;
+    let connectedAddress = null;
+    let lastTxHash = "";
+
+    const $ = (id) => document.getElementById(id);
+
+    function logMsg(msg) {
+      $("statusLog").textContent = msg;
+    }
+
+    function appendLog(msg) {
+      $("statusLog").textContent += "\n" + msg;
+    }
+
+    function populateFromQuery() {
+      const qs = new URLSearchParams(window.location.search);
+      const map = {
+        action: "action",
+        chain_id: "chainId",
+        contract_address: "contractAddress",
+        case_id: "caseId",
+        subject: "subject",
+        subject_chain_id: "subjectChainId",
+        evidence_hash: "evidenceHash",
+        model_version_hash: "modelVersionHash",
+        evidence_uri: "evidenceUri",
+        decision: "decision",
+        reason_hash: "reasonHash",
+      };
+      for (const [param, elId] of Object.entries(map)) {
+        const val = qs.get(param);
+        if (val !== null && val !== "") {
+          $(elId).value = val;
+        }
+      }
+    }
+
+    $("reasonText").addEventListener("input", () => {
+      const txt = $("reasonText").value.trim();
+      if (!txt) {
+        $("reasonHash").value = "0x" + "00".repeat(32);
+      } else if (typeof ethers !== "undefined") {
+        $("reasonHash").value = ethers.keccak256(ethers.toUtf8Bytes(txt));
+      }
+    });
+
+    async function refreshWalletStatus() {
+      if (!provider || !signer) return;
+      connectedAddress = await signer.getAddress();
+      const net = await provider.getNetwork();
+      const currentCid = Number(net.chainId);
+      const targetCid = Number($("chainId").value);
+
+      $("walletBadge").textContent = connectedAddress.slice(0, 6) + "..." + connectedAddress.slice(-4);
+      $("walletBadge").className = "pill ok";
+
+      $("networkBadge").textContent = `Chain: ${currentCid}` + (currentCid === targetCid ? " (match)" : ` (need ${targetCid})`);
+      $("networkBadge").className = currentCid === targetCid ? "pill ok" : "pill warn";
+      $("btnSwitchNet").disabled = currentCid === targetCid;
+
+      const contractAddr = $("contractAddress").value.trim();
+      if (ethers.isAddress(contractAddr) && currentCid === targetCid) {
+        try {
+          const c = new ethers.Contract(contractAddr, REGISTRY_ABI, provider);
+          const isAud = await c.is_auditor(connectedAddress);
+          $("auditorBadge").textContent = isAud ? "Auditor: AUTHORIZED" : "Auditor: NOT authorized";
+          $("auditorBadge").className = isAud ? "pill ok" : "pill err";
+        } catch (err) {
+          $("auditorBadge").textContent = "Auditor check failed";
+          $("auditorBadge").className = "pill warn";
+        }
+      }
+    }
+
+    async function connectMetaMask() {
+      if (typeof ethers === "undefined") {
+        logMsg("Error: ethers.js library failed to load.");
+        return;
+      }
+      if (!window.ethereum) {
+        logMsg("MetaMask (window.ethereum) not detected.\nServe signer/ over http://127.0.0.1 (not file://) and unlock MetaMask.");
+        return;
+      }
+      provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = await provider.getSigner();
+      await refreshWalletStatus();
+      logMsg("Connected MetaMask account: " + connectedAddress);
+    }
+
+    async function switchNetwork() {
+      if (!window.ethereum) return;
+      const targetCid = Number($("chainId").value);
+      const cfg = CHAIN_CONFIGS[targetCid];
+      const hexChainId = cfg ? cfg.chainId : "0x" + targetCid.toString(16);
+      try {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: hexChainId }],
+        });
+      } catch (err) {
+        if (err && err.code === 4902 && cfg) {
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [cfg],
+          });
+        } else {
+          logMsg("Network switch error: " + (err.message || String(err)));
+          return;
+        }
+      }
+      provider = new ethers.BrowserProvider(window.ethereum);
+      signer = await provider.getSigner();
+      await refreshWalletStatus();
+    }
+
+    function validateCommonInputs() {
+      if (!signer) throw new Error("Connect MetaMask first.");
+      const contractAddr = $("contractAddress").value.trim();
+      const caseId = $("caseId").value.trim();
+      if (!ethers.isAddress(contractAddr)) throw new Error("Invalid contract_address.");
+      if (!ethers.isHexString(caseId, 32)) throw new Error("Invalid bytes32 case_id.");
+      return { contractAddr, caseId };
+    }
+
+    async function readCaseState() {
+      try {
+        const { contractAddr, caseId } = validateCommonInputs();
+        const c = new ethers.Contract(contractAddr, REGISTRY_ABI, provider);
+        const [k, n, cs] = await Promise.all([c.threshold(), c.auditor_count(), c.get_case(caseId)]);
+        const exists = cs.registrant !== ethers.ZeroAddress;
+        const summary = {
+          contract: contractAddr,
+          threshold: Number(k),
+          auditor_count: Number(n),
+          case_exists: exists,
+          subject: cs.subject,
+          subject_chain_id: Number(cs.subject_chain_id),
+          evidence_hash: cs.evidence_hash,
+          model_version_hash: cs.model_version_hash,
+          registrant: cs.registrant,
+          approve_count: Number(cs.approve_count),
+          reject_count: Number(cs.reject_count),
+          review_count: Number(cs.review_count),
+          status: `${Number(cs.status)} (${STATUS_NAMES[Number(cs.status)] || "Unknown"})`,
+        };
+        logMsg(JSON.stringify(summary, null, 2));
+      } catch (err) {
+        logMsg("Read failed: " + (err.shortMessage || err.message || String(err)));
+      }
+    }
+
+    function showTxReceipt(txHash, receipt, targetCid) {
+      lastTxHash = txHash;
+      $("btnCopyTx").disabled = false;
+      const explorerMap = {
+        11155111: "https://sepolia.etherscan.io/tx/",
+        421614: "https://sepolia.arbiscan.io/tx/",
+      };
+      if (explorerMap[targetCid]) {
+        $("explorerLink").innerHTML = `<a href="${explorerMap[targetCid]}${txHash}" target="_blank" rel="noopener">View on Explorer</a>`;
+      } else {
+        $("explorerLink").textContent = "";
+      }
+      appendLog(`Confirmed in block #${receipt.blockNumber}, status=${receipt.status}, gasUsed=${receipt.gasUsed.toString()}`);
+    }
+
+    async function submitRegisterCase() {
+      try {
+        const { contractAddr, caseId } = validateCommonInputs();
+        const net = await provider.getNetwork();
+        const targetCid = Number($("chainId").value);
+        if (Number(net.chainId) !== targetCid) {
+          throw new Error(`Connected chainId ${net.chainId} != target ${targetCid}. Click Switch Network first.`);
+        }
+        const subject = $("subject").value.trim();
+        const subjectChainId = BigInt($("subjectChainId").value.trim());
+        const evidenceHash = $("evidenceHash").value.trim();
+        const modelVersionHash = $("modelVersionHash").value.trim();
+        const evidenceUri = $("evidenceUri").value.trim();
+
+        if (!ethers.isAddress(subject)) throw new Error("Invalid subject address.");
+        if (!ethers.isHexString(evidenceHash, 32)) throw new Error("Invalid bytes32 evidence_hash.");
+        if (!ethers.isHexString(modelVersionHash, 32)) throw new Error("Invalid bytes32 model_version_hash.");
+        if (!evidenceUri || evidenceUri.length > 128) throw new Error("evidence_uri must be 1..128 chars.");
+
+        const c = new ethers.Contract(contractAddr, REGISTRY_ABI, signer);
+        logMsg("Awaiting MetaMask signature for register_case(...)...");
+        const tx = await c.register_case(caseId, subject, subjectChainId, evidenceHash, modelVersionHash, evidenceUri);
+        logMsg(`Submitted register_case tx: ${tx.hash}\nWaiting for 1 confirmation...`);
+        const receipt = await tx.wait(1);
+        showTxReceipt(tx.hash, receipt, targetCid);
+      } catch (err) {
+        logMsg("register_case failed: " + (err.shortMessage || err.reason || err.message || String(err)));
+      }
+    }
+
+    async function submitAttest() {
+      try {
+        const { contractAddr, caseId } = validateCommonInputs();
+        const net = await provider.getNetwork();
+        const targetCid = Number($("chainId").value);
+        if (Number(net.chainId) !== targetCid) {
+          throw new Error(`Connected chainId ${net.chainId} != target ${targetCid}. Click Switch Network first.`);
+        }
+        const decision = Number($("decision").value);
+        const reasonHash = $("reasonHash").value.trim();
+        if (![1, 2, 3].includes(decision)) throw new Error("decision must be 1, 2, or 3.");
+        if (!ethers.isHexString(reasonHash, 32)) throw new Error("Invalid bytes32 reason_hash.");
+
+        const c = new ethers.Contract(contractAddr, REGISTRY_ABI, signer);
+        logMsg(`Awaiting MetaMask signature for attest(case_id, decision=${decision})...`);
+        const tx = await c.attest(caseId, decision, reasonHash);
+        logMsg(`Submitted attest tx: ${tx.hash}\nWaiting for 1 confirmation...`);
+        const receipt = await tx.wait(1);
+        showTxReceipt(tx.hash, receipt, targetCid);
+      } catch (err) {
+        logMsg("attest failed: " + (err.shortMessage || err.reason || err.message || String(err)));
+      }
+    }
+
+    $("btnConnect").addEventListener("click", connectMetaMask);
+    $("btnSwitchNet").addEventListener("click", switchNetwork);
+    $("btnCheckState").addEventListener("click", readCaseState);
+    $("btnRegister").addEventListener("click", submitRegisterCase);
+    $("btnAttest").addEventListener("click", submitAttest);
+    $("btnCopyTx").addEventListener("click", async () => {
+      if (!lastTxHash) return;
+      await navigator.clipboard.writeText(lastTxHash);
+      appendLog("Copied tx hash to clipboard: " + lastTxHash);
+    });
+
+    if (window.ethereum) {
+      window.ethereum.on("accountsChanged", () => connectMetaMask().catch(() => {}));
+      window.ethereum.on("chainChanged", () => connectMetaMask().catch(() => {}));
+    }
+
+    populateFromQuery();
+  </script>
+</body>
+</html>

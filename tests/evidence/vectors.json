@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "vectors": [
+    {
+      "name": "vector_1_ponzi_positive",
+      "evidence": {
+        "schema_version": "1.0",
+        "source_chain_id": 1,
+        "subject_address": "0x0006157838d5a6b33ab66588a6a693a57c869999",
+        "code_hash": "0x5e2dc4ab48ddd128ff37517d7f5993680da12e21a0cc29b25cbed15f7fd24bde",
+        "dataset_id": "xspide_S_code",
+        "sample_id": "xspide_00000",
+        "feature_schema_hash": "0xac12b3e03d1418790a091bd61a5ed919344863ff97ce781b874ebc463f843c01",
+        "model_version_hash": "0x5d00194582127b30dabce1702fb84502d52eef96c5045ea090a738b6fe5796b5",
+        "score": "0.912346",
+        "threshold": "0.256746",
+        "predicted_label": 1,
+        "shap_top_k": [
+          {
+            "feature": "paid_rate",
+            "value": "0.850000",
+            "shap_value": "1.245678"
+          },
+          {
+            "feature": "CALL",
+            "value": "0.031250",
+            "shap_value": "0.654321"
+          },
+          {
+            "feature": "CALLVALUE",
+            "value": "0.015000",
+            "shap_value": "0.412300"
+          },
+          {
+            "feature": "tx_in",
+            "value": "42.000000",
+            "shap_value": "-0.105000"
+          }
+        ],
+        "shap_digest": "0x9b76b1ddc20248386d92ef087ae26139d8f2a019b3e07ef5c70651eb6edf48c6",
+        "run_id": "0x1111111111111111111111111111111111111111111111111111111111111111",
+        "created_at_utc": "2026-11-14T08:00:00Z"
+      },
+      "canonical_json": "{\"code_hash\":\"0x5e2dc4ab48ddd128ff37517d7f5993680da12e21a0cc29b25cbed15f7fd24bde\",\"created_at_utc\":\"2026-11-14T08:00:00Z\",\"dataset_id\":\"xspide_S_code\",\"feature_schema_hash\":\"0xac12b3e03d1418790a091bd61a5ed919344863ff97ce781b874ebc463f843c01\",\"model_version_hash\":\"0x5d00194582127b30dabce1702fb84502d52eef96c5045ea090a738b6fe5796b5\",\"predicted_label\":1,\"run_id\":\"0x1111111111111111111111111111111111111111111111111111111111111111\",\"sample_id\":\"xspide_00000\",\"schema_version\":\"1.0\",\"score\":\"0.912346\",\"shap_digest\":\"0x9b76b1ddc20248386d92ef087ae26139d8f2a019b3e07ef5c70651eb6edf48c6\",\"shap_top_k\":[{\"feature\":\"paid_rate\",\"shap_value\":\"1.245678\",\"value\":\"0.850000\"},{\"feature\":\"CALL\",\"shap_value\":\"0.654321\",\"value\":\"0.031250\"},{\"feature\":\"CALLVALUE\",\"shap_value\":\"0.412300\",\"value\":\"0.015000\"},{\"feature\":\"tx_in\",\"shap_value\":\"-0.105000\",\"value\":\"42.000000\"}],\"source_chain_id\":1,\"subject_address\":\"0x0006157838d5a6b33ab66588a6a693a57c869999\",\"threshold\":\"0.256746\"}",
+      "expected_evidence_hash": "0x3cc1d054bb71b0110544c0faa2929e3e288662b296f7c992c93fd3c7924d00ef",
+      "expected_case_id": "0xd3a71776e38604a6ebd1043abced7ac2e671d2b25cd4acd361cf5432a1b2976f"
+    },
+    {
+      "name": "vector_2_non_ponzi_negative",
+      "evidence": {
+        "schema_version": "1.0",
+        "source_chain_id": 1,
+        "subject_address": "0x001a589dda0d6be37632925eaf1256986b2c6ad0",
+        "code_hash": "0x044469e1a0128d0dfff8586d670034b987d6e7ccdefeab27161401b8bad88747",
+        "dataset_id": "xspide_S_code",
+        "sample_id": "xspide_00001",
+        "feature_schema_hash": "0xac12b3e03d1418790a091bd61a5ed919344863ff97ce781b874ebc463f843c01",
+        "model_version_hash": "0x5d00194582127b30dabce1702fb84502d52eef96c5045ea090a738b6fe5796b5",
+        "score": "0.041234",
+        "threshold": "0.256746",
+        "predicted_label": 0,
+        "shap_top_k": [
+          {
+            "feature": "balance",
+            "value": "0.000000",
+            "shap_value": "-0.789012"
+          },
+          {
+            "feature": "SSTORE",
+            "value": "0.022000",
+            "shap_value": "-0.345678"
+          },
+          {
+            "feature": "PUSH",
+            "value": "0.350000",
+            "shap_value": "0.123456"
+          }
+        ],
+        "shap_digest": "0xde8dd3efccbefcf0ee942b289d35abf86225c91c611e18e3bef1a4f1f417702e",
+        "run_id": "0x2222222222222222222222222222222222222222222222222222222222222222",
+        "created_at_utc": "2026-11-14T08:05:00Z"
+      },
+      "canonical_json": "{\"code_hash\":\"0x044469e1a0128d0dfff8586d670034b987d6e7ccdefeab27161401b8bad88747\",\"created_at_utc\":\"2026-11-14T08:05:00Z\",\"dataset_id\":\"xspide_S_code\",\"feature_schema_hash\":\"0xac12b3e03d1418790a091bd61a5ed919344863ff97ce781b874ebc463f843c01\",\"model_version_hash\":\"0x5d00194582127b30dabce1702fb84502d52eef96c5045ea090a738b6fe5796b5\",\"predicted_label\":0,\"run_id\":\"0x2222222222222222222222222222222222222222222222222222222222222222\",\"sample_id\":\"xspide_00001\",\"schema_version\":\"1.0\",\"score\":\"0.041234\",\"shap_digest\":\"0xde8dd3efccbefcf0ee942b289d35abf86225c91c611e18e3bef1a4f1f417702e\",\"shap_top_k\":[{\"feature\":\"balance\",\"shap_value\":\"-0.789012\",\"value\":\"0.000000\"},{\"feature\":\"SSTORE\",\"shap_value\":\"-0.345678\",\"value\":\"0.022000\"},{\"feature\":\"PUSH\",\"shap_value\":\"0.123456\",\"value\":\"0.350000\"}],\"source_chain_id\":1,\"subject_address\":\"0x001a589dda0d6be37632925eaf1256986b2c6ad0\",\"threshold\":\"0.256746\"}",
+      "expected_evidence_hash": "0x2bf02acb0f1fe05f011282e0d2aeae101849b0c4e5c26773ff540415a5f86957",
+      "expected_case_id": "0x70a477790b5c8df40ddf643d0e486607ad840d8eee70acf1859d40a592a9500d"
+    },
+    {
+      "name": "vector_3_unicode_custom_edge",
+      "evidence": {
+        "schema_version": "1.0",
+        "source_chain_id": 11155111,
+        "subject_address": "0x00674045bb7c17f0aa1cde34780d6c51af548728",
+        "code_hash": "0xd6c5146743c66b6f016b461e39c17a77835e29bdc67d13a51efabea497758303",
+        "dataset_id": "custom_bytecode_utf8_test",
+        "sample_id": "custom_mẫu_003",
+        "feature_schema_hash": "0xac12b3e03d1418790a091bd61a5ed919344863ff97ce781b874ebc463f843c01",
+        "model_version_hash": "0x5d00194582127b30dabce1702fb84502d52eef96c5045ea090a738b6fe5796b5",
+        "score": "0.000000",
+        "threshold": "0.256746",
+        "predicted_label": 0,
+        "shap_top_k": [
+          {
+            "feature": "STOP",
+            "value": "0.010000",
+            "shap_value": "0.002000"
+          },
+          {
+            "feature": "JUMPI",
+            "value": "0.050000",
+            "shap_value": "0.000000"
+          }
+        ],
+        "shap_digest": "0xc086783dfe050e722dbb0db565a387d635dd04743f356f2dda0877fa345b04d6",
+        "run_id": "0xabababababababababababababababababababababababababababababababab",
+        "created_at_utc": "2026-11-14T08:10:00Z"
+      },
+      "canonical_json": "{\"code_hash\":\"0xd6c5146743c66b6f016b461e39c17a77835e29bdc67d13a51efabea497758303\",\"created_at_utc\":\"2026-11-14T08:10:00Z\",\"dataset_id\":\"custom_bytecode_utf8_test\",\"feature_schema_hash\":\"0xac12b3e03d1418790a091bd61a5ed919344863ff97ce781b874ebc463f843c01\",\"model_version_hash\":\"0x5d00194582127b30dabce1702fb84502d52eef96c5045ea090a738b6fe5796b5\",\"predicted_label\":0,\"run_id\":\"0xabababababababababababababababababababababababababababababababab\",\"sample_id\":\"custom_mẫu_003\",\"schema_version\":\"1.0\",\"score\":\"0.000000\",\"shap_digest\":\"0xc086783dfe050e722dbb0db565a387d635dd04743f356f2dda0877fa345b04d6\",\"shap_top_k\":[{\"feature\":\"STOP\",\"shap_value\":\"0.002000\",\"value\":\"0.010000\"},{\"feature\":\"JUMPI\",\"shap_value\":\"0.000000\",\"value\":\"0.050000\"}],\"source_chain_id\":11155111,\"subject_address\":\"0x00674045bb7c17f0aa1cde34780d6c51af548728\",\"threshold\":\"0.256746\"}",
+      "expected_evidence_hash": "0x223fa7228c9212a37470403d55ce1e3d744b060bd10bc3e5abd276a51fde3ccd",
+      "expected_case_id": "0x6f8573d6da2265c849f1103709c0a86a68acefb36312d50a3ec716c311ee7741"
+    }
+  ]
+}
