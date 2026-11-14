@@ -1,0 +1,6 @@
+interface:
+  display_name: "IEEE Academic Paper Writing"
+  short_description: "Plan, draft, revise, and review IEEE academic papers"
+  default_prompt: "Use $ieee-paper-writing. Review the paper structure and contribution chain, and propose revisions first."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,32 @@
+{
+  "name": "ieee-latex-writer",
+  "version": "0.1.0",
+  "description": "Open-community Codex skill for IEEE-style LaTeX research manuscripts, formal citation verification, reviewer responses, anonymity checks, BibTeX cleanup, and submission audits.",
+  "license": "MIT",
+  "keywords": [
+    "ieee",
+    "latex",
+    "research-writing",
+    "peer-review",
+    "bibtex",
+    "scholarly-metadata"
+  ],
+  "skills": "./",
+  "interface": {
+    "displayName": "IEEE LaTeX Writer Open",
+    "shortDescription": "Draft, cite, anonymize, and audit IEEE LaTeX papers.",
+    "longDescription": "IEEE LaTeX Writer Open helps prepare IEEE-style manuscripts with official IEEEtran templates, research narrative checks, formal publication-version verification, authorized access guidance, reviewer-response workflows, BibTeX cleanup, double-blind anonymity review, and static LaTeX audits.",
+    "developerName": "Open community",
+    "category": "Productivity",
+    "capabilities": [
+      "Write",
+      "Review"
+    ],
+    "defaultPrompt": [
+      "Use $ieee-latex-writer to audit my IEEE paper.",
+      "Use $ieee-latex-writer to verify formal citations and clean BibTeX.",
+      "Use $ieee-latex-writer to revise my reviewer response."
+    ],
+    "brandColor": "#0B5CAD"
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "IEEE LaTeX Writer Open"
+  short_description: "Shape, cite, anonymize, revise, and audit IEEE papers."
+  default_prompt: "Use $ieee-latex-writer to improve my IEEE paper, verify formal citations, clean BibTeX, and check submission readiness."

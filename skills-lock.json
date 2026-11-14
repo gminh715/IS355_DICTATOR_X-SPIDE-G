@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "skills": {
+    "empirical-paper-writer": {
+      "source": "yunshenwuchuxun/latex-paper-skills",
+      "sourceType": "github",
+      "skillPath": ".codex/skills/empirical-paper-writer/SKILL.md",
+      "computedHash": "0b8ad13a2066543c31465fe678669b92666b01b6ec1fe634bac51c0173eb591a",
+      "installMode": "copy"
+    },
+    "ieee-latex-writer": {
+      "source": "Listen-Sun/ieee-latex-writer",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "81ad70f8a7758d05195b9f7eae701a1d3d3e516802926de2eb7fc424ac9185cc",
+      "installMode": "copy"
+    },
+    "ieee-paper-writing": {
+      "source": "Arcadiastra/ieee-paper-writing",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "902dc2f28b3b74ddc707572380b2ed7b165cd8a22874ce04a6c289f3e8d3faf9",
+      "installMode": "copy"
+    },
+    "latex-paper-en": {
+      "source": "bahayonghang/academic-writing-skills",
+      "sourceType": "github",
+      "skillPath": "academic-writing-skills/latex-paper-en/SKILL.md",
+      "computedHash": "39ba7ba2dbf3fbb352427671f372b4528c050ad7f933ac0aabeaa14446320b33",
+      "installMode": "copy"
+    },
+    "latex-rhythm-refiner": {
+      "source": "yunshenwuchuxun/latex-paper-skills",
+      "sourceType": "github",
+      "skillPath": ".codex/skills/latex-rhythm-refiner/SKILL.md",
+      "computedHash": "36018de7dbce54dda93e16385f2c0212d8857b822bf1da761a37b2cde289d39a",
+      "installMode": "copy"
+    },
+    "paper-audit": {
+      "source": "bahayonghang/academic-writing-skills",
+      "sourceType": "github",
+      "skillPath": "academic-writing-skills/paper-audit/SKILL.md",
+      "computedHash": "7c97a2e50e0c60a02823bc1afe3dc6b8f1d4aecf8ec04dfd7d4853b7255296ff",
+      "installMode": "copy"
+    },
+    "results-backfill": {
+      "source": "yunshenwuchuxun/latex-paper-skills",
+      "sourceType": "github",
+      "skillPath": ".codex/skills/results-backfill/SKILL.md",
+      "computedHash": "42bfa697c42ed4387a93acac24e1da67d617a870e67eebaa1917d914df48c00e",
+      "installMode": "copy"
+    }
+  }
+}
