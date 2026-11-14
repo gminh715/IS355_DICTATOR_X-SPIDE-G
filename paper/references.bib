@@ -76,6 +76,55 @@
   doi     = {10.1145/3460093}
 }
 
+@inproceedings{luu2016oyente,
+  author    = {L. Luu and D.-H. Chu and H. Olickel and P. Saxena and A. Hobor},
+  title     = {Making Smart Contracts Smarter},
+  booktitle = {Proc. {ACM} {SIGSAC} Conf. Comput. Commun. Secur. ({CCS})},
+  pages     = {254--269},
+  year      = {2016},
+  doi       = {10.1145/2976749.2978309}
+}
+
+@inproceedings{grech2019gigahorse,
+  author    = {N. Grech and L. Brent and B. Scholz and Y. Smaragdakis},
+  title     = {{Gigahorse}: Thorough, Declarative Decompilation of Smart Contracts},
+  booktitle = {Proc. 41st {IEEE}/{ACM} Int. Conf. Softw. Eng. ({ICSE})},
+  pages     = {1176--1186},
+  year      = {2019},
+  doi       = {10.1109/ICSE.2019.00120}
+}
+
+@inproceedings{contro2021ethersolve,
+  author    = {F. Contro and M. Crosara and M. Ceccato and M. Dalla Preda},
+  title     = {{EtherSolve}: Computing an Accurate Control-Flow Graph from {Ethereum} Bytecode},
+  booktitle = {Proc. 29th {IEEE}/{ACM} Int. Conf. Program Comprehension ({ICPC})},
+  pages     = {127--137},
+  year      = {2021},
+  doi       = {10.1109/ICPC52881.2021.00021}
+}
+
+@inproceedings{he2020clones,
+  author    = {N. He and L. Wu and H. Wang and Y. Guo and X. Jiang},
+  title     = {Characterizing Code Clones in the {Ethereum} Smart Contract Ecosystem},
+  booktitle = {Proc. Int. Conf. Financial Cryptography and Data Security ({FC})},
+  series    = {LNCS},
+  volume    = {12059},
+  pages     = {654--675},
+  year      = {2020},
+  doi       = {10.1007/978-3-030-51280-4_35}
+}
+
+@article{kondo2020cloning,
+  author  = {M. Kondo and G. A. Oliva and Z. M. Jiang and A. E. Hassan and O. Mizuno},
+  title   = {Code cloning in smart contracts: a case study on verified contracts from the {Ethereum} blockchain platform},
+  journal = {Empir. Softw. Eng.},
+  volume  = {25},
+  number  = {6},
+  pages   = {4617--4675},
+  year    = {2020},
+  doi     = {10.1007/s10664-020-09852-5}
+}
+
 @article{nadeau2003inference,
   author  = {C. Nadeau and Y. Bengio},
   title   = {Inference for the Generalization Error},
@@ -94,7 +143,8 @@
   volume  = {6},
   number  = {2},
   pages   = {65--70},
-  year    = {1979}
+  year    = {1979},
+  doi     = {10.2307/4615733}
 }
 
 @inproceedings{broder1997resemblance,
@@ -112,7 +162,9 @@
   booktitle = {Adv. Neural Inf. Process. Syst.},
   volume    = {30},
   pages     = {3149--3157},
-  year      = {2017}
+  year      = {2017},
+  doi       = {10.5555/3294996.3295074},
+  url       = {https://proceedings.neurips.cc/paper/2017/hash/6907658b7d5ab7481818d8fb0294872a-Abstract.html}
 }
 
 @inproceedings{lundberg2017shap,
@@ -120,8 +172,10 @@
   title     = {A Unified Approach to Interpreting Model Predictions},
   booktitle = {Adv. Neural Inf. Process. Syst.},
   volume    = {30},
-  pages     = {4766--4777},
-  year      = {2017}
+  pages     = {4765--4774},
+  year      = {2017},
+  doi       = {10.48550/arXiv.1705.07874},
+  url       = {https://papers.nips.cc/paper_files/paper/2017/hash/8a20a8621978632d76c43dfd28b67767-Abstract.html}
 }
 
 @inproceedings{akiba2019optuna,
@@ -134,19 +188,28 @@
 }
 
 @article{pedregosa2011scikit,
-  author  = {F. Pedregosa and others},
+  author  = {F. Pedregosa and G. Varoquaux and A. Gramfort and V. Michel and B. Thirion and O. Grisel and M. Blondel and P. Prettenhofer and R. Weiss and V. Dubourg and J. Vanderplas and A. Passos and D. Cournapeau and M. Brucher and M. Perrot and E. Duchesnay},
   title   = {Scikit-learn: Machine Learning in {Python}},
   journal = {J. Mach. Learn. Res.},
   volume  = {12},
   pages   = {2825--2830},
-  year    = {2011}
+  year    = {2011},
+  doi     = {10.48550/arXiv.1201.0490},
+  url     = {https://www.jmlr.org/papers/volume12/pedregosa11a/}
 }
 
 @misc{wood2014ethereum,
   author       = {G. Wood},
   title        = {{Ethereum}: A Secure Decentralised Generalised Transaction Ledger},
-  howpublished = {Ethereum Project Yellow Paper},
+  howpublished = {Ethereum Project Yellow Paper: \url{https://ethereum.github.io/yellowpaper/paper.pdf}},
   year         = {2014}
+}
+
+@misc{eip712,
+  author       = {R. Bloemen and L. Logvinov and J. Evans},
+  title        = {{EIP-712}: Typed Structured Data Hashing and Signing},
+  howpublished = {Ethereum Improvement Proposals: \url{https://eips.ethereum.org/EIPS/eip-712}},
+  year         = {2017}
 }
 
 @misc{pennella2025repo,
@@ -157,7 +220,7 @@
 }
 
 @misc{liang2024repo,
-  author       = {R. Liang and others},
+  author       = {R. Liang and J. Chen and K. He and Y. Wu and G. Deng and R. Du and C. Wu},
   title        = {{PonziGuard} Dataset and Tools},
   howpublished = {GitHub repository: \url{https://github.com/PonziDetection/PonziGuard}},
   year         = {2024}
