@@ -1,0 +1,17 @@
+name: x-spide-g
+
+plugins:
+  - name: vyper
+  - name: foundry
+
+vyper:
+  version: "0.4.3"
+
+default_ecosystem: ethereum
+
+ethereum:
+  default_network: local
+
+foundry:
+  host: http://127.0.0.1:8545
+  fork_block_number: null

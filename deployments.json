@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "networks": {
+    "local-evm": {
+      "network": "local-evm",
+      "chain_id": 131277322940537,
+      "updated_at_utc": "2026-11-14T05:56:47Z",
+      "git_commit": "f5ad34b18912eee63cb7d75496b336cb4938766e",
+      "contracts": {
+        "D1": {
+          "contract_name": "RiskAttestationRegistry",
+          "source_path": "contracts/RiskAttestationRegistry.vy",
+          "source_sha256": "cae5e0b9a504f958fe2eb953606461eaad11af9d823d96c5967634d7c5e4ed0f",
+          "vyper_version": "0.4.3",
+          "address": "0xF2E246BB76DF876Cef8b38ae84130F4F55De395b",
+          "deploy_tx_hash": "0x46f168828d60d86b55754851c8b87e1fa499e84e1bd42d0464d8566e9ff5b778",
+          "deploy_gas_used": 1068183,
+          "block_number": 1,
+          "deployer": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf",
+          "owner": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf",
+          "owner_type": "local_ephemeral_eoa",
+          "constructor_arg_initial_owner": "0x0000000000000000000000000000000000000000",
+          "auditor_count": 3,
+          "threshold": 2,
+          "auditors": [
+            "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF",
+            "0x6813Eb9362372EEF6200f3b1dbC3f819671cBA69",
+            "0x1efF47bc3a10a45D4B230B5d10E37751FE6AA718"
+          ],
+          "pending_owner_setup": false,
+          "intended_auditors": [],
+          "setup_txs": {
+            "add_auditors": [
+              {
+                "auditor": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF",
+                "tx_hash": "0xa12595fd3d7589dbd6ced588425e9369d24ec6b59af6bf21a84b0e33fb18212a",
+                "gas_used": 69429
+              },
+              {
+                "auditor": "0x6813Eb9362372EEF6200f3b1dbC3f819671cBA69",
+                "tx_hash": "0xd1a2d3dfb3417b6cdd078deae7b307416442135381144abf02fcf256f8606c67",
+                "gas_used": 52317
+              },
+              {
+                "auditor": "0x1efF47bc3a10a45D4B230B5d10E37751FE6AA718",
+                "tx_hash": "0xcbaa7df06e9b7692edb38a07cfc2755098dd1ae9dadf4e096afdf8d43a06fb28",
+                "gas_used": 52329
+              }
+            ],
+            "set_threshold": {
+              "threshold": 2,
+              "tx_hash": "0x847c670a73eeaa439234f955f71106710843b099a9cf58c7ba54f8d30a622d92",
+              "gas_used": 29165
+            }
+          },
+          "verified_explorer": false
+        },
+        "D2": {
+          "contract_name": "D2_EventOnly",
+          "source_path": "contracts/variants/D2_EventOnly.vy",
+          "source_sha256": "4de211d0077a415a6e6a035065d00f2ecb6c94d0a304081becfc379326ffb5ad",
+          "vyper_version": "0.4.3",
+          "address": "0x6D411e0A54382eD43F02410Ce1c7a7c122afA6E1",
+          "deploy_tx_hash": "0xda17175d33e18bd1ac832ce0451d69909c7082df1435fa6c0a9c78d4fff23fb3",
+          "deploy_gas_used": 1057392,
+          "block_number": 6,
+          "deployer": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf",
+          "owner": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf",
+          "owner_type": "local_ephemeral_eoa",
+          "constructor_arg_initial_owner": "0x0000000000000000000000000000000000000000",
+          "auditor_count": 3,
+          "threshold": 2,
+          "auditors": [
+            "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF",
+            "0x6813Eb9362372EEF6200f3b1dbC3f819671cBA69",
+            "0x1efF47bc3a10a45D4B230B5d10E37751FE6AA718"
+          ],
+          "pending_owner_setup": false,
+          "intended_auditors": [],
+          "setup_txs": {
+            "add_auditors": [
+              {
+                "auditor": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF",
+                "tx_hash": "0x551beaa28261f80dc902af3f796ddaafb859692943706d69f823bcb10e0de630",
+                "gas_used": 69429
+              },
+              {
+                "auditor": "0x6813Eb9362372EEF6200f3b1dbC3f819671cBA69",
+                "tx_hash": "0x6f9d744743cae1095956dd1820e805c5ae127fe67fb675a1d1e57e5fd0e4b84b",
+                "gas_used": 52317
+              },
+              {
+                "auditor": "0x1efF47bc3a10a45D4B230B5d10E37751FE6AA718",
+                "tx_hash": "0x8df577c06323b3fdb8ae92c87aa2865bb75bc00b9e1386c3818b596351763913",
+                "gas_used": 52329
+              }
+            ],
+            "set_threshold": {
+              "threshold": 2,
+              "tx_hash": "0x1f6d6f052ff24fc2ef8b3a0846e4b065b0caabfce26754bcbb9e62a74790cddd",
+              "gas_used": 29165
+            }
+          },
+          "verified_explorer": false
+        },
+        "D3": {
+          "contract_name": "D3_MerkleBatch",
+          "source_path": "contracts/variants/D3_MerkleBatch.vy",
+          "source_sha256": "8430e3fe5b17177bcc97bd316de22d63fecc1aa669c93f917e5352169cc11dc4",
+          "vyper_version": "0.4.3",
+          "address": "0x00De48310d77A4d56aa400248b0B1613508f5B73",
+          "deploy_tx_hash": "0x29f0954e85b3caa5f20c82adfaf791286108b79fbafadc7aadb3965311ea0c33",
+          "deploy_gas_used": 1139153,
+          "block_number": 11,
+          "deployer": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf",
+          "owner": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf",
+          "owner_type": "local_ephemeral_eoa",
+          "constructor_arg_initial_owner": "0x0000000000000000000000000000000000000000",
+          "auditor_count": 3,
+          "threshold": 2,
+          "auditors": [
+            "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF",
+            "0x6813Eb9362372EEF6200f3b1dbC3f819671cBA69",
+            "0x1efF47bc3a10a45D4B230B5d10E37751FE6AA718"
+          ],
+          "pending_owner_setup": false,
+          "intended_auditors": [],
+          "setup_txs": {
+            "add_auditors": [
+              {
+                "auditor": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF",
+                "tx_hash": "0xb58f068e63e111c6758dcf34e8cb33a665f59dad7277981b3d618449a73157cf",
+                "gas_used": 69429
+              },
+              {
+                "auditor": "0x6813Eb9362372EEF6200f3b1dbC3f819671cBA69",
+                "tx_hash": "0x094479888aecb9e5149ba49e56d44e7e4c525651fcb3eccadc8b43a6c524b990",
+                "gas_used": 52317
+              },
+              {
+                "auditor": "0x1efF47bc3a10a45D4B230B5d10E37751FE6AA718",
+                "tx_hash": "0x64675046616f68dda3983ddc79fb9790d3fe0853db7bdf862b2ff9af7311d896",
+                "gas_used": 52329
+              }
+            ],
+            "set_threshold": {
+              "threshold": 2,
+              "tx_hash": "0xad756d887b7164ccd4403223d9e5dccbfbce9e860dff4528c36447f6ea3dddd3",
+              "gas_used": 29165
+            }
+          },
+          "verified_explorer": false
+        }
+      },
+      "smoke_check_d1": {
+        "case_id": "0xd80dff953ab2de62ff7bc1b7b5137e84fa5cd6237d4db13d6f19d401d646d964",
+        "register_gas_used": 171156,
+        "attest1_gas_used": 124828,
+        "attest2_gas_used": 129311,
+        "total_finalization_gas": 425295,
+        "final_status": 1,
+        "verify_evidence_exact": true
+      }
+    }
+  }
+}
