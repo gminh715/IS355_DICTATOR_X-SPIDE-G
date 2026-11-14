@@ -2,14 +2,14 @@
 
 - **Compiler:** Vyper `0.4.3+commit.bff19ea2` (`# pragma version ^0.4.0`)
 - **EVM Test Backend:** `eth-tester 0.14.0b1` / `py-evm 0.12.1b1` (`EthereumTesterProvider`)
-- **Test Command:** `.\.venv\Scripts\python.exe -m pytest tests/contracts --cov=src/contracts --cov-report=term-missing -v`
+- **Test Command:** `.\.venv\Scripts\python.exe -m pytest -v --cov=src/contracts --cov-report=term-missing`
 
 ## 1. Test Suite Results (`T1`–`T12`)
 
-- **Total Contract Tests:** `33 passed in 151.62s` (`0` warnings, `0` skipped)
+- **Total Tests:** `83 passed in 611.05s (0:10:11)` (covering all `34` contract tests in `tests/contracts/` plus Phase 1–4 suites; `0` failed, `0` skipped)
 - **Test Modules:**
   - [`tests/contracts/test_registry_d1_d2.py`](../tests/contracts/test_registry_d1_d2.py): `T1`–`T10` parameterized across both `D1` (`RiskAttestationRegistry.vy`) and `D2` (`D2_EventOnly.vy`), including exhaustive $3^3 = 27$ 3-auditor decision permutations for $k = 2, n = 3$ (`T4`).
-  - [`tests/contracts/test_fuzz_t11.py`](../tests/contracts/test_fuzz_t11.py): `T11` Hypothesis differential property/fuzz test (`25` random multi-actor operation traces) checking `D1` against [`src/contracts/reference.py`](../src/contracts/reference.py).
+  - [`tests/contracts/test_fuzz_t11.py`](../tests/contracts/test_fuzz_t11.py): `T11` Hypothesis differential property/fuzz test (`25` random multi-actor operation traces) + deterministic `set_threshold` deferral regression checking `D1` against [`src/contracts/reference.py`](../src/contracts/reference.py).
   - [`tests/contracts/test_merkle_d3_t12.py`](../tests/contracts/test_merkle_d3_t12.py): `T12` Merkle leaf parity, batch sizes $N \in \{1, 5, 16, 100\}$, tampered/unregistered proofs, and `D3` quorum governance.
   - [`tests/contracts/test_revert_branch_coverage.py`](../tests/contracts/test_revert_branch_coverage.py): Automated AST/source extraction and execution of every `assert` revert guard across `D1`, `D2`, and `D3`, plus non-payable ETH rejection.
   - [`tests/contracts/test_deploy_and_verify_scripts.py`](../tests/contracts/test_deploy_and_verify_scripts.py): `local-evm` deployment manifest validation, raw-signed EIP-1559/private-key tx path, and Etherscan v2 `vyper-json` verification payload/timeout checks.
@@ -30,8 +30,8 @@
 | `src/contracts/__init__.py` | 4 | 0 | 100% |
 | `src/contracts/compiler.py` | 76 | 28 | 63% |
 | `src/contracts/merkle.py` | 58 | 2 | 97% |
-| `src/contracts/reference.py` | 112 | 8 | 93% |
-| **Total (`src/contracts/`)** | **250** | **38** | **85%** |
+| `src/contracts/reference.py` | 114 | 11 | 90% |
+| **Total (`src/contracts/`)** | **252** | **41** | **84%** |
 
 > **Deployment & Environment Note (`5.7`):** [`deployments.json`](../deployments.json) records verified deployments (each configured with 3 auditors and `threshold = 2`) across all four targets:
 > - `local-evm` (`PyEVMBackend` deterministic check + `D1` end-to-end smoke check): `D1`, `D2`, `D3`.

@@ -43,6 +43,7 @@ class ReferenceCase:
     reject_count: int = 0
     review_count: int = 0
     status: int = STATUS_OPEN
+    last_eval_threshold: int = 2
 
 
 @dataclass
@@ -114,6 +115,7 @@ class ReferenceRegistryState:
             evidence_hash=evidence_hash,
             model_version_hash=model_version_hash,
             registrant=caller,
+            last_eval_threshold=self.threshold,
         )
         self.attestations[case_id] = {}
 
@@ -146,10 +148,13 @@ class ReferenceRegistryState:
             case.review_count += 1
 
         case_atts[caller] = ReferenceAttestation(decision=decision, revision=prev.revision + 1)
+        case.last_eval_threshold = self.threshold
         case.status = compute_status(case.approve_count, case.reject_count, self.threshold)
 
     def assert_invariants(self, case_id: bytes) -> None:
         case = self.cases[case_id]
         non_zero = sum(1 for att in self.attestations[case_id].values() if att.decision != 0)
         assert case.approve_count + case.reject_count + case.review_count == non_zero
-        assert case.status == compute_status(case.approve_count, case.reject_count, self.threshold)
+        assert case.status == compute_status(
+            case.approve_count, case.reject_count, case.last_eval_threshold
+        )

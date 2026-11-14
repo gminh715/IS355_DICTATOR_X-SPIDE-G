@@ -10,7 +10,14 @@ from web3 import Web3
 from web3.providers.eth_tester import EthereumTesterProvider
 
 from src.contracts.compiler import compile_contract
-from src.contracts.reference import ReferenceRegistryState, compute_status
+from src.contracts.reference import (
+    DECISION_NEEDS_REVIEW,
+    DECISION_REJECT,
+    STATUS_OPEN,
+    STATUS_REJECTED,
+    ReferenceRegistryState,
+    compute_status,
+)
 from tests.contracts.conftest import ZERO_ADDRESS, ZERO_BYTES32, assert_reverts
 
 OP_ADD_AUDITOR = "add_auditor"
@@ -170,5 +177,50 @@ def test_t11_property_fuzz_state_and_invariants(ops: list[tuple[int | str, ...]]
                 ref_case.reject_count,
                 ref_case.review_count,
             )
-            assert status_c == compute_status(approve_c, reject_c, ref.threshold)
+            assert status_c == compute_status(approve_c, reject_c, ref_case.last_eval_threshold)
             assert status_c == ref_case.status
+
+
+def test_t11_set_threshold_recomputation_deferral_matches_spec() -> None:
+    """Regression check for Hypothesis seed where set_threshold follows attest without re-attesting."""
+    w3 = Web3(EthereumTesterProvider(EthereumTester(PyEVMBackend())))
+    accounts = w3.eth.accounts
+    owner, aud0, aud1, aud2, subject = accounts[0], accounts[1], accounts[2], accounts[3], accounts[6]
+
+    compiled = compile_contract("D1", use_cache=True)
+    factory = w3.eth.contract(abi=compiled.abi, bytecode=compiled.bytecode)
+    rc = w3.eth.wait_for_transaction_receipt(factory.constructor(ZERO_ADDRESS).transact({"from": owner}))
+    contract = w3.eth.contract(address=rc.contractAddress, abi=compiled.abi)
+
+    ref = ReferenceRegistryState(owner=owner, threshold=2)
+    for aud in (aud0, aud1, aud2):
+        w3.eth.wait_for_transaction_receipt(contract.functions.add_auditor(aud).transact({"from": owner}))
+        ref.add_auditor(owner, aud)
+
+    cid = keccak(b"threshold-deferral-case")
+    eh = keccak(b"threshold-deferral-ev")
+    mh = keccak(b"threshold-deferral-model")
+    w3.eth.wait_for_transaction_receipt(
+        contract.functions.register_case(cid, subject, 1, eh, mh, "ipfs://reg").transact({"from": aud0})
+    )
+    ref.register_case(aud0, cid, subject, 1, eh, mh)
+
+    # Reject count=1 at threshold=2 keeps case Open
+    w3.eth.wait_for_transaction_receipt(
+        contract.functions.attest(cid, DECISION_REJECT, ZERO_BYTES32).transact({"from": aud0})
+    )
+    ref.attest(aud0, cid, DECISION_REJECT)
+
+    # Lower threshold to 1: stored case.status remains Open until next attest triggers _compute_status
+    w3.eth.wait_for_transaction_receipt(contract.functions.set_threshold(1).transact({"from": owner}))
+    ref.set_threshold(owner, 1)
+    ref.assert_invariants(cid)
+    assert contract.functions.get_case(cid).call()[9] == STATUS_OPEN == ref.cases[cid].status
+
+    # Subsequent attest recomputes case status under threshold=1 -> Rejected
+    w3.eth.wait_for_transaction_receipt(
+        contract.functions.attest(cid, DECISION_NEEDS_REVIEW, ZERO_BYTES32).transact({"from": aud1})
+    )
+    ref.attest(aud1, cid, DECISION_NEEDS_REVIEW)
+    ref.assert_invariants(cid)
+    assert contract.functions.get_case(cid).call()[9] == STATUS_REJECTED == ref.cases[cid].status
