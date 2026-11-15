@@ -4,7 +4,7 @@
 **Institution:** University of Information Technology – VNU-HCM, Faculty of Information Systems  
 **Group:** 4 – DICTATOR  
 **Repository:** https://github.com/gminh715/IS355_DICTATOR_X-SPIDE-G (Release tag: `v1.0-final`)  
-**Companion Artifacts:** [4_DICTATOR_IS355_Final_Report.pdf](../4_DICTATOR_IS355_Final_Report.pdf) · [4_DICTATOR_IS355_Final_Report.docx](../4_DICTATOR_IS355_Final_Report.docx) · [Traceability Matrix](traceability_matrix.md) · [Defense Q&A](defense_qa.md)
+**Companion Artifacts:** [IEEE Paper](../paper/main.pdf) · [Traceability Matrix](traceability_matrix.md) · [Defense Q&A](defense_qa.md)
 
 | No. | Full Name | Student ID | Role | Primary Project Contributions |
 |---|---|---|---|---|

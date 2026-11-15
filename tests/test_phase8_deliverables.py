@@ -8,8 +8,6 @@ import re
 import subprocess
 import sys
 
-from pptx import Presentation
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -58,9 +56,8 @@ def test_phase8_traceability_matrix_complete() -> None:
 
 def test_phase8_final_report_outputs() -> None:
     md = REPO_ROOT / "reports" / "final_report.md"
-    docx_file = REPO_ROOT / "4_DICTATOR_IS355_Final_Report.docx"
-    pdf_file = REPO_ROOT / "4_DICTATOR_IS355_Final_Report.pdf"
-    for p in (md, docx_file, pdf_file):
+    paper_pdf = REPO_ROOT / "paper" / "main.pdf"
+    for p in (md, paper_pdf):
         assert p.exists() and p.stat().st_size > 10_000, f"Final report artifact incomplete: {p}"
 
     md_text = md.read_text(encoding="utf-8")
@@ -78,21 +75,10 @@ def test_phase8_final_report_outputs() -> None:
         assert required_section in md_text, f"Missing section in final_report.md: {required_section}"
     assert "[13]" in md_text
 
-    # Non-empty PDF page count check (>= 12 pages)
-    pdf_bytes = pdf_file.read_bytes()
+    # Non-empty IEEE paper PDF page count check (>= 8 pages)
+    pdf_bytes = paper_pdf.read_bytes()
     pages = re.findall(rb"/Type\s*/Page(?!s)\b", pdf_bytes)
-    assert len(pages) >= 12, f"Expected multi-page Final Report PDF, found {len(pages)}"
-
-
-def test_phase8_presentation_slide_count_and_pdf() -> None:
-    pptx_file = REPO_ROOT / "4_DICTATOR_IS355_Final_Presentation.pptx"
-    pdf_file = REPO_ROOT / "4_DICTATOR_IS355_Final_Presentation.pdf"
-    assert pptx_file.exists() and pptx_file.stat().st_size > 100_000
-    assert pdf_file.exists() and pdf_file.stat().st_size > 100_000
-
-    prs = Presentation(str(pptx_file))
-    n_slides = len(prs.slides)
-    assert 12 <= n_slides <= 15, f"Slide count must be 12..15 per Phase 8.3 spec, got {n_slides}"
+    assert len(pages) >= 8, f"Expected multi-page IEEE paper PDF, found {len(pages)}"
 
 
 def test_phase8_demo_video_and_screenshots() -> None:

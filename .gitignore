@@ -8,8 +8,9 @@ data/raw/
 data/processed/
 *.zip
 
-# Local draft backups
+# Local draft backups & course deliverables
 backup/
+lab/
 
 # Python / pytest / notebooks
 __pycache__/
