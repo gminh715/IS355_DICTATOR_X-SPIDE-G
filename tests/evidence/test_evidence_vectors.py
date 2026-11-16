@@ -164,3 +164,89 @@ def test_storage_persistence_cidv1_and_tamper_detection(tmp_path: Path) -> None:
     ok_bad, diag_bad = verify_evidence_payload(fetched_bad, receipt.evidence_hash)
     assert ok_bad is False
     assert diag_bad["raw_hash_matches"] is False
+
+
+def test_verify_evidence_payload_checks_subject_chain_model_and_case_id() -> None:
+    vec = _load_vectors()[0]
+    ev = vec["evidence"]
+    raw = canonical_bytes(ev)
+    eh = vec["expected_evidence_hash"]
+    cid = vec["expected_case_id"]
+
+    # Full match across hash + all 4 identity fields -> True
+    ok_all, diag_all = verify_evidence_payload(
+        raw,
+        eh,
+        expected_case_id_hex=cid,
+        expected_subject=ev["subject_address"],
+        expected_subject_chain_id=ev["source_chain_id"],
+        expected_model_version_hash_hex=ev["model_version_hash"],
+    )
+    assert ok_all is True
+    assert diag_all["identity_match"] is True
+    assert diag_all["identity_errors"] == []
+
+    # Hash matches, but on-chain subject is Contract A while JSON is Contract B -> False
+    ok_subj, diag_subj = verify_evidence_payload(
+        raw,
+        eh,
+        expected_case_id_hex=cid,
+        expected_subject="0x000000000000000000000000000000000000dead",
+        expected_subject_chain_id=ev["source_chain_id"],
+        expected_model_version_hash_hex=ev["model_version_hash"],
+    )
+    assert ok_subj is False
+    assert diag_subj["raw_hash_matches"] is True
+    assert diag_subj["identity_match"] is False
+    assert any("subject_address mismatch" in e for e in diag_subj["identity_errors"])
+
+    # Hash matches, but chain_id, model_version_hash, or case_id mismatches -> False
+    ok_chain, diag_chain = verify_evidence_payload(
+        raw,
+        eh,
+        expected_case_id_hex="0x" + ("11" * 32),
+        expected_subject=ev["subject_address"],
+        expected_subject_chain_id=11155111,
+        expected_model_version_hash_hex="0x" + ("22" * 32),
+    )
+    assert ok_chain is False
+    assert len(diag_chain["identity_errors"]) == 3
+
+
+def test_persist_evidence_bundle_prevents_accidental_overwrite(tmp_path: Path) -> None:
+    vec = _load_vectors()[0]
+    ev = copy.deepcopy(vec["evidence"])
+    cid_case = vec["expected_case_id"]
+    ev_dir = tmp_path / "evidence"
+
+    r1 = persist_evidence_bundle(
+        ev,
+        cid_case,
+        evidence_dir=ev_dir,
+        repo_root=tmp_path,
+        ipfs_api_url="",
+        pinata_jwt="",
+    )
+    # Saving identical bytes is idempotent
+    r2 = persist_evidence_bundle(
+        ev,
+        cid_case,
+        evidence_dir=ev_dir,
+        repo_root=tmp_path,
+        ipfs_api_url="",
+        pinata_jwt="",
+    )
+    assert r1.evidence_hash == r2.evidence_hash
+
+    # Changing created_at_utc while keeping the same case_id must raise FileExistsError by default
+    ev_changed = copy.deepcopy(ev)
+    ev_changed["created_at_utc"] = "2026-12-31T23:59:59Z"
+    with pytest.raises(FileExistsError):
+        persist_evidence_bundle(
+            ev_changed,
+            cid_case,
+            evidence_dir=ev_dir,
+            repo_root=tmp_path,
+            ipfs_api_url="",
+            pinata_jwt="",
+        )

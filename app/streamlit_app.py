@@ -18,6 +18,7 @@ from src.evidence.canonical import (
     canonical_bytes,
     case_id_hex,
     evidence_hash_hex,
+    normalize_utc_timestamp,
     verify_evidence_payload,
 )
 from src.evidence.chain_client import (
@@ -103,6 +104,7 @@ def _init_session_state() -> None:
         "current_evidence_uri": "",
         "current_storage_receipt": None,
         "last_run_id": "0x" + secrets.token_hex(32),
+        "last_created_at_utc": normalize_utc_timestamp(),
         "last_tx_hashes": [],
     }
     for k, v in defaults.items():
@@ -185,7 +187,9 @@ def _render_page_1_analysis(model: Any, df_s_code: pd.DataFrame) -> None:
                 analysis = analyze_dataset_sample(df_s_code, model, target)
                 st.session_state["current_analysis"] = analysis
                 st.session_state["current_evidence"] = None
+                st.session_state["current_storage_receipt"] = None
                 st.session_state["last_run_id"] = "0x" + secrets.token_hex(32)
+                st.session_state["last_created_at_utc"] = analysis.created_at_utc or normalize_utc_timestamp()
             except Exception as exc:
                 st.error(f"Không tìm thấy hoặc lỗi phân tích: {exc}")
     else:
@@ -220,7 +224,9 @@ def _render_page_1_analysis(model: Any, df_s_code: pd.DataFrame) -> None:
                 )
                 st.session_state["current_analysis"] = analysis
                 st.session_state["current_evidence"] = None
+                st.session_state["current_storage_receipt"] = None
                 st.session_state["last_run_id"] = "0x" + secrets.token_hex(32)
+                st.session_state["last_created_at_utc"] = analysis.created_at_utc or normalize_utc_timestamp()
             except Exception as exc:
                 st.error(f"Lỗi phân tích bytecode: {exc}")
 
@@ -290,7 +296,11 @@ def _render_page_2_evidence() -> None:
     with c2:
         if st.button("Sinh run_id mới"):
             st.session_state["last_run_id"] = "0x" + secrets.token_hex(32)
+            st.session_state["last_created_at_utc"] = normalize_utc_timestamp()
+            st.session_state["current_storage_receipt"] = None
             st.rerun()
+
+    frozen_ts = st.session_state.get("last_created_at_utc") or analysis.created_at_utc or None
 
     try:
         evidence = build_evidence_bundle(
@@ -306,6 +316,7 @@ def _render_page_2_evidence() -> None:
             predicted_label=analysis.predicted_label,
             shap_top_k=analysis.shap_top_k,
             run_id=run_id_val,
+            created_at_utc=frozen_ts,
         )
         raw_bytes = canonical_bytes(evidence)
         ev_hash = evidence_hash_hex(evidence)
@@ -589,17 +600,24 @@ def _render_page_4_verifier(network: str, custom_rpc: str | None) -> None:
             source_desc = "pasted_text"
 
     if raw_bytes is not None:
-        verified_local, diag = verify_evidence_payload(raw_bytes, case_data["evidence_hash"])
+        verified_local, diag = verify_evidence_payload(
+            raw_bytes,
+            case_data["evidence_hash"],
+            expected_case_id_hex=target_cid,
+            expected_subject=case_data.get("subject"),
+            expected_subject_chain_id=case_data.get("subject_chain_id"),
+            expected_model_version_hash_hex=case_data.get("model_version_hash"),
+        )
         onchain_match = verify_evidence_onchain(contract, target_cid, diag["recomputed_hash"])
         passed = verified_local and onchain_match
 
         if passed:
             st.success(
-                f"✅ VERIFIED — Bằng chứng khớp 100% với on-chain `verify_evidence == True` (nguồn: `{source_desc}`)"
+                f"✅ VERIFIED — Bằng chứng khớp 100% với on-chain `verify_evidence == True` và toàn bộ trường định danh (`subject`, `chain_id`, `model_version_hash`, `case_id`) (nguồn: `{source_desc}`)"
             )
         else:
             st.error(
-                f"❌ TAMPERED / MISMATCH — Hash hoặc schema KHÔNG khớp on-chain (`verify_evidence == {onchain_match}`)"
+                f"❌ TAMPERED / MISMATCH — Hash, schema hoặc trường định danh KHÔNG khớp on-chain (`verify_evidence == {onchain_match}`, `identity_match == {diag.get('identity_match')}`)"
             )
 
         c_a, c_b = st.columns(2)
@@ -607,6 +625,8 @@ def _render_page_4_verifier(network: str, custom_rpc: str | None) -> None:
         c_b.code(f"Recomputed keccak256:\n{diag['recomputed_hash']}")
         if diag["schema_errors"]:
             st.warning("Lỗi schema/digest: " + "; ".join(diag["schema_errors"]))
+        if diag.get("identity_errors"):
+            st.warning("Lỗi đối chiếu định danh on-chain: " + "; ".join(diag["identity_errors"]))
 
         if isinstance(diag.get("evidence"), dict):
             ev_obj = diag["evidence"]

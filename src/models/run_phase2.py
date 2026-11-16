@@ -252,11 +252,11 @@ def render_rq1_report(
     f1_drop = e1_sum["F1"]["mean"] - float(row_r5_99["F1"])
     lines.append("**Key RQ1 findings:**")
     lines.append(
-        f"- **Clone leakage inflation exposed:** Switching from random 5-fold CV (`E0` 99 features) to leakage-controlled `group_near` 5×5 CV (`E1`) "
+        f"- **Combined protocol & clone-grouping shift (`E0` → `E1`):** Moving from the paper-style 5-fold random evaluation (`E0` 99 features, fixed `0.5` cutoff and `tr_85` GridSearchCV) to leakage-controlled `group_near` 5×5 nested Optuna CV (`E1`, inner OOF F1 threshold) "
         f"changes `PR-AUC` by **{pr_drop:+.4f}** (`{row_r5_99['PR-AUC']:.4f}` → `{e1_sum['PR-AUC']['mean']:.4f}`), "
         f"`ROC-AUC` by **{roc_drop:+.4f}** (`{row_r5_99['ROC-AUC']:.4f}` → `{e1_sum['ROC-AUC']['mean']:.4f}`), "
         f"and `F1` by **{f1_drop:+.4f}** (`{row_r5_99['F1']:.4f}` → `{e1_sum['F1']['mean']:.4f}`). "
-        f"Because Phase 1 showed `59.1%` (`520/880`) of Ponzi contracts reside in multi-member `group_near` families, random splits allow near-identical clones in both train and test, inflating perceived detection quality."
+        f"Because `E0` and `E1` differ in tuning protocol, fold count (5 vs 25), and thresholding alongside split grouping, this `{pr_drop:+.4f}` shift reflects the combined transition to strict nested grouped evaluation; Phase 4 sensitivity `S1` (`E1_S1_group_exact` vs `E1`) isolates the pure near-clone vs exact-clone grouping effect (`-0.0283` PR-AUC, `-0.0261` F1) under identical 5×5 nested tuning."
     )
     lines.append(
         f"- **In-fold RFE (`E2`) vs Full 99 (`E1`):** Across the 25 paired `group_near` folds, `E2` selects `{e2_sum['n_features']['mean']:.1f} ± {e2_sum['n_features']['std']:.1f}` features inside each fold "

@@ -96,7 +96,9 @@ def build_traceability_rows(repo_root: Path) -> list[dict[str, Any]]:
     for _, sr in prereg_st.iterrows():
         comp = str(sr["comparison"])
         cid = "STAT-" + comp.replace(" ", "_")
-        add("Sec 6.2 (Stats)", cid, f"Pre-reg Holm test: {comp}", f"Delta PR-AUC={sr['mean_delta']:+.4f}, 95% NB CI [{sr['ci95_low']:+.4f}, {sr['ci95_high']:+.4f}], p_Holm={sr['p_holm']:.3e} -> {sr['conclusion']}", "results/stat_tests.csv", "src/stats/tests.py", "Nadeau-Bengio df=24 + Holm (m=8)", "phase4")
+        p_nb_h = float(sr.get("nb_p_holm", sr["p_holm"]))
+        p_w_h = float(sr.get("wilcoxon_p_holm", sr["p_holm"]))
+        add("Sec 6.2 (Stats)", cid, f"Pre-reg Holm test: {comp}", f"Delta PR-AUC={sr['mean_delta']:+.4f}, 95% NB CI [{sr['ci95_low']:+.4f}, {sr['ci95_high']:+.4f}], p_Holm,NB={p_nb_h:.3e} (p_Holm,W={p_w_h:.3e}) -> {sr['conclusion']}", "results/stat_tests.csv", "src/stats/tests.py", "Nadeau-Bengio df=24 + Holm (m=8)", "phase4")
 
     s1_e1 = sens[sens["variant"] == "E1_S1_group_exact"].iloc[0]
     s1_e4c = sens[sens["variant"] == "E4c_S1_group_exact"].iloc[0]

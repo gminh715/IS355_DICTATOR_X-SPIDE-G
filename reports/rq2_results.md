@@ -10,10 +10,10 @@
 ## 1. Executive Summary
 
 1. **Sequential opcode bigrams (`F-BIGRAM`) deliver a confirmed, large improvement over the 99-feature X-SPIDE baseline (`E1`), even without account transaction features:**
-   - Adding top-200 in-fold opcode bigrams to `E1` (`E4b`: `PR-AUC = 0.8995 ± 0.0212`, `F1 = 0.8263 ± 0.0269`) achieves a pre-registered **Confirmed Improvement** (`ΔPR-AUC = +0.0227 >= 0.02`, 95% Nadeau–Bengio CI `[+0.0096, +0.0358]`, `NB p = 0.00155`, `Wilcoxon p_Holm = 4.77e-7`).
+   - Adding top-200 in-fold opcode bigrams to `E1` (`E4b`: `PR-AUC = 0.8995 ± 0.0212`, `F1 = 0.8263 ± 0.0269`) achieves a pre-registered **Confirmed Improvement** (`ΔPR-AUC = +0.0227 >= 0.02`, 95% Nadeau–Bengio CI `[+0.0096, +0.0358]`, `NB p = 0.00155`, `p_Holm,NB = 0.00927`, `Wilcoxon p_Holm,W = 4.77e-7`).
    - Crucially for **zero-history / pre-deployment detection**, the pure code-only bigram model `E3b` (`200` in-fold bigrams only, `0` account features) attains `PR-AUC = 0.9013 ± 0.0191` (`F1 = 0.8247 ± 0.0241`, `ROC-AUC = 0.9736`), outperforming `E1` (`0.8767`) by `+0.0246` (`95% NB CI [+0.0064, +0.0428]`, auxiliary comparison).
 2. **Transparent negative / inconclusive verdict for compact static CFG semantics (`F-GSEM`) relative to `F-BIGRAM`:**
-   - Among compact 15–16 feature structural representations without account features, semantic CFG + SCC + opcode PageRank (`E3c`: `PR-AUC = 0.7787 ± 0.0418`) yields a **Confirmed Improvement** over naive transition graph statistics (`E3`: `0.6000 ± 0.0629`, `ΔPR-AUC = +0.1787`, `95% NB CI [+0.1242, +0.2332]`, `p_Holm = 4.77e-7`).
+   - Among compact 15–16 feature structural representations without account features, semantic CFG + SCC + opcode PageRank (`E3c`: `PR-AUC = 0.7787 ± 0.0418`) yields a **Confirmed Improvement** over naive transition graph statistics (`E3`: `0.6000 ± 0.0629`, `ΔPR-AUC = +0.1787`, `95% NB CI [+0.1242, +0.2332]`, `p_Holm,NB = 3.75e-6`, `p_Holm,W = 4.77e-7`).
    - However, adding `F-GSEM` to `E1` (`E4c`: `PR-AUC = 0.8825 ± 0.0233`, `Δ = +0.0058`) does **not** achieve statistical significance under Nadeau–Bengio (`95% NB CI [-0.0037, +0.0152]`, `NB p = 0.2200`) and falls short of the pre-registered MDE (`0.02`). Furthermore, `E4c` trails `E4b` (`Δ = -0.0169`, `95% NB CI [-0.0298, -0.0041]`, **Inconclusive** relative to `E4b`), and combining `F-GSEM` on top of `99 + F-BIGRAM` (`E4d`: `PR-AUC = 0.9010 ± 0.0216`) yields virtually no marginal gain over `E4b` (`Δ = +0.0016`, `95% NB CI [-0.0075, +0.0107]`, **No Significant Difference**).
 3. **Methodology & Robustness (`S1`–`S4`, `R4`, `R6`):**
    - Naive exact-hash grouping (`S1`: `group_exact`) overestimates performance by `+0.027`–`+0.028` `PR-AUC` (`E1`: `0.9051` vs `0.8767`; `E4c`: `0.9097` vs `0.8825`) due to near-clone leakage across folds.
@@ -47,24 +47,24 @@ All 9 main configurations were trained and evaluated on identical `S_code_group_
 
 ## 3. Pre-Registered Statistical Hypothesis Tests (`results/stat_tests.csv`)
 
-Statistical inference uses the **Nadeau–Bengio (1999/2003) corrected resampled paired t-test** (`rho = 0.25` for 5-fold CV overlap) together with exact Wilcoxon signed-rank p-values adjusted via **Holm–Bonferroni** across the 8 pre-registered `PR-AUC` comparisons (`docs/preregistration.md`). Under the three-way decision rule, `Confirmed Improvement` requires `ΔPR-AUC >= 0.02` (MDE), `95% NB CI > 0`, and `p_Holm < 0.05`.
+Statistical inference uses the **Nadeau–Bengio (1999/2003) corrected resampled paired t-test** (`rho = 0.25` for 5-fold CV overlap) with **Holm–Bonferroni** step-down adjustment applied directly to the Nadeau–Bengio p-values (`p_Holm,NB`) across the 8 pre-registered `PR-AUC` comparisons (`docs/preregistration.md`), reported alongside two-sided Wilcoxon signed-rank p-values (`p_Holm,W`). Under the three-way decision rule, `Confirmed Improvement` requires `ΔPR-AUC >= 0.02` (MDE), `95% NB CI > 0`, and `p_Holm,NB < 0.05`.
 
 ### 3.1 Pre-Registered 8-Comparison Holm Family (`PR-AUC`, 25 paired folds)
 
-| Family | Comparison | `mean_a` | `mean_b` | `ΔPR-AUC` (`sd`) | `95% Nadeau–Bengio CI` | `NB t` (`NB p`) | `Wilcoxon p` (`p_Holm`) | Verdict |
+| Family | Comparison | `mean_a` | `mean_b` | `ΔPR-AUC` (`sd`) | `95% Nadeau–Bengio CI` | `NB t` (`NB p` / `p_Holm,NB`) | `Wilcoxon p` (`p_Holm,W`) | Verdict |
 |---|---|---:|---:|---:|---:|---:|---:|---|
-| `vs_E1` | `E4 vs E1` | `0.8805` | `0.8767` | `+0.0037` (`0.0058`) | `[-0.0027, +0.0102]` | `1.190` (`0.2457`) | `0.00460` (`0.01381`) | **No Significant Difference** |
-| `vs_E1` | `E4b vs E1` | `0.8995` | `0.8767` | `+0.0227` (`0.0118`) | `[+0.0096, +0.0358]` | `3.571` (`0.00155`) | `5.96e-8` (`4.77e-7`) | **Confirmed Improvement** |
-| `vs_E1` | `E4c vs E1` | `0.8825` | `0.8767` | `+0.0058` (`0.0085`) | `[-0.0037, +0.0152]` | `1.259` (`0.2200`) | `0.00203` (`0.00810`) | **No Significant Difference** |
-| `vs_E1` | `E2 vs E1` | `0.8768` | `0.8767` | `+0.0000` (`0.0064`) | `[-0.0070, +0.0071]` | `0.009` (`0.9929`) | `1.00000` (`1.00000`) | **No Significant Difference** |
-| `novelty_critical` | `E4c vs E4b` | `0.8825` | `0.8995` | `-0.0169` (`0.0115`) | `[-0.0298, -0.0041]` | `-2.730` (`0.01167`) | `5.96e-7` (`2.98e-6`) | **Inconclusive** (degradation vs `E4b`) |
-| `novelty_critical` | `E4d vs E4b` | `0.9010` | `0.8995` | `+0.0016` (`0.0082`) | `[-0.0075, +0.0107]` | `0.356` (`0.7247`) | `0.67208` (`1.00000`) | **No Significant Difference** |
-| `code_only` | `E3c vs E3b` | `0.7787` | `0.9013` | `-0.1226` (`0.0317`) | `[-0.1578, -0.0874]` | `-7.188` (`1.99e-7`) | `5.96e-8` (`4.77e-7`) | **Inconclusive** (degradation vs `E3b`) |
-| `code_only` | `E3c vs E3` | `0.7787` | `0.6000` | `+0.1787` (`0.0490`) | `[+0.1242, +0.2332]` | `6.766` (`5.35e-7`) | `5.96e-8` (`4.77e-7`) | **Confirmed Improvement** |
+| `vs_E1` | `E4 vs E1` | `0.8805` | `0.8767` | `+0.0037` (`0.0058`) | `[-0.0027, +0.0102]` | `1.190` (`0.2457` / `0.8799`) | `0.00460` (`0.01381`) | **No Significant Difference** |
+| `vs_E1` | `E4b vs E1` | `0.8995` | `0.8767` | `+0.0227` (`0.0118`) | `[+0.0096, +0.0358]` | `3.571` (`0.00155` / `0.00927`) | `5.96e-8` (`4.77e-7`) | **Confirmed Improvement** |
+| `vs_E1` | `E4c vs E1` | `0.8825` | `0.8767` | `+0.0058` (`0.0085`) | `[-0.0037, +0.0152]` | `1.259` (`0.2200` / `0.8799`) | `0.00203` (`0.00810`) | **No Significant Difference** |
+| `vs_E1` | `E2 vs E1` | `0.8768` | `0.8767` | `+0.0000` (`0.0064`) | `[-0.0070, +0.0071]` | `0.009` (`0.9929` / `1.0000`) | `1.00000` (`1.00000`) | **No Significant Difference** |
+| `novelty_critical` | `E4c vs E4b` | `0.8825` | `0.8995` | `-0.0169` (`0.0115`) | `[-0.0298, -0.0041]` | `-2.730` (`0.01167` / `0.05834`) | `5.96e-7` (`2.98e-6`) | **Inconclusive** (degradation vs `E4b`) |
+| `novelty_critical` | `E4d vs E4b` | `0.9010` | `0.8995` | `+0.0016` (`0.0082`) | `[-0.0075, +0.0107]` | `0.356` (`0.7247` / `1.0000`) | `0.67208` (`1.00000`) | **No Significant Difference** |
+| `code_only` | `E3c vs E3b` | `0.7787` | `0.9013` | `-0.1226` (`0.0317`) | `[-0.1578, -0.0874]` | `-7.188` (`1.99e-7` / `1.59e-6`) | `5.96e-8` (`4.77e-7`) | **Inconclusive** (degradation vs `E3b`) |
+| `code_only` | `E3c vs E3` | `0.7787` | `0.6000` | `+0.1787` (`0.0490`) | `[+0.1242, +0.2332]` | `6.766` (`5.35e-7` / `3.75e-6`) | `5.96e-8` (`4.77e-7`) | **Confirmed Improvement** |
 
 ![Nadeau-Bengio 95% CIs across the 8 pre-registered Holm-Bonferroni comparisons](../figures/delta_pr_auc_ci.png)
 
-**Methodological observation:** In `E4 vs E1` and `E4c vs E1`, naive paired Wilcoxon flags `p_Holm < 0.05` (`0.0138` and `0.0081`) because it treats the 25 repeated 5-fold CV measurements as independent, inflating effective sample size. Accounting for shared training data (`rho = 0.25`), the Nadeau–Bengio 95% CIs cross zero (`[-0.0027, +0.0102]` and `[-0.0037, +0.0152]`), and both effect sizes remain far below the `0.02` MDE threshold.
+**Methodological observation:** In `E4 vs E1` and `E4c vs E1`, naive paired Wilcoxon flags `p_Holm,W < 0.05` (`0.0138` and `0.0081`) because it treats the 25 repeated 5-fold CV measurements as independent, inflating effective sample size. Accounting for shared training data (`rho = 0.25`), the Nadeau–Bengio Holm-adjusted p-values (`p_Holm,NB = 0.8799`) and 95% CIs (`[-0.0027, +0.0102]` and `[-0.0037, +0.0152]`) confirm no statistically significant difference, and both effect sizes remain far below the `0.02` MDE threshold.
 
 ### 3.2 Selected Auxiliary Comparisons (`PR-AUC` & `F1`, Descriptive Only)
 
@@ -140,7 +140,7 @@ Using LightGBM `TreeExplainer` over held-out test folds for seed `42` (`E1` vs `
 
 ### `F-GSEM` Ranking and `has_loop_with_call` Directional Sanity Check (`results/xai_gsem_summary.json`)
 
-| Rank | `F-GSEM` Feature | Mean `|SHAP|` | Spearman `ρ(val, SHAP)` | Non-zero Fraction | Mean SHAP (`val > 0`) | Mean SHAP (`val == 0`) |
+| Rank | `F-GSEM` Feature | Mean `|SHAP|` | Spearman `ρ(val, SHAP)` | Fraction (`val > 0`) | Mean SHAP (`val > 0`) | Mean SHAP (`val <= 0`) |
 |---:|---|---:|---:|---:|---:|---:|
 | 1 | `call_block_ratio` | `0.2833` | `+0.874` | `85.39%` | `+0.1157` | `-0.5358` |
 | 2 | `n_loops_with_call` | `0.2061` | `+0.515` | `9.84%` | **`+1.0520`** | `-0.1138` |
@@ -151,8 +151,8 @@ Using LightGBM `TreeExplainer` over held-out test folds for seed `42` (`E1` vs `
 | 7 | `cyclomatic` | `0.0634` | `-0.416` | `42.02%` | `-0.0238` | `+0.0266` |
 | 8 | **`has_loop_with_call`** | `0.0589` | `+0.515` | `9.84%` | **`+0.3191`** | **`-0.0305`** |
 
-- **`has_loop_with_call` sanity check passed:** Even though binary `has_loop_with_call = 1` (and `n_loops_with_call > 0`) occurs in only `9.84%` of contracts, its conditional SHAP push toward Ponzi is strongly positive (`+0.3191` vs `-0.0305` for `has_loop_with_call`, and `+1.0520` vs `-0.1138` for `n_loops_with_call`, `Spearman ρ = +0.515`). `call_block_ratio` ranks 5th globally among all 114 features in `E4c` (`mean |SHAP| = 0.2833`), demonstrating that `F-GSEM` structural signals *are* actively leveraged by LightGBM—yet remain redundant with 200 sequential opcode bigrams (`E4b`/`E4d`) for top-line `PR-AUC`.
-- **Direction of `unresolved_jump_ratio` (`ρ = -0.897`):** Higher unresolved jump ratios strongly push predictions *away* from Ponzi, reflecting complex dispatcher/library/proxy contracts vs simpler legacy Ponzi schemes.
+- **`has_loop_with_call` directional sanity check:** Even though binary `has_loop_with_call = 1` (and `n_loops_with_call > 0`) occurs in only `9.84%` of contracts, its conditional SHAP push toward Ponzi is positive (`+0.3191` vs `-0.0305` for `has_loop_with_call`, and `+1.0520` vs `-0.1138` for `n_loops_with_call`, `Spearman ρ = +0.515`). Note that `has_loop_with_call` is strictly a static structural heuristic indicating a `CALL` opcode inside a strongly connected component (SCC), not semantic proof of an investor payout loop. `call_block_ratio` ranks 5th globally among all 114 features in `E4c` (`mean |SHAP| = 0.2833`), showing that `F-GSEM` structural signals are utilized by LightGBM yet do not provide additional `PR-AUC` gain beyond 200 sequential opcode bigrams (`E4b`/`E4d`).
+- **Direction of `unresolved_jump_ratio` (`ρ = -0.897`) & `cyclomatic` (`|E| - |V| + 2`):** Because `cyclomatic` uses the single-component formula $|E| - |V| + 2$ ($P=1$), indirect jumps that leave basic blocks disconnected ($P > 1$) cause `cyclomatic <= 0` in `57.98%` of contracts. Higher `unresolved_jump_ratio` values push predictions *away* from Ponzi in `E4c` (`ρ = -0.897`), reflecting complex dispatcher/library/proxy contracts vs simpler legacy Ponzi schemes. Note that SHAP attributions describe how `E4c` weights these features rather than proving why `F-GSEM` trails `F-BIGRAM`; the primary structural difference is that `F-GSEM` compresses the graph into 15 coarse scalar summaries whereas `F-BIGRAM` preserves 200 fine-grained local opcode transitions.
 
 ---
 
@@ -175,7 +175,7 @@ On `seed = 42` (`E4c` OOF confusion matrix: `TP=685, FP=125, FN=195, TN=6,441`),
 ### 7.2 Taxonomy of Audited False Negatives (`12` lowest-probability cases, `y=1`)
 
 1. **`atypical_ponzi_without_static_call_loop` (`9/12`):** `xspide_03775`, `xspide_07419`, `xspide_04028`, `xspide_04097` (canonical `cfg_fn.png`, `341` ins), `xspide_05023`, `xspide_03429`, `xspide_07415` (`SELFDESTRUCT=1`, `NUMBER=3`), `xspide_03510`, `xspide_04235` (`y_proba = 3.4e-6 .. 1.1e-4`). **All 9 have `n_loops_with_call = 0, has_loop_with_call = 0`** and lack Byzantium `RETURNDATASIZE`, while carrying `CALL` (`1`–`13`), `CALLVALUE` (`4`–`52`), and frequently `TIMESTAMP`/`NUMBER` (`7/9`). Because queue-based, single-payout-per-deposit, or time-locked HYIP schemes pay out one address per transaction rather than iterating over an array in a loop, no intra-CFG `CALL` cycle appears, and high `ISZERO` / `SUB` / `AND` frequencies pull SHAP negative.
-2. **`mixed_label_near_clone_cluster` (`3/12`):** `xspide_04342` (`near_00207`, `label=1` vs clone `xspide_06255` `label=0`, both `tx_in=1, tx_out=0`), `xspide_01190` (`near_04041`, `exact_01037`, `label=1, tx_in=108` vs identical bytecode `xspide_07093` labeled `0` with `tx_in=1`), and `xspide_07213` (`near_01781`, `CALLCODE=1`, `NUMBER=15`). X-SPIDE's behavioral/post-deployment labeling occasionally assigns `0` to dormant deployments of exact Ponzi codebases, establishing an irreducible label-noise floor on `S_code`.
+2. **`mixed_label_near_clone_cluster` (`3/12`):** `xspide_04342` (`near_00207`, `label=1` vs clone `xspide_06255` `label=0`, both `tx_in=1, tx_out=0`), `xspide_01190` (`near_04041`, `exact_01037`, `label=1, tx_in=108` vs identical bytecode `xspide_07093` labeled `0` with `tx_in=1`), and `xspide_07213` (`near_01781`, `CALLCODE=1`, `NUMBER=15`). Because `group_near` clusters ($J \ge 0.90$) allow up to 10% opcode variation and X-SPIDE's labeling incorporates post-deployment transaction behavior (e.g., dormant vs active deployments of the same bytecode template), mixed-label clone clusters create friction for static bytecode features when account activity is low or ambiguous.
 
 ---
 

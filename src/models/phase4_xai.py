@@ -263,10 +263,14 @@ def plot_gsem_importance_and_sanity(
         rho, pval = spearmanr(xv, sv)
         rho_f = 0.0 if np.isnan(rho) else float(rho)
 
-        # Conditional mean SHAP when binary indicator is 1 vs 0 (for sanity checks).
+        # Conditional mean SHAP when feature > 0 vs == 0 vs < 0 (e.g., fragmented cyclomatic).
         mask_pos = xv > 0.0
+        mask_eq0 = xv == 0.0
+        mask_neg = xv < 0.0
         mean_sv_pos = float(np.mean(sv[mask_pos])) if np.any(mask_pos) else float("nan")
-        mean_sv_zero = float(np.mean(sv[~mask_pos])) if np.any(~mask_pos) else float("nan")
+        mean_sv_le0 = float(np.mean(sv[~mask_pos])) if np.any(~mask_pos) else float("nan")
+        mean_sv_eq0 = float(np.mean(sv[mask_eq0])) if np.any(mask_eq0) else float("nan")
+        mean_sv_lt0 = float(np.mean(sv[mask_neg])) if np.any(mask_neg) else float("nan")
 
         rows.append(
             {
@@ -275,8 +279,13 @@ def plot_gsem_importance_and_sanity(
                 "spearman_val_vs_shap": rho_f,
                 "spearman_pval": 1.0 if np.isnan(pval) else float(pval),
                 "mean_shap_when_gt0": mean_sv_pos,
-                "mean_shap_when_eq0": mean_sv_zero,
-                "frac_nonzero": float(np.mean(mask_pos)),
+                "mean_shap_when_le0": mean_sv_le0,
+                "mean_shap_when_eq0": mean_sv_eq0,
+                "mean_shap_when_lt0": mean_sv_lt0,
+                "frac_gt0": float(np.mean(mask_pos)),
+                "frac_eq0": float(np.mean(mask_eq0)),
+                "frac_lt0": float(np.mean(mask_neg)),
+                "frac_nonzero": float(np.mean(xv != 0.0)),
             }
         )
 

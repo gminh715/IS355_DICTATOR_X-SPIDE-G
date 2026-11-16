@@ -68,9 +68,9 @@ Smart Ponzi schemes disguise investor-funded redistribution loops as staking, yi
 
 | RQ | Finding | Key numbers |
 |---|---|---|
-| **RQ1** – Clone leakage | **59.09 %** of Ponzi contracts (`520/880`) have near-duplicate bytecode. Moving from random 5-fold CV (`E0`) to clone-grouped `5 × 5` CV (`E1`) removes optimism. | PR-AUC `0.9149 → 0.8767` (**−0.0382**), F1 `0.8589 → 0.8118` (**−0.0471**) |
-| **RQ2** – Structural features | Explicit in-fold top-200 **opcode bigrams** give a *Confirmed Improvement*. Lightweight static **CFG semantics** (`F-GSEM`) do **not** reach the pre-registered MDE. | `E4b vs E1`: **+0.0227** PR-AUC, 95 % NB CI `[+0.0096, +0.0358]`, `p_Holm = 4.77e-7` · `E4c vs E1`: `+0.0058`, CI `[−0.0037, +0.0152]` (n.s.) |
-| **RQ3** – On-chain registry | Full-storage `D1` **fails** the 250k-gas/case ceiling. Merkle-batch `D3` **passes** by a wide margin. Latency target met on Sepolia; ~1.2 s on Arbitrum Sepolia. | `D1` `427,461` gas (FAIL) · `D2` `294,706` (−31.06 %) · `D3` `3,574.53`/case @ N=100, `357.46` @ N=1000 (PASS ≤ 10,000) |
+| **RQ1** – Clone leakage | **59.09 %** of Ponzi contracts (`520/880`) have near-duplicate bytecode. Moving from random 5-fold (`E0`) to clone-grouped `5 × 5` nested CV (`E1`) lowers PR-AUC by `-0.0382`, while strictly controlled `group_exact → group_near` (`S1`) isolates `-0.0283`. | `E0 → E1`: PR-AUC `0.9149 → 0.8767` (**−0.0382**), F1 `0.8589 → 0.8118` (**−0.0471**) · `S1`: `0.9051 → 0.8767` (**−0.0283**) |
+| **RQ2** – Structural features | Explicit in-fold top-200 **opcode bigrams** give a *Confirmed Improvement*. Lightweight static **CFG semantics** (`F-GSEM`) do **not** reach the pre-registered MDE. | `E4b vs E1`: **+0.0227** PR-AUC, 95 % NB CI `[+0.0096, +0.0358]`, `p_Holm,NB = 9.27e-3` (`p_Holm,W = 4.77e-7`) · `E4c vs E1`: `+0.0058`, CI `[−0.0037, +0.0152]` (n.s.) |
+| **RQ3** – On-chain registry | Full-storage `D1` **fails** the 250k-gas/case ceiling. Merkle-batch `D3` **passes** by a wide margin. Receipt inclusion latency target met on Sepolia (`D1.attest`); ~1.2 s on Arbitrum Sepolia. | `D1` `427,461` gas (FAIL) · `D2` `294,706` (−31.06 %) · `D3` `3,574.53`/case @ N=100, `357.46` @ N=1000 (PASS ≤ 10,000) |
 
 Additional facts: median end-to-end feature extraction `16.58 ms/contract` (0 errors on 7,446); `100 %` revert-branch coverage on all three contracts; verified deployments on two public testnets; 1-byte evidence tamper is rejected on-chain (`verify_evidence → False`).
 
@@ -147,8 +147,8 @@ Implemented in `src/features/` on CBOR-stripped bytecode via a linear-sweep EVM 
 |---|---:|---|
 | **Baseline (X-SPIDE)** | 99 | 23 account/transaction features + 76 normalized opcode unigram frequencies. |
 | **`F-BIGRAM`** | 200 | Relative frequency of consecutive normalized opcode pairs; **top-200 by document frequency selected strictly inside each training fold** (`BigramTopKVectorizer`). |
-| **`F-GSTAT`** | 16 | Transition-multigraph statistics: density, reciprocity, degree entropy, top-1 concentration, self-loop ratio, `/L`-normalized variants. |
-| **`F-GSEM`** | 15 | Basic-block CFG (stack-local `JUMP/JUMPI` resolution): `n_blocks`, `n_cfg_edges`, cyclomatic complexity, `n_scc_cycles`, `has_loop_with_call`, `n_loops_with_call`, `n_loops_with_sstore`, `path_callvalue_to_call`, `call_block_ratio`, `unresolved_jump_ratio`, `has_selfdestruct`, `selfdestruct_reachable`, `pagerank_CALL`, `pagerank_SSTORE`, … |
+| **`F-GSTAT`** | 16 | Transition-graph statistics: node/edge counts, self-loop-aware density (`\|E\|/\|V\|^2`), total transitions, mean/max weighted in-degree & out-degree, transition Shannon entropy, self-loop ratio, and 6 `/L`-normalized variants. |
+| **`F-GSEM`** | 15 | Basic-block CFG (stack-local `JUMP/JUMPI` resolution): `n_blocks`, `n_cfg_edges`, `cyclomatic` (`\|E\|-\|V\|+2`, negative when $P>1$), `n_scc_cycles`, `has_loop_with_call`, `n_loops_with_call`, `n_loops_with_sstore`, `path_callvalue_to_call`, `call_block_ratio`, `unresolved_jump_ratio`, `has_selfdestruct`, `selfdestruct_reachable`, `pagerank_CALL`, `pagerank_SSTORE`, … |
 
 **Extraction cost** (i5-12450H, 15.6 GB, Python 3.12.13; 7,446 contracts, 0 errors; [`results/feature_extraction_cost.csv`](results/feature_extraction_cost.csv)):
 
@@ -201,20 +201,20 @@ The frozen demo artifact [`models/baseline_v1/`](models/baseline_v1) (seed 42 / 
 | `E4c` | 99 + `F-GSEM` | 114 | 0.8825 ± 0.0233 | +0.0058 | 0.8125 | 0.9649 |
 | `E4d` | 99 + `F-BIGRAM` + `F-GSEM` | 314 | 0.9010 ± 0.0216 | +0.0243 | 0.8259 | 0.9734 |
 
-Pre-registered hypothesis tests (Holm family of 8; `p_Holm` from exact Wilcoxon; full table in [`results/stat_tests.csv`](results/stat_tests.csv)):
+Pre-registered hypothesis tests (Holm family of 8; `p_Holm,NB` from Nadeau–Bengio paired *t*-test and `p_Holm,W` from exact Wilcoxon; full table in [`results/stat_tests.csv`](results/stat_tests.csv)):
 
-| Comparison | ΔPR-AUC | 95 % NB CI | `p_Holm` | Verdict |
+| Comparison | ΔPR-AUC | 95 % NB CI | `p_Holm,NB` (`p_Holm,W`) | Verdict |
 |---|---:|---|---:|---|
-| `E4b vs E1` | **+0.0227** | `[+0.0096, +0.0358]` | `4.77e-7` | **Confirmed Improvement** |
-| `E3c vs E3` | +0.1787 | `[+0.1242, +0.2332]` | `4.77e-7` | **Confirmed Improvement** |
-| `E4 vs E1` | +0.0037 | `[−0.0027, +0.0102]` | `1.38e-2` | No Significant Difference |
-| `E4c vs E1` | +0.0058 | `[−0.0037, +0.0152]` | `8.10e-3` | No Significant Difference |
-| `E4d vs E4b` | +0.0016 | `[−0.0075, +0.0107]` | `1.00` | No Significant Difference |
-| `E2 vs E1` | +0.0000 | `[−0.0070, +0.0071]` | `1.00` | No Significant Difference |
-| `E4c vs E4b` | −0.0169 | `[−0.0298, −0.0041]` | `2.98e-6` | Inconclusive (degradation) |
-| `E3c vs E3b` | −0.1226 | `[−0.1578, −0.0874]` | `4.77e-7` | Inconclusive (degradation) |
+| `E4b vs E1` | **+0.0227** | `[+0.0096, +0.0358]` | `9.27e-3` (`4.77e-7`) | **Confirmed Improvement** |
+| `E3c vs E3` | +0.1787 | `[+0.1242, +0.2332]` | `3.75e-6` (`4.77e-7`) | **Confirmed Improvement** |
+| `E4 vs E1` | +0.0037 | `[−0.0027, +0.0102]` | `8.80e-1` (`1.38e-2`) | No Significant Difference |
+| `E4c vs E1` | +0.0058 | `[−0.0037, +0.0152]` | `8.80e-1` (`8.10e-3`) | No Significant Difference |
+| `E4d vs E4b` | +0.0016 | `[−0.0075, +0.0107]` | `1.00` (`1.00`) | No Significant Difference |
+| `E2 vs E1` | +0.0000 | `[−0.0070, +0.0071]` | `1.00` (`1.00`) | No Significant Difference |
+| `E4c vs E4b` | −0.0169 | `[−0.0298, −0.0041]` | `5.83e-2` (`2.98e-6`) | Inconclusive (degradation) |
+| `E3c vs E3b` | −0.1226 | `[−0.1578, −0.0874]` | `1.59e-6` (`4.77e-7`) | Inconclusive (degradation) |
 
-> Naive Wilcoxon alone would flag `E4`/`E4c` vs `E1` as significant (`p_Holm < 0.05`) because it treats the 25 overlapping CV folds as independent. The Nadeau–Bengio CI corrects for this and both effects stay far below the 0.02 MDE.
+> Naive Wilcoxon alone would flag `E4`/`E4c` vs `E1` as significant (`p_Holm,W < 0.05`) because it treats the 25 overlapping CV folds as independent. Applying Holm–Bonferroni to the Nadeau–Bengio *t*-test (`p_Holm,NB = 0.880`) and 95 % CIs corrects for shared training folds, and both effects stay far below the 0.02 MDE.
 
 <p align="center">
   <img src="figures/pr_curves.png" width="46%" alt="Precision-Recall curves"/>
@@ -228,9 +228,9 @@ Pre-registered hypothesis tests (Holm family of 8; `p_Holm` from exact Wilcoxon;
 
 **External sanity check (`E6`).** Only `10` non-overlapping unique PonziGuard Ponzi runtimes remain (< 30), so Risk **R6** downgrades `E6` to `SANITY_CHECK_ONLY`: PR-AUC `0.6535` (95 % bootstrap CI `[0.3965, 0.9141]`), `n_test = 107`.
 
-**Explainability & error audit.** OOF TreeExplainer SHAP on `E4c` ranks `call_block_ratio` (0.283), `n_loops_with_call` (0.206), `n_blocks_with_call` (0.171), `unresolved_jump_ratio` (0.152) highest, consistent with Ponzi payout-loop logic. Manual audit of 12 FP + 12 FN ([`results/error_analysis_cases.csv`](results/error_analysis_cases.csv)) links errors to legitimate distributor payout loops and mixed-label clone clusters (14 FP / 38 FN). Figures: [`figures/`](figures) (SHAP beeswarm/waterfall, CFG visualizations).
+**Explainability & error audit.** OOF TreeExplainer SHAP on `E4c` ranks `call_block_ratio` (0.283), `n_loops_with_call` (0.206), `n_blocks_with_call` (0.171), `unresolved_jump_ratio` (0.152) highest among `F-GSEM` descriptors (note that `has_loop_with_call` is a static `CALL`-in-SCC heuristic rather than proof of a Ponzi payout loop). Manual audit of 12 FP + 12 FN ([`results/error_analysis_cases.csv`](results/error_analysis_cases.csv)) links errors to legitimate distributor loops and mixed-label clone clusters (14 FP / 38 FN). Figures: [`figures/`](figures) (SHAP beeswarm/waterfall, CFG visualizations).
 
-**Why did `F-GSEM` underperform `F-BIGRAM`?** Solidity 0.4–0.5 bytecode frequently routes dispatchers and loop exits through indirect stack/memory jumps (median `19.18 %` unresolved jumps; `526/7,446 = 7.06 %` of contracts > 50 %), which fragments static loop back-edges. Short bigrams (`CALLVALUE→ISZERO→JUMPI`, `SLOAD→CALL`) capture the same idioms without jump-resolution loss. Full discussion: [reports/rq2_results.md](reports/rq2_results.md).
+**Why did `F-GSEM` underperform `F-BIGRAM`?** Plausibly because (1) `F-GSEM` compresses the graph into 15 coarse scalar summaries whereas `F-BIGRAM` retains 200 fine-grained local transitions (`CALLVALUE→DUP`, `DUP→REVERT`, `SLOAD→LT`), and (2) Solidity 0.4–0.5 bytecode routes some dispatchers and loop exits through indirect stack/memory jumps (median `19.18 %` unresolved jumps; `526/7,446 = 7.06 %` of contracts > 50 %), which can fragment static loop back-edges. Full discussion: [reports/rq2_results.md](reports/rq2_results.md).
 
 ### 8.3 RQ3 – On-chain gas, cost, latency & security (`E5`)
 
@@ -303,7 +303,7 @@ All contracts are written in **Vyper `0.4.3`** and share the same governance mod
 - `model_version_hash = keccak256(model_file_bytes ‖ feature_schema_json)` (recorded in [`model_card.json`](models/baseline_v1/model_card.json))
 - `shap_digest = keccak256(canonical(shap_top_k))` over the top-10 SHAP contributors
 - **Persistence:** deterministic IPFS **CIDv1** (`ipfs://bafkrei…`; pinned via Kubo/Pinata if configured, otherwise explicitly marked `local_content_addressed_unpinned`) **plus** a Git mirror in [`evidence/`](evidence) (`<case_id>.json` + `cid_index.json`).
-- **Public verification:** fetch bytes → `keccak256` → compare with on-chain `evidence_hash` and `verify_evidence(...)`; any 1-byte change flips to `❌ TAMPERED`.
+- **Public verification:** fetch bytes → `keccak256` → compare with on-chain `evidence_hash`, `verify_evidence(...)`, and on-chain `Case` identity fields (`subject`, `subject_chain_id`, `model_version_hash`, `case_id`); any 1-byte change or identity mismatch flips to `❌ TAMPERED / MISMATCH`.
 
 **4-page Streamlit DApp** (`app/streamlit_app.py`):
 
@@ -359,7 +359,7 @@ Source of truth: [`deployments.json`](deployments.json). Each deployment has `3`
 | Arbitrum Sepolia | `421614` | `D3` | `0x693632c45108A9ca25a7F9d693c00554EeDD1EB1` | Pass – Verified |
 | Anvil (local PyEVM RPC) | `31337` | `D1`/`D2`/`D3` | `0x5FbDB…0aa3` / `0x5FC8d…5707` / `0x61017…D788` | Local dev |
 
-> **Governance limitation.** Live deployments use an EOA owner (`0x950e0416b13153d542d07Bf7f9AB586B0e903465`, recorded as `owner_type = "eoa_demo_limit"`) instead of a Safe multisig. The owner can never alter history, but a compromised owner key could change the auditor roster for *future* attestations. Live Sepolia auditor accounts hold `0 ETH`; Sepolia writes via the DApp use the MetaMask signer once funded from a faucet (read-only verification is live).
+> **Governance limitation.** Live deployments use an EOA owner (`0x950e0416b13153d542d07Bf7f9AB586B0e903465`, recorded as `owner_type = "eoa_demo_limit"`) instead of a Safe multisig. While the owner cannot call `attest` directly or delete history, a compromised owner key could add a Sybil auditor address or lower the global `threshold` (affecting open/existing cases upon a subsequent `attest`), and rotating auditors mid-case preserves prior tally counts while allowing new auditors to vote; moreover, `_compute_status` evaluates `approve_count >= k` before `reject_count >= k`, requiring strict majority quorums ($k > n/2$). Live Sepolia auditor accounts hold `0 ETH`; Sepolia writes via the DApp use the MetaMask signer once funded from a faucet (read-only verification is live).
 
 ---
 

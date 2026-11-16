@@ -21,6 +21,7 @@ from web3 import Web3
 
 from src.data.bytecode import parse_hex_bytecode, strip_cbor_metadata
 from src.data.parquet_io import read_parquet
+from src.evidence.canonical import normalize_utc_timestamp
 from src.features.disasm import disassemble
 from src.features.gsem import CFGResult, GSEM_FEATURE_NAMES, build_cfg, extract_gsem_features
 from src.features.gstat import build_transition_graph
@@ -78,6 +79,7 @@ class AnalysisResult:
     transition_graph: nx.DiGraph
     account_features_imputed: bool
     notes: str = ""
+    created_at_utc: str = ""
 
 
 def load_baseline_model(model_dir: Path = DEFAULT_MODEL_DIR) -> LoadedBaselineModel:
@@ -191,6 +193,7 @@ def analyze_dataset_sample(
         transition_graph=trans_graph,
         account_features_imputed=False,
         notes="Evaluated using exact S_code 99 features (23 account + 76 opcode frequencies).",
+        created_at_utc=normalize_utc_timestamp(),
     )
 
 
@@ -274,6 +277,7 @@ def analyze_custom_bytecode(
         transition_graph=trans_graph,
         account_features_imputed=imputed,
         notes=note,
+        created_at_utc=normalize_utc_timestamp(),
     )
 
 
@@ -299,7 +303,7 @@ def render_shap_waterfall_figure(analysis: AnalysisResult, *, max_display: int =
 
 
 def render_cfg_figure(analysis: AnalysisResult) -> plt.Figure:
-    """Render recovered basic-block CFG highlighting payout-loop, CALL, CALLVALUE, and SSTORE nodes."""
+    """Render recovered basic-block CFG highlighting SCC call-loops, CALL, CALLVALUE, and SSTORE nodes."""
     cfg_res = analysis.cfg_result
     g = cfg_res.graph
     blocks = cfg_res.blocks

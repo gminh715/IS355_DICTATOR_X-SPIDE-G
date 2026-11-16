@@ -381,13 +381,14 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
         doc,
         f"X-SPIDE-G audits and extends the X-SPIDE Ethereum smart Ponzi detection pipeline while anchoring verifiable, "
         f"multi-auditor risk attestations on-chain. After uncovering that 59.09% of Ponzi contracts (520/880) in X-SPIDE belong "
-        f"to MinHash near-clone clusters after Solidity CBOR metadata stripping, enforcing leak-free 5x5 StratifiedGroupKFold "
-        f"(RQ1) lowers 99-feature LightGBM baseline PR-AUC from {e0_grid['PR-AUC']:.4f} (E0) to {mc.loc['E1','PR_AUC_mean']:.4f} ± {mc.loc['E1','PR_AUC_std']:.4f} "
-        f"(E1; Delta = {mc.loc['E1','PR_AUC_mean'] - e0_grid['PR-AUC']:+.4f}, F1: {e0_grid['F1']:.4f} -> {mc.loc['E1','F1_mean']:.4f}). Across our pre-registered RQ2 ablations "
+        f"to MinHash near-clone clusters after Solidity CBOR metadata stripping, moving from paper-style 5-fold random evaluation "
+        f"(RQ1, E0 = {e0_grid['PR-AUC']:.4f}) to leak-free 5x5 StratifiedGroupKFold nested Optuna CV "
+        f"(E1) lowers 99-feature LightGBM baseline PR-AUC to {mc.loc['E1','PR_AUC_mean']:.4f} ± {mc.loc['E1','PR_AUC_std']:.4f} "
+        f"(Delta = {mc.loc['E1','PR_AUC_mean'] - e0_grid['PR-AUC']:+.4f}, F1: {e0_grid['F1']:.4f} -> {mc.loc['E1','F1_mean']:.4f}; strictly controlled grouping sensitivity S1 isolates -0.0283 PR-AUC from group_exact -> group_near). Across our pre-registered RQ2 ablations "
         f"(8-test Holm-Bonferroni family, Nadeau-Bengio df=24, MDE >= 0.02 PR-AUC), explicit opcode bigrams (F-BIGRAM) deliver "
-        f"a Confirmed Improvement (+0.0227 PR-AUC to {mc.loc['E4b','PR_AUC_mean']:.4f}, 95% CI [+0.0096, +0.0358], p_Holm = 4.77e-7; "
+        f"a Confirmed Improvement (+0.0227 PR-AUC to {mc.loc['E4b','PR_AUC_mean']:.4f}, 95% CI [+0.0096, +0.0358], p_Holm,NB = 9.27e-3, p_Holm,W = 4.77e-7; "
         f"code-only E3b = {mc.loc['E3b','PR_AUC_mean']:.4f}), whereas 15 basic-block CFG semantic features (F-GSEM, E4c = {mc.loc['E4c','PR_AUC_mean']:.4f}, "
-        f"Delta = +0.0058, 95% CI [-0.0037, +0.0152]) yield No Significant Difference and are transparently reported as a negative structural result.",
+        f"Delta = +0.0058, 95% CI [-0.0037, +0.0152], p_Holm,NB = 0.8799) yield No Significant Difference and are transparently reported as a negative structural result.",
     )
     _p(
         doc,
@@ -396,9 +397,9 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
         f"a single finalized D1 case consumes {int(py_d1['gas_used']):,} gas (FAIL vs <= 250,000 ceiling; ${py_d1['mainnet_ref_cost_usd']:.6f} "
         f"at 0.084427 gwei / ETH = $1,900.68), D2 reduces gas by 31.06% to {int(py_d2['gas_used']):,}, and D3 amortizes gas to "
         f"{py_d3_100['gas_per_case']:.2f} gas/case at N=100 and {py_d3_1000['gas_per_case']:.2f} gas/case at N=1,000 (PASS vs <= 10,000 target). "
-        f"Live confirmation latency meets the <= 2-block target on Sepolia (median {e5_sum['latency_summary']['sepolia']['median_blocks']:.2f} block / "
+        f"Live 1-block receipt confirmation latency on D1.attest (n=30) meets the <= 2-block target on Sepolia (median {e5_sum['latency_summary']['sepolia']['median_blocks']:.2f} block / "
         f"{e5_sum['latency_summary']['sepolia']['median_seconds']:.3f}s) and achieves {e5_sum['latency_summary']['arbitrum-sepolia']['median_seconds']:.3f}s "
-        f"median finality on Arbitrum Sepolia, alongside live Sepolia T1/T6/T8 security proofs and a 4-page DApp with zero-server-key MetaMask signing.",
+        f"median receipt inclusion on Arbitrum Sepolia, alongside live Sepolia T1/T6/T8 security proofs and a 4-page DApp with zero-server-key MetaMask signing.",
     )
 
     _callout(
@@ -537,8 +538,8 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
         "In addition to the 99 X-SPIDE baseline features (23 account stats + 76 row-wise relative opcode frequencies), Phase 3 implemented linear-sweep EVM disassembly on CBOR-stripped runtime bytecode (normalized opcode families grouping PUSH1..32 -> PUSH, DUP1..16 -> DUP, SWAP1..16 -> SWAP, LOG0..4 -> LOG):",
     )
     _bullet(doc, "F-BIGRAM (In-Fold Top-200): ", "Normalized consecutive opcode pairs computed per contract and vectorized strictly inside each training fold via BigramTopKVectorizer(top_k=200), preventing test vocabulary leakage.")
-    _bullet(doc, "F-GSTAT (16 Transition Statistics): ", "Directed normalized opcode multigraph descriptors: node/edge counts, density, reciprocity, average out/in degree & weighted strengths, degree entropy, top-1 out/in concentration, normalized self-loop ratio, and size-normalized /L ratios.")
-    _bullet(doc, "F-GSEM (15 Basic-Block CFG & Semantic Descriptors): ", "Static basic-block CFG recovering JUMP/JUMPI targets via local stack-push tracking: n_blocks, n_cfg_edges, cyclomatic complexity, n_scc_cycles, has_loop_with_call, n_loops_with_call, n_loops_with_sstore, path_callvalue_to_call, n_blocks_with_call, call_block_ratio, unresolved_jump_ratio, has_selfdestruct, selfdestruct_reachable, and personalized opcode PageRank weights pagerank_CALL & pagerank_SSTORE.")
+    _bullet(doc, "F-GSTAT (16 Transition Statistics): ", "Directed normalized opcode transition-graph descriptors: node/edge counts, self-loop-aware density (|E|/|V|^2), total transitions, mean/max weighted in-degree & out-degree, transition Shannon entropy, self-loop ratio, and 6 instruction-length (/L) normalized variants.")
+    _bullet(doc, "F-GSEM (15 Basic-Block CFG & Semantic Descriptors): ", "Static basic-block CFG recovering JUMP/JUMPI targets via local stack-push tracking: n_blocks, n_cfg_edges, cyclomatic (|E|-|V|+2, negative on fragmented CFGs where P>1), n_scc_cycles, has_loop_with_call, n_loops_with_call, n_loops_with_sstore, path_callvalue_to_call, n_blocks_with_call, call_block_ratio, unresolved_jump_ratio, has_selfdestruct, selfdestruct_reachable, and opcode transition PageRank weights pagerank_CALL & pagerank_SSTORE.")
 
     fx_rows = [
         [
@@ -565,7 +566,7 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
     doc.add_heading("5.2 Anti-Leakage ML Pipeline & Statistical Protocol", level=2)
     _p(
         doc,
-        "Every 5x5 experiment reuses the identical 25 frozen StratifiedGroupKFold(n_splits=5) partitions on group_near (seeds 42..46). Inside each outer training fold, Optuna executes 30 TPE trials using 3-fold inner StratifiedGroupKFold (optimizing PR-AUC) with strictly nested feature selection (RFECV in E2; BigramTopKVectorizer in E3b/E4b/E4d), selects threshold tau* maximizing OOF F1, and evaluates once on the untouched outer fold. Statistical inference uses Nadeau-Bengio corrected paired t-tests (rho = 1/(k+1) or empirical n_te/(n_tr+n_te), df = 24), two-sided Wilcoxon signed-rank checks, and Holm-Bonferroni correction across the pre-registered 8-test family, declaring 'Confirmed Improvement' only when Delta PR-AUC >= 0.02, 95% NB CI lies strictly above 0, and p_Holm < 0.05.",
+        "Every 5x5 experiment reuses the identical 25 frozen StratifiedGroupKFold(n_splits=5) partitions on group_near (seeds 42..46). Inside each outer training fold, Optuna executes 30 TPE trials using 3-fold inner StratifiedGroupKFold (optimizing PR-AUC) with strictly nested feature selection (RFECV in E2; BigramTopKVectorizer in E3b/E4b/E4d), selects threshold tau* maximizing OOF F1, and evaluates once on the untouched outer fold. Statistical inference uses Nadeau-Bengio corrected paired t-tests (rho = n_te/n_tr = 0.25, df = 24), two-sided Wilcoxon signed-rank checks, and Holm-Bonferroni correction across the pre-registered 8-test family (reporting both p_Holm,NB and p_Holm,W), declaring 'Confirmed Improvement' only when Delta PR-AUC >= 0.02, 95% NB CI lies strictly above 0, and p_Holm,NB < 0.05.",
     )
 
     doc.add_heading("5.3 Smart Contract Architecture & Canonical Evidence Pipeline", level=2)
@@ -614,7 +615,7 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
     )
     _p(
         doc,
-        f"Quarantining near-clones (E0 random -> E1 group_near) cuts PR-AUC by {mc.loc['E1','PR_AUC_mean'] - e0_5f['PR-AUC']:+.4f} and F1 by {mc.loc['E1','F1_mean'] - e0_5f['F1']:+.4f}, confirming substantial clone-leakage optimism in ungrouped splits. Because |S_code| == |S_full| (100% coverage), E1-full matches E1 in population and verifies exact pipeline alignment (0.8767). In-fold RFE (E2) prunes to 71.4 ± 16.7 features with zero meaningful gain (Delta PR-AUC = +0.00003, p_Holm = 1.0). Frozen models/baseline_v1 (seed 42 fold 0, tau* = {card['classification_threshold']:.6f}) achieves PR-AUC = {card['demo_fold_metrics']['pr_auc']:.4f} and F1 = {card['demo_fold_metrics']['f1']:.4f}.",
+        f"Moving from paper-style 5-fold random evaluation (E0) to leak-free 5x5 group_near nested Optuna CV (E1) shifts PR-AUC by {mc.loc['E1','PR_AUC_mean'] - e0_5f['PR-AUC']:+.4f} and F1 by {mc.loc['E1','F1_mean'] - e0_5f['F1']:+.4f} (reflecting the combined transition in split grouping, nested tuning, and thresholding, while controlled sensitivity S1 isolates -0.0283 PR-AUC from group_exact -> group_near under identical 5x5 tuning). Because |S_code| == |S_full| (100% coverage), E1-full matches E1 in population and verifies exact pipeline alignment (0.8767). In-fold RFE (E2) prunes to 71.4 ± 16.7 features with zero meaningful gain (Delta PR-AUC = +0.00003, p_Holm = 1.0). Frozen models/baseline_v1 (seed 42 fold 0, tau* = {card['classification_threshold']:.6f}) achieves PR-AUC = {card['demo_fold_metrics']['pr_auc']:.4f} and F1 = {card['demo_fold_metrics']['f1']:.4f}.",
     )
 
     doc.add_heading("6.2 RQ2: Feature Engineering Ablations, Statistics, Sensitivity & XAI", level=2)
@@ -647,17 +648,17 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
             f"[{r['ci95_low']:+.4f}, {r['ci95_high']:+.4f}]",
             f"{r['nb_t_stat']:+.2f}",
             f"{r['nb_p_value']:.2e}",
-            f"{r['p_holm']:.2e}",
+            f"{r.get('nb_p_holm', r['p_holm']):.2e} ({r.get('wilcoxon_p_holm', r['p_holm']):.2e})",
             r["conclusion"],
         ]
         for _, r in st_prereg.iterrows()
     ]
     _table(
         doc,
-        ["Comparison (df=24)", "Delta PR-AUC", "95% Nadeau-Bengio CI", "t-stat", "NB p-val", "p_Holm", "Pre-Registered Verdict"],
+        ["Comparison (df=24)", "Delta PR-AUC", "95% Nadeau-Bengio CI", "t-stat", "NB p-val", "p_Holm,NB (p_Holm,W)", "Pre-Registered Verdict"],
         st_rows,
-        col_widths=[1.15, 0.75, 1.35, 0.55, 0.72, 0.72, 1.52],
-        font_size=8.1,
+        col_widths=[1.10, 0.70, 1.30, 0.50, 0.68, 1.05, 1.43],
+        font_size=8.0,
     )
 
     _two_figures(
@@ -767,12 +768,12 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
     # ---- SECTION 7 ----
     doc.add_heading("7. Discussion: Negative Results & Threats to Validity", level=1)
     doc.add_heading("7.1 Why F-GSEM Underperformed F-BIGRAM & Why D1 Exceeded 250k Gas", level=2)
-    _bullet(doc, "Negative ML Structural Result (F-GSEM vs F-BIGRAM): ", "Despite strong domain intuition (call_block_ratio and loop-with-CALL SHAP ranking), adding 15 scalar CFG features to E1 (+0.0058 PR-AUC) or E4b (+0.0016) failed to pass MDE or statistical significance, whereas sparse in-fold top-200 opcode bigrams (F-BIGRAM) yielded a Confirmed +0.0227 PR-AUC gain (and code-only E3b reached 0.9013). Two concrete mechanisms explain this: (a) Solidity 0.4–0.5 runtime code resolves dynamic function dispatchers and loop exit addresses via stack/memory pointers, leaving median 19.18% (and 526 contracts > 50%) unresolved indirect jumps that fragment loop back-edges, and (b) opcode bigrams directly preserve local micro-idioms (e.g., CALLVALUE->ISZERO->JUMPI, SLOAD->CALL) without suffering from indirect jump loss.")
+    _bullet(doc, "Negative ML Structural Result (F-GSEM vs F-BIGRAM): ", "Despite model utilization of call_block_ratio and loop-with-CALL indicators, adding 15 scalar CFG features to E1 (+0.0058 PR-AUC) or E4b (+0.0016) failed to pass MDE or statistical significance, whereas sparse in-fold top-200 opcode bigrams (F-BIGRAM) yielded a Confirmed +0.0227 PR-AUC gain (and code-only E3b reached 0.9013). Two plausible mechanisms explain this gap: (a) F-GSEM compresses the entire control-flow graph into 15 coarse scalar summaries whereas F-BIGRAM preserves 200 fine-grained local transitions (CALLVALUE->DUP, DUP->REVERT, SLOAD->LT), and (b) Solidity 0.4–0.5 runtime code resolves some dynamic function dispatchers and loop exit addresses via stack/memory pointers (median 19.18% and 526 contracts > 50% unresolved indirect jumps), which can fragment static loop back-edges.")
     _bullet(doc, "Negative On-Chain Cost Result (D1 Single-Case Gas = 427,461 > 250,000): ", "Storing full 10-field structs plus per-auditor mappings incurs three separate cold SSTORE trees across register_case and two cold attest calls. Rather than relaxing thresholds post-hoc, E5 transparently flags D1 FAIL against the 250k ceiling and validates D3_MerkleBatch as the production scaling path (3,574.53 gas/case at N=100, 357.46 at N=1,000).")
 
     doc.add_heading("7.2 Threats to Validity", level=2)
-    _bullet(doc, "Internal & Label Validity: ", "X-SPIDE exhibits 10 exact-clone and 24 near-clone clusters containing conflicting Ponzi/non-Ponzi labels, contributing to 14 FPs and 38 FNs in seed-42 E4c. Without source-verified manual relabeling, this represents an upper bound on label cleanliness.")
-    _bullet(doc, "Construct Validity (Static Disassembly & Testnet Accounting): ", "Linear-sweep stack tracking misses dynamic memory/storage jump targets (7.06% contracts > 50% unresolved jumps) and skips symbolic execution. On-chain, Sepolia EIP-8037 repricing differs from Cancun, and Arbitrum Sepolia returns gasUsedForL1 = 0x0.")
+    _bullet(doc, "Internal & Mixed-Label Clone Clusters: ", "X-SPIDE exhibits 10 exact-clone and 24 near-clone clusters containing both Ponzi and non-Ponzi labels (14 FPs and 38 FNs in seed-42 E4c), reflecting either up to 10% opcode variation within J >= 0.90 near-clone groups or post-deployment behavioral differences (e.g., dormant vs active deployments).")
+    _bullet(doc, "Construct & Governance Validity: ", "Linear-sweep stack tracking misses dynamic memory/storage jump targets (7.06% contracts > 50% unresolved jumps, making cyclomatic = |E| - |V| + 2 negative when P > 1). On-chain, _compute_status evaluates approve_count >= threshold before reject_count >= threshold, global threshold changes apply to subsequent attest calls on open cases, and remove_auditor/add_auditor retains prior tallies while allowing new auditors to vote on open cases—requiring strict majority quorums (k > n/2), multisig/timelock ownership, and no mid-case roster rotation. Testnet accounting also differs from Cancun via Sepolia EIP-8037 repricing and Arbitrum Sepolia gasUsedForL1 = 0x0.")
     _bullet(doc, "External & Temporal Validity: ", "X-SPIDE lacks block_number (preventing S3 temporal holdout), leaving post-2023 Solidity proxy/diamond Ponzi patterns untested; additionally, bytecode_opcode_8k.csv exclusion introduces statistically significant selection bias (Risk R2), and E6 only has 10 independent non-overlapping Ponzis (Risk R6).")
 
     # ---- SECTION 8 ----

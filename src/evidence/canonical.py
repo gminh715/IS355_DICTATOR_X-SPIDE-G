@@ -324,8 +324,13 @@ def validate_evidence_bundle(evidence: dict[str, Any]) -> list[str]:
 def verify_evidence_payload(
     raw_bytes: bytes,
     expected_hash_hex: str,
+    *,
+    expected_case_id_hex: str | None = None,
+    expected_subject: str | None = None,
+    expected_subject_chain_id: int | None = None,
+    expected_model_version_hash_hex: str | None = None,
 ) -> tuple[bool, dict[str, Any]]:
-    """Verify raw JSON bytes against an on-chain evidence_hash and schema invariants."""
+    """Verify raw JSON bytes against an on-chain evidence_hash, schema invariants, and optional case metadata."""
     expected_norm = normalize_bytes32_hex(expected_hash_hex)
     actual_hash = "0x" + keccak(raw_bytes).hex()
     raw_hash_matches = actual_hash == expected_norm
@@ -335,7 +340,10 @@ def verify_evidence_payload(
         "recomputed_hash": actual_hash,
         "raw_hash_matches": raw_hash_matches,
         "canonical_match": False,
+        "identity_match": True,
+        "derived_case_id": None,
         "schema_errors": [],
+        "identity_errors": [],
         "evidence": None,
     }
 
@@ -352,8 +360,48 @@ def verify_evidence_payload(
         re_canon = canonical_bytes(parsed)
         diag["canonical_match"] = re_canon == raw_bytes
         diag["canonical_hash"] = "0x" + keccak(re_canon).hex()
+        derived_cid = case_id_hex(
+            int(parsed["source_chain_id"]),
+            str(parsed["subject_address"]),
+            str(parsed["model_version_hash"]),
+            str(parsed["run_id"]),
+        )
+        diag["derived_case_id"] = derived_cid
+
+        identity_errors: list[str] = []
+        if expected_case_id_hex is not None:
+            exp_cid = normalize_bytes32_hex(expected_case_id_hex)
+            if derived_cid != exp_cid:
+                identity_errors.append(
+                    f"case_id mismatch: derived {derived_cid}, expected on-chain {exp_cid}"
+                )
+        if expected_subject is not None:
+            exp_subj = normalize_address(expected_subject)
+            if parsed["subject_address"] != exp_subj:
+                identity_errors.append(
+                    f"subject_address mismatch: JSON {parsed['subject_address']}, expected on-chain {exp_subj}"
+                )
+        if expected_subject_chain_id is not None:
+            if int(parsed["source_chain_id"]) != int(expected_subject_chain_id):
+                identity_errors.append(
+                    f"source_chain_id mismatch: JSON {parsed['source_chain_id']}, expected on-chain {int(expected_subject_chain_id)}"
+                )
+        if expected_model_version_hash_hex is not None:
+            exp_mvh = normalize_bytes32_hex(expected_model_version_hash_hex)
+            if parsed["model_version_hash"] != exp_mvh:
+                identity_errors.append(
+                    f"model_version_hash mismatch: JSON {parsed['model_version_hash']}, expected on-chain {exp_mvh}"
+                )
+        diag["identity_errors"] = identity_errors
+        diag["identity_match"] = len(identity_errors) == 0
     else:
         diag["canonical_match"] = False
+        diag["identity_match"] = False
 
-    verified = raw_hash_matches and diag["canonical_match"] and len(schema_errors) == 0
+    verified = (
+        raw_hash_matches
+        and diag["canonical_match"]
+        and len(schema_errors) == 0
+        and diag["identity_match"]
+    )
     return verified, diag

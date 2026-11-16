@@ -170,6 +170,7 @@ def run_pairwise_suite(
 ) -> pd.DataFrame:
     """Evaluate a family of paired comparisons `(group, model_a, model_b)` across 25 folds."""
     raw_rows: list[dict[str, Any]] = []
+    p_nb_list: list[float] = []
     p_wilcoxon_list: list[float] = []
 
     for family_group, model_a, model_b in comparisons:
@@ -188,6 +189,7 @@ def run_pairwise_suite(
         scores_b = df_b[metric].to_numpy(dtype=np.float64)
         nb = nadeau_bengio_test(scores_a, scores_b, n_tr, n_te, alpha=alpha)
         w_stat, p_wilc = wilcoxon_signed_rank(scores_a, scores_b)
+        p_nb_list.append(nb.p_value)
         p_wilcoxon_list.append(p_wilc)
 
         raw_rows.append(
@@ -213,15 +215,18 @@ def run_pairwise_suite(
             }
         )
 
-    p_holm_list = holm_bonferroni(p_wilcoxon_list) if apply_holm else [float("nan")] * len(raw_rows)
-    for row, p_holm in zip(raw_rows, p_holm_list):
-        row["p_holm"] = p_holm
+    p_holm_nb_list = holm_bonferroni(p_nb_list) if apply_holm else [float("nan")] * len(raw_rows)
+    p_holm_wilc_list = holm_bonferroni(p_wilcoxon_list) if apply_holm else [float("nan")] * len(raw_rows)
+    for row, p_holm_nb, p_holm_wilc in zip(raw_rows, p_holm_nb_list, p_holm_wilc_list):
+        row["nb_p_holm"] = p_holm_nb
+        row["wilcoxon_p_holm"] = p_holm_wilc
+        row["p_holm"] = p_holm_nb
         if apply_holm:
             verdict, note = classify_preregistered_outcome(
                 row["mean_delta"],
                 row["ci95_low"],
                 row["ci95_high"],
-                p_holm,
+                p_holm_nb,
                 mde=mde,
                 alpha=alpha,
             )

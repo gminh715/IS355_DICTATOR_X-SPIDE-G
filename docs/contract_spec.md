@@ -84,7 +84,7 @@ struct Attestation:
   3. Else if `approve_count >= 1 and reject_count >= 1` → `3` (`STATUS_DISPUTED`)
   4. Else → `0` (`STATUS_OPEN`)
 
-> Under standard majority quorums ($k > n / 2$, such as default $k = 2$ of $n = 3$), `approve_count >= threshold` and `reject_count >= threshold` are mutually exclusive. If an owner lowers `threshold` to $k = 1$ with $n \ge 2$, the precedence order above ensures deterministic evaluation matching the Python reference verifier.
+> Under strict majority quorums ($k > n / 2$, such as default $k = 2$ of $n = 3$ without mid-case auditor rotation), `approve_count >= threshold` and `reject_count >= threshold` are mutually exclusive. Note that if $k \le n / 2$ (e.g., $k = 1$ with $n \ge 2$ or $k = 2$ with $n = 4$) or if auditors are removed/added while a case is still open, both `approve_count >= threshold` and `reject_count >= threshold` can be reached simultaneously, and the `if/elif` order above prioritizes `STATUS_APPROVED`. Governance must therefore maintain $k > n / 2$ and avoid rotating auditors during open cases.
 
 ---
 

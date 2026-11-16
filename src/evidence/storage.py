@@ -156,6 +156,7 @@ def persist_evidence_bundle(
     repo_root: Path = REPO_ROOT,
     ipfs_api_url: str | None = None,
     pinata_jwt: str | None = None,
+    allow_overwrite: bool = False,
 ) -> StorageReceipt:
     """Write canonical JSON bytes to Git mirror ``evidence/<case_id>.json`` and compute/pin IPFS CID."""
     cid_case = normalize_bytes32_hex(case_id)
@@ -164,6 +165,13 @@ def persist_evidence_bundle(
 
     evidence_dir.mkdir(parents=True, exist_ok=True)
     target_path = evidence_dir / f"{cid_case}.json"
+    if target_path.is_file() and not allow_overwrite:
+        existing_bytes = target_path.read_bytes()
+        if existing_bytes != raw_bytes:
+            raise FileExistsError(
+                f"Evidence file {target_path.name} already exists with different canonical bytes; "
+                "generate a new run_id or pass allow_overwrite=True to avoid overwriting anchored evidence."
+            )
     target_path.write_bytes(raw_bytes)
 
     cid, pin_status, pin_detail = pin_evidence_bytes(
