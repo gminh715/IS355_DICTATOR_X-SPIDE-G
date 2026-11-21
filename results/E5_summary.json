@@ -1,15 +1,15 @@
 {
-  "schema_version": "1.0",
-  "generated_utc": "2026-11-14T09:48:30.775711Z",
-  "git_commit": "71436e075f040a670c5d0b02fe71c926bcd80aea",
+  "schema_version": "1.1",
+  "generated_utc": "2026-11-21T14:09:18.974690Z",
+  "git_commit": "9f9a032a39f7abfa62ece4437883a5a12efa43d0",
   "price_anchor": {
-    "fetched_utc": "2026-11-14T09:30:11Z",
-    "mainnet_block_range": "26412234..26412333",
-    "mainnet_median_base_fee_gwei": 0.071787,
-    "mainnet_median_priority_fee_gwei": 0.01,
-    "mainnet_median_gas_price_gwei": 0.084427,
-    "etherscan_propose_gwei": 0.077298,
-    "eth_usd": 1900.68,
+    "fetched_utc": "2026-11-21T14:04:49Z",
+    "mainnet_block_range": "26463858..26463957",
+    "mainnet_median_base_fee_gwei": 0.862457,
+    "mainnet_median_priority_fee_gwei": 0.119199,
+    "mainnet_median_gas_price_gwei": 0.971057,
+    "etherscan_propose_gwei": 0.726795,
+    "eth_usd": 1704.05,
     "gas_source": "https://ethereum-rpc.publicnode.com eth_feeHistory(100 blocks, p50 priority)",
     "eth_price_source": "Etherscan v2 stats.ethprice"
   },
@@ -17,48 +17,48 @@
     "sepolia": {
       "network": "sepolia",
       "n_txs": 30,
-      "median_seconds": 10.357,
-      "p95_seconds": 11.217,
-      "mean_seconds": 10.339,
-      "min_seconds": 8.884,
-      "max_seconds": 11.743,
+      "median_seconds": 10.56,
+      "p95_seconds": 11.699,
+      "mean_seconds": 10.182,
+      "min_seconds": 7.67,
+      "max_seconds": 12.07,
       "median_blocks": 1.0,
       "p95_blocks": 1.0,
       "min_blocks": 1,
       "max_blocks": 1,
-      "median_gas_used": 281439.0,
-      "p95_gas_used": 482975.0,
-      "median_fee_eth": "0.000140719504",
-      "total_fee_eth": "0.004224125125",
-      "median_fee_usd": 0.26746275,
-      "total_fee_usd": 8.0287102,
+      "median_gas_used": 285957.0,
+      "p95_gas_used": 487493.0,
+      "median_fee_eth": "0.000071489254",
+      "total_fee_eth": "0.002145561370",
+      "median_fee_usd": 0.12182126,
+      "total_fee_usd": 3.65614385,
       "prereg_max_median_blocks": 2.0,
       "meets_target": true
     },
     "arbitrum-sepolia": {
       "network": "arbitrum-sepolia",
       "n_txs": 30,
-      "median_seconds": 1.226,
-      "p95_seconds": 1.675,
-      "mean_seconds": 1.34,
-      "min_seconds": 1.022,
-      "max_seconds": 1.699,
+      "median_seconds": 1.212,
+      "p95_seconds": 1.756,
+      "mean_seconds": 1.346,
+      "min_seconds": 1.078,
+      "max_seconds": 1.776,
       "median_blocks": 4.0,
-      "p95_blocks": 5.55,
+      "p95_blocks": 6.0,
       "min_blocks": 3,
       "max_blocks": 6,
-      "median_gas_used": 93393.0,
-      "p95_gas_used": 129695.0,
-      "median_fee_eth": "0.000001872554",
-      "total_fee_eth": "0.000056183454",
-      "median_fee_usd": 0.00355912,
-      "total_fee_usd": 0.10678678
+      "median_gas_used": 97911.0,
+      "p95_gas_used": 134213.0,
+      "median_fee_eth": "0.000001962639",
+      "total_fee_eth": "0.000058869241",
+      "median_fee_usd": 0.00334443,
+      "total_fee_usd": 0.10031611
     }
   },
   "live_networks": {
     "sepolia": {
       "security_on_main_d1": {
-        "main_d1_address": "0x14895F5e1f7F1aC5C58b35dA6d57674Aa5951b77",
+        "main_d1_address": "0x9E01ed5Aa19f0758d8dEc7C461dc374AcDA52Fad",
         "abi_functions": [
           "DECISION_APPROVE",
           "DECISION_NEEDS_REVIEW",
@@ -71,6 +71,7 @@
           "add_auditor",
           "attest",
           "attestations",
+          "auditor_added_at",
           "auditor_count",
           "cases",
           "get_attestation",
@@ -79,6 +80,8 @@
           "owner",
           "register_case",
           "remove_auditor",
+          "revoke_removed_auditor_vote",
+          "roster_nonce",
           "set_threshold",
           "threshold",
           "verify_evidence"
@@ -88,100 +91,125 @@
         "threshold": 2,
         "case_registered_count": 0,
         "T1_non_auditor_register_revert": {
-          "sender": "0xACbbF512AFEb817634178Ec4293518d108a6FF9b",
-          "tx_hash": "0x0ff94b4e0f5076059937b331ba6fba7ed8301a034fa78c05d6f32abcb945bb19",
-          "block_number": 12132229,
+          "sender": "0x76dd3661708982Fc51B0e6f0D35FC8Df63b187f7",
+          "tx_hash": "0xe2beb043a6021edde8b9e9b91bc542502722713661901d32a4b96ff3f6cf482c",
+          "block_number": 12182210,
           "status": 0,
           "gas_used": 31640,
           "eth_call_revert": "('execution reverted: Only auditor', '0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000c4f6e6c792061756469746f720000000000000000000000000000000000000000')"
         },
         "T1_non_auditor_attest_revert": {
-          "sender": "0xACbbF512AFEb817634178Ec4293518d108a6FF9b",
-          "tx_hash": "0x6c5b7e5e36187ffc7438839143248b3b67327e5338dece3a7df951abebfee4dc",
-          "block_number": 12132230,
+          "sender": "0x76dd3661708982Fc51B0e6f0D35FC8Df63b187f7",
+          "tx_hash": "0x04727e454a7ecb66a755ab6be00175757a17c00670995aa68eef6b2d9ce0b867",
+          "block_number": 12182211,
           "status": 0,
           "gas_used": 21400,
           "eth_call_revert": "('execution reverted: Only auditor', '0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000c4f6e6c792061756469746f720000000000000000000000000000000000000000')"
         },
         "T6_owner_register_revert": {
           "sender": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
-          "tx_hash": "0xddd44781373cadd0568a4bdd5067a8a877a2bee3b4175b150b463e85a96c8bea",
-          "block_number": 12132227,
+          "tx_hash": "0x34248ef97307e6bcab05ce915d180b2b8a54d22060135fce6118ff8dbb55f6ec",
+          "block_number": 12182207,
           "status": 0,
           "gas_used": 31640,
           "eth_call_revert": "('execution reverted: Only auditor', '0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000c4f6e6c792061756469746f720000000000000000000000000000000000000000')"
         },
-        "T6_owner_add_self_revert": {
-          "sender": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
-          "tx_hash": "0xced0e6e75fa8d5f4330773e2129cc0024b21e111cd572c95b35ca4007d78a6ce",
-          "block_number": 12132228,
-          "status": 0,
-          "gas_used": 18090,
-          "eth_call_revert": "('execution reverted: Owner cannot be auditor', '0x08c379a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000174f776e65722063616e6e6f742062652061756469746f72000000000000000000')"
-        },
         "T6_owner_attest_revert": {
           "sender": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
-          "tx_hash": "0x56764e897eec218d260f2208723495421b1313de1ea858913f8e057c8c3e89bc",
-          "block_number": 12132406,
+          "tx_hash": "0x686750805433fec3bb239b722b384d9be211c08789616ccbe83a70ff9d8d208a",
+          "block_number": 12182208,
           "status": 0,
           "gas_used": 21400,
           "eth_call_revert": "('execution reverted: Only auditor', '0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000c4f6e6c792061756469746f720000000000000000000000000000000000000000')"
+        },
+        "T6_owner_add_self_revert": {
+          "sender": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
+          "tx_hash": "0x45b4df6d141db654699cafb09fdcc5daa5b04f990f1cd0da3cc58f582db78a5c",
+          "block_number": 12182209,
+          "status": 0,
+          "gas_used": 18090,
+          "eth_call_revert": "('execution reverted: Owner cannot be auditor', '0x08c379a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000174f776e65722063616e6e6f742062652061756469746f72000000000000000000')"
         }
       },
       "benchmark_contracts": {
         "D1": {
-          "address": "0x277cFb96F25150a3506D1bC9C8E503D89Ab3d25f",
-          "deploy_tx_hash": "0xb99649a7364ac0d21e7944e536defd915666109885075c96f04b50eb1b34876b",
-          "deploy_gas_used": 7365849,
+          "address": "0x5E7CA7Bd284e2A598F4844af403d2f106c52dbA6",
+          "deploy_tx_hash": "0x4eae4406769cafa6967d0342f33e88f6e22964c59ff26dd1a6415359bdd5d3ab",
+          "deploy_gas_used": 9751010,
           "auditors": [
-            "0xc52298B4B0C666D72EAC1119CA7765d97CD4685b",
-            "0x4843D759e0F74722181686b99568809D7267F97f",
-            "0x9c8C84Ac899fD5C665998e963292aF58053DC377"
+            "0x0fB880fFC78b1cF42a93789cCb45833aF7aed590",
+            "0x8Fe9fB2AC247B9cb0B9E022e760E02184EF23ACc",
+            "0x80DE645aEf7202472BBf8020e39a4d0088aBb479"
           ],
           "add_auditor_txs": [
-            "0x07336fa8ae9c4cd68ec51ac2bb98b213ab6a8c60ff82c19dc204fb97c844cdb7",
-            "0xacb1481d0a888e4c7118bdf7f9b3b1d248ceebfc132f728736c91f68b8bdc8f2",
-            "0x08f30e6d958eff00d785f8615d4d5b91b6a7b28ab06343e5a4628516e8ea71c7"
+            "0xd29a4ff591a87592a0da8f32bfaea3469b1d0c0154d76b3eb99a3e1463568443",
+            "0xb5fd31037413d9a72b91c19c573f090c753837bf5717d463e7ba641b27a4a966",
+            "0x8016572a968bc4c7ca6e37ecbf5a3a8745fe1548867c646c374a5db23f87ece3"
           ],
-          "set_threshold_tx": "0x507a17102ac6e07a034c5ed8138173e3a6f8bec4483bf4f0d2a6fcf29a6734b6"
+          "set_threshold_tx": "0x073f901d260a4d413c9d9f4540277183e7afe2e3f0f49632a69abfad679d9b8a"
         },
         "D2": {
-          "address": "0x8b25987043d4D6Dcb6BBd8BEC786Ae2c1aF3a7C0",
-          "deploy_tx_hash": "0x35721fe24cc4afb8759caa25b7135d77cbdf791fc768844f6ba742ce1fe19196",
-          "deploy_gas_used": 7288546,
+          "address": "0xCCA071A7f0aaE055F39961b415ed6476C5Ab77BC",
+          "deploy_tx_hash": "0x1f0b3078d1a2253387a26f381954905941acd3bc2d4053ec377e5e0a0db40145",
+          "deploy_gas_used": 9699930,
           "auditors": [
-            "0xc52298B4B0C666D72EAC1119CA7765d97CD4685b",
-            "0x4843D759e0F74722181686b99568809D7267F97f",
-            "0x9c8C84Ac899fD5C665998e963292aF58053DC377"
+            "0x0fB880fFC78b1cF42a93789cCb45833aF7aed590",
+            "0x8Fe9fB2AC247B9cb0B9E022e760E02184EF23ACc",
+            "0x80DE645aEf7202472BBf8020e39a4d0088aBb479"
           ],
           "add_auditor_txs": [
-            "0x5e693d3182dbe1c24c4db00cdc3b779adb49f953cbaca6df158b0af7cbce48b8",
-            "0x82ac4b16865a46b498bf324ce61d863cd301c292529f4121337220791539ba6e",
-            "0x0406b588f25a949584e07badb3a150952a08650ba3f4858f22927076cb3f246e"
+            "0x5f8da496a35656ae12a98a17b6f99dde9c90a3cf6a9c7ee325698ad858f0d763",
+            "0xc6e54e68eee1d3b5579dd70cd461ff3982d8eeea545a76a0bd89bd677efb4eff",
+            "0x241609e00e9d50479c68a6419fd7c385a0a30befbb8272a8ab030ce7c8b53811"
           ],
-          "set_threshold_tx": "0x6651e44214e131f143967742118c98ad24cce0f1e8981f3efc305afce45fa3a6"
+          "set_threshold_tx": "0xd0bdd708769a24241ccc62ed5bc1334daaa48637197b2cc4856567d43ce2b0a3"
         },
         "D3": {
-          "address": "0x02e5AC648C34A3890687160E923A94A58Ee7e025",
-          "deploy_tx_hash": "0x5ddf7a4da6d283d52a425e3f20df6a703cc3257a6a74410b99a053894af35171",
-          "deploy_gas_used": 7871789,
+          "address": "0x9f9Ef34F5afe6c59677BB19A93F095dE4ccd05b1",
+          "deploy_tx_hash": "0xb929786fb828e53d692075247bba6693540b3a633383c960509085d0faefd0ff",
+          "deploy_gas_used": 10321937,
           "auditors": [
-            "0xc52298B4B0C666D72EAC1119CA7765d97CD4685b",
-            "0x4843D759e0F74722181686b99568809D7267F97f",
-            "0x9c8C84Ac899fD5C665998e963292aF58053DC377"
+            "0x0fB880fFC78b1cF42a93789cCb45833aF7aed590",
+            "0x8Fe9fB2AC247B9cb0B9E022e760E02184EF23ACc",
+            "0x80DE645aEf7202472BBf8020e39a4d0088aBb479"
           ],
           "add_auditor_txs": [
-            "0xb2bb2f311e0c4446034aa360a57d954c296041674888b1cdb9ba19b43913c080",
-            "0xaf0fbdd9c3a29af584683277020daaac811fc556b4a9ea83de2b277823afd543",
-            "0xaf57198a073a08de7a34e8380be855ce8a8a69771dcf086f47ddb29853f94f09"
+            "0x4d817234b3954807d153ace8488d10538710869baca779b5f205a15dd7789fdd",
+            "0x54b81e4306f84766d775181d82ff118785ca65f96e7e2a9f51276e20ba546a01",
+            "0x193ac63c4e87c9d865f07f87dd814eeae5d96ed4fd4455b0385c019ccd40bcbc"
           ],
-          "set_threshold_tx": "0x83217007db1f7e271e5edac354b2b853ca213ae5a09dfa89da1d26f78440161b"
+          "set_threshold_tx": "0x881b09ab3d4637d4974c06e1eb5cd10c4549448fdb3c923c38ffb4f927648945"
         }
       },
+      "T13_sepolia_quorum_isolation": {
+        "contract_address": "0x5E7CA7Bd284e2A598F4844af403d2f106c52dbA6",
+        "case_id": "0x5bd5629a1127c277a37bc9c9ce75c77bac6bc76ea8bc2eb494782844e19eb968",
+        "register_tx_hash": "0x59a22a5b9f6a26efb3a0cc1ff81b2b4f39985280677258ef07a609a5ee4d5193",
+        "initial_attest_tx_hash": "0x8d7d201949a7b06fd172b0eda634df4c99237c99c525517ca6ebab6902d1e261",
+        "set_threshold_1_tx_hash": "0xeb09f2937c5d72a7cd5113ea95f75375afe3a5684948b3bce996b0f1e907858b",
+        "add_sybil_auditor_tx_hash": "0x6d1e42c89c77f03b75af3cd2c8227a752794ba2b304a6e60a5956211140aacd0",
+        "sybil_auditor": "0x7Dc8fb20CcB4Cf47094d95f7b4bd6177fb7D45b5",
+        "snapshotted_required_threshold": 2,
+        "snapshotted_created_roster_nonce": 3,
+        "sybil_attest_revert": {
+          "tx_hash": "0x56d73080cfed7bb139bb14cdd7dd6a02d9473ba2b49edc95c1842e200fc0957d",
+          "block_number": 12182281,
+          "status": 0,
+          "gas_used": 25371,
+          "eth_call_revert": "('execution reverted: Auditor added after case creation', '0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002141756469746f722061646465642061667465722063617365206372656174696f6e00000000000000000000000000000000000000000000000000000000000000')"
+        },
+        "remove_auditor_tx_hash": "0xba4c4e92850306d86f4b14ec116d4409d69c920b749ef38eef9d3168ca2282d7",
+        "revoke_removed_vote_tx_hash": "0xcdf735c325aa0ef7034e6824f48e7e0bc6c347c4a607e0a0a02ebd99c216737e",
+        "revoke_removed_vote_gas_used": 63402,
+        "post_revoke_approve_count": 0,
+        "post_revoke_status": 0,
+        "post_revoke_decision": 0,
+        "post_revoke_revision": 2
+      },
       "T8_sepolia_verify_evidence": {
-        "contract_address": "0x277cFb96F25150a3506D1bC9C8E503D89Ab3d25f",
+        "contract_address": "0x5E7CA7Bd284e2A598F4844af403d2f106c52dbA6",
         "case_id": "0x4f059ee606addf455d91f363dd2d2017e92b7bdcde58a7ca30730b3d8e053311",
-        "register_tx_hash": "0x9b1eb9e73eebf0dabed6ed48484927a5edc15ee138f2332c247d05fd73591191",
+        "register_tx_hash": "0xf2bffdf48f743f3ef068856634c85da87a14db45c1cebc5b9865be1950baf330",
         "exact_evidence_hash": "0x8d13b1201fa73ff33261d0beebb571e2f2e3cef1a59f076504e8bc14952653f9",
         "tampered_1byte_hash": "0xc82b12805f4ee81c7379915ee746d21c977b42b34ae2b607c959ce21427b9607",
         "verify_exact_onchain": true,
@@ -191,36 +219,36 @@
     "arbitrum-sepolia": {
       "benchmark_contracts": {
         "D1": {
-          "address": "0xf04fd7BD0Ee4DBf28d19D7D02988ac01fD989eF2",
-          "deploy_tx_hash": "0xfe8af093c14656155e035883343b26f9e67a0c25c5a650d41bdb7350362a0897",
-          "deploy_gas_used": 1068183,
+          "address": "0x5CA73970D602A05B0451b1434f4c2E0C66f42dFE",
+          "deploy_tx_hash": "0xc571e53567eb3bf338e36895c6654684292914254c4472da4efd41baccdee94f",
+          "deploy_gas_used": 1400866,
           "auditors": [
-            "0x86953a59d70c935ed8Eea33656142de18BF6c906",
-            "0xEE60A3D6FC282FC95401208fc12DBb4CCE806BfF",
-            "0x52309bB2bfC629176513aFa27D7ff88859ea8Bd1"
+            "0xECeB99C758CAaA4687579bEA21762A37d72d30A7",
+            "0xFaAd459dFBd27b15835e02123601c303dcA6Db51",
+            "0x90c32A5Ba1A21eD9cBa6975B5772A98eC76c5443"
           ],
           "add_auditor_txs": [
-            "0xcb8e7b367df6647f7bcec159115c76c21e292b90e538f38b7127950c022bf15f",
-            "0x128b7275552371d17ba78ca89feccec353005e7c3335813a3b3971c329bc5c4f",
-            "0xb75164cd753bebbb4469108a92a9ba110788182f3853df51474d5a1b976cb654"
+            "0x175ed9f9faf5bb99104e2437770e8bec263f6db9ff6e47fc0d3477102053643a",
+            "0xb99a664bbbc0e03315c49eedf82d805d714733dd60f6f4cab81578bd07f3e433",
+            "0x3aca91f88a1ca2fd42371b48718c8ff06cc20e5ec44c2154ab56e47951547a5c"
           ],
-          "set_threshold_tx": "0xf708599c2719ff8dd693b1b903cb036bf55ff530d7192d5e5950aef4ed653415"
+          "set_threshold_tx": "0x2202fc988be1f2896564ff44931b53239b2238f54d39006f8e89c5d5dff083bc"
         },
         "D3": {
-          "address": "0x5452460fC11fDD9Ca4E36513f0465B5eE969c96d",
-          "deploy_tx_hash": "0x6dbc62cf3c380a8b89badb134d3dbfbab18267c25fbde5734247d07b9e56f322",
-          "deploy_gas_used": 1139153,
+          "address": "0xdf0d0e3F1E862CFe095E6Fa98aA67f9B60270894",
+          "deploy_tx_hash": "0x49525520458db6ee34918d76e28cd4e4097d66ce4d583de1f840abbb5735052d",
+          "deploy_gas_used": 1480957,
           "auditors": [
-            "0x86953a59d70c935ed8Eea33656142de18BF6c906",
-            "0xEE60A3D6FC282FC95401208fc12DBb4CCE806BfF",
-            "0x52309bB2bfC629176513aFa27D7ff88859ea8Bd1"
+            "0xECeB99C758CAaA4687579bEA21762A37d72d30A7",
+            "0xFaAd459dFBd27b15835e02123601c303dcA6Db51",
+            "0x90c32A5Ba1A21eD9cBa6975B5772A98eC76c5443"
           ],
           "add_auditor_txs": [
-            "0x22ca7cdd8c8c1b3fd3caedf21dbb23ceb5588d4951f0979f0d161bb52f3cc704",
-            "0x456cdeaf542b0875e22c5311b9170e43c3925757baf8be5cf8853b60bec79ca3",
-            "0x815e39288623d4581d9d588c2b168ecf534d145df04f9afcea945e0a858b4406"
+            "0x4189d93a7ca0d6765d807535faa7bab20e2caab427cebef3cdf01620b32fa225",
+            "0x019b1ec1ba9199470077ca1859af596257b0e8fd02c47fa365d737b552560d1d",
+            "0x7c81c68c98c349124010a8ec095fa88378f462bb4d9e289a81294726fe31b455"
           ],
-          "set_threshold_tx": "0x84be5b98148c80f4903826ac6a6475819c8fcfa24959d13f50545d054bdcaf2b"
+          "set_threshold_tx": "0xb341173b69a405f1bb3cb50c4aa0216733301d3a7ddc48bfc0bae122b1caa823"
         }
       }
     }
@@ -228,6 +256,7 @@
   "outputs": {
     "E5_gas_csv": "results/E5_gas.csv",
     "E5_latency_csv": "results/E5_latency.csv",
-    "gas_vs_batch_png": "figures/gas_vs_batch.png"
+    "gas_vs_batch_png": "figures/gas_vs_batch.png",
+    "gas_vs_batch_pdf": "paper/figures/gas_vs_batch.pdf"
   }
 }

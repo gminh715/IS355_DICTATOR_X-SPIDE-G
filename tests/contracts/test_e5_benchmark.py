@@ -35,10 +35,13 @@ def test_anvil_gas_suite_covers_variants_cold_warm_and_batches(tmp_path: Path) -
     d1_warm = float(df[(df["variant"] == "D1") & (df["operation"] == "attest_warm_replace")]["gas_used"].iloc[0])
     assert d1_warm < d1_cold
 
-    # Governance remove_auditor measured across all three variants.
+    # Governance remove_auditor and v1.1 revoke_removed_auditor_vote measured across all three variants.
     rem_rows = df[(df["operation"] == "remove_auditor") & (df["storage_mode"] == "warm_update")]
     assert set(rem_rows["variant"].unique()) == {"D1", "D2", "D3"}
     assert (rem_rows["gas_used"] > 21_000).all()
+    rev_rows = df[(df["operation"] == "revoke_removed_auditor_vote") & (df["storage_mode"] == "warm_update")]
+    assert set(rev_rows["variant"].unique()) == {"D1", "D2", "D3"}
+    assert (rev_rows["gas_used"] > 21_000).all()
 
     # D3 amortized cost across N in {1, 10, 100, 1000}
     d3_tot = df[(df["variant"] == "D3") & (df["operation"] == "batch_finalized_total")].sort_values("batch_size")

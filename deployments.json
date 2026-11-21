@@ -4,17 +4,17 @@
     "local-evm": {
       "network": "local-evm",
       "chain_id": 131277322940537,
-      "updated_at_utc": "2026-11-14T05:56:47Z",
-      "git_commit": "f5ad34b18912eee63cb7d75496b336cb4938766e",
+      "updated_at_utc": "2026-11-21T13:36:36Z",
+      "git_commit": "9f9a032a39f7abfa62ece4437883a5a12efa43d0",
       "contracts": {
         "D1": {
           "contract_name": "RiskAttestationRegistry",
           "source_path": "contracts/RiskAttestationRegistry.vy",
-          "source_sha256": "cae5e0b9a504f958fe2eb953606461eaad11af9d823d96c5967634d7c5e4ed0f",
+          "source_sha256": "da88689e6b7d1e8b3e818f0dfa13b897497d6bfe1f45f86c03d1919d3bdac68b",
           "vyper_version": "0.4.3",
           "address": "0xF2E246BB76DF876Cef8b38ae84130F4F55De395b",
-          "deploy_tx_hash": "0x46f168828d60d86b55754851c8b87e1fa499e84e1bd42d0464d8566e9ff5b778",
-          "deploy_gas_used": 1068183,
+          "deploy_tx_hash": "0x0d7acce703246ba16170b2b311a211e079781c72fcd2491f7589591270afc027",
+          "deploy_gas_used": 1400866,
           "block_number": 1,
           "deployer": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf",
           "owner": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf",
@@ -33,18 +33,18 @@
             "add_auditors": [
               {
                 "auditor": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF",
-                "tx_hash": "0xa12595fd3d7589dbd6ced588425e9369d24ec6b59af6bf21a84b0e33fb18212a",
-                "gas_used": 69429
+                "tx_hash": "0xadbe81e3c84cbc88884d6e891a36e3db818f0999677c3f006b8c9ec649382054",
+                "gas_used": 113841
               },
               {
                 "auditor": "0x6813Eb9362372EEF6200f3b1dbC3f819671cBA69",
-                "tx_hash": "0xd1a2d3dfb3417b6cdd078deae7b307416442135381144abf02fcf256f8606c67",
-                "gas_used": 52317
+                "tx_hash": "0x761972e3477d1ef1dc6a067ffd51d3cefff6fb32ddae3ef21ae4f5e785e456d2",
+                "gas_used": 79629
               },
               {
                 "auditor": "0x1efF47bc3a10a45D4B230B5d10E37751FE6AA718",
-                "tx_hash": "0xcbaa7df06e9b7692edb38a07cfc2755098dd1ae9dadf4e096afdf8d43a06fb28",
-                "gas_used": 52329
+                "tx_hash": "0x6aec1661d2d7a6851379e1bde29b00ba281090d4631f106c8065ec31078bcbb2",
+                "gas_used": 79641
               }
             ],
             "set_threshold": {
@@ -58,11 +58,11 @@
         "D2": {
           "contract_name": "D2_EventOnly",
           "source_path": "contracts/variants/D2_EventOnly.vy",
-          "source_sha256": "4de211d0077a415a6e6a035065d00f2ecb6c94d0a304081becfc379326ffb5ad",
+          "source_sha256": "27d83067003eb48b3198c8ac21210ec34dbe82d17ef4b37f8cb58c5ae4a4158a",
           "vyper_version": "0.4.3",
           "address": "0x6D411e0A54382eD43F02410Ce1c7a7c122afA6E1",
-          "deploy_tx_hash": "0xda17175d33e18bd1ac832ce0451d69909c7082df1435fa6c0a9c78d4fff23fb3",
-          "deploy_gas_used": 1057392,
+          "deploy_tx_hash": "0xe4225956d8cefaef938a7d3c8416871d4ccfdef546c8399e2d16b438b27dea2d",
+          "deploy_gas_used": 1393682,
           "block_number": 6,
           "deployer": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf",
           "owner": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf",
@@ -81,18 +81,18 @@
             "add_auditors": [
               {
                 "auditor": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF",
-                "tx_hash": "0x551beaa28261f80dc902af3f796ddaafb859692943706d69f823bcb10e0de630",
-                "gas_used": 69429
+                "tx_hash": "0x1d9aa503aba39f13c93afc6af4b8bb85c9207a41917a62cf726ce732b18440c6",
+                "gas_used": 113841
               },
               {
                 "auditor": "0x6813Eb9362372EEF6200f3b1dbC3f819671cBA69",
-                "tx_hash": "0x6f9d744743cae1095956dd1820e805c5ae127fe67fb675a1d1e57e5fd0e4b84b",
-                "gas_used": 52317
+                "tx_hash": "0x48affdcca8508f2b39408746198efdf13460ecbbba3a55dd549c22fa92f51e11",
+                "gas_used": 79629
               },
               {
                 "auditor": "0x1efF47bc3a10a45D4B230B5d10E37751FE6AA718",
-                "tx_hash": "0x8df577c06323b3fdb8ae92c87aa2865bb75bc00b9e1386c3818b596351763913",
-                "gas_used": 52329
+                "tx_hash": "0x48a85c021cee69cfe3409e8287994827f38567d8bde627ee53959fcabc9edc7b",
+                "gas_used": 79641
               }
             ],
             "set_threshold": {
@@ -106,11 +106,11 @@
         "D3": {
           "contract_name": "D3_MerkleBatch",
           "source_path": "contracts/variants/D3_MerkleBatch.vy",
-          "source_sha256": "8430e3fe5b17177bcc97bd316de22d63fecc1aa669c93f917e5352169cc11dc4",
+          "source_sha256": "d6362adb9e0d40534e99835ab19d2821f6d80d4ff2e73285b874cd9036562da5",
           "vyper_version": "0.4.3",
           "address": "0x00De48310d77A4d56aa400248b0B1613508f5B73",
-          "deploy_tx_hash": "0x29f0954e85b3caa5f20c82adfaf791286108b79fbafadc7aadb3965311ea0c33",
-          "deploy_gas_used": 1139153,
+          "deploy_tx_hash": "0x9393440deaed967a378e6bbb4a3e54678ebdde65f154d5998392780d9f7af259",
+          "deploy_gas_used": 1480957,
           "block_number": 11,
           "deployer": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf",
           "owner": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf",
@@ -129,18 +129,18 @@
             "add_auditors": [
               {
                 "auditor": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF",
-                "tx_hash": "0xb58f068e63e111c6758dcf34e8cb33a665f59dad7277981b3d618449a73157cf",
-                "gas_used": 69429
+                "tx_hash": "0x7e39d7db6df616a4e3ad43f16cb1463a49341d83471cd3b3dd0225341fed71ea",
+                "gas_used": 113841
               },
               {
                 "auditor": "0x6813Eb9362372EEF6200f3b1dbC3f819671cBA69",
-                "tx_hash": "0x094479888aecb9e5149ba49e56d44e7e4c525651fcb3eccadc8b43a6c524b990",
-                "gas_used": 52317
+                "tx_hash": "0xba11c60ff52a50aa73186a8832a181b2497563ae47b9cf0a3f78a0eecd79003c",
+                "gas_used": 79629
               },
               {
                 "auditor": "0x1efF47bc3a10a45D4B230B5d10E37751FE6AA718",
-                "tx_hash": "0x64675046616f68dda3983ddc79fb9790d3fe0853db7bdf862b2ff9af7311d896",
-                "gas_used": 52329
+                "tx_hash": "0xf5e9a4a7a77146526014df5e302062a3cbfdc272a6dd0a415b38e60db8b8b03e",
+                "gas_used": 79641
               }
             ],
             "set_threshold": {
@@ -154,10 +154,10 @@
       },
       "smoke_check_d1": {
         "case_id": "0xd80dff953ab2de62ff7bc1b7b5137e84fa5cd6237d4db13d6f19d401d646d964",
-        "register_gas_used": 171156,
-        "attest1_gas_used": 124828,
-        "attest2_gas_used": 129311,
-        "total_finalization_gas": 425295,
+        "register_gas_used": 219580,
+        "attest1_gas_used": 129243,
+        "attest2_gas_used": 133829,
+        "total_finalization_gas": 482652,
         "final_status": 1,
         "verify_evidence_exact": true
       }
@@ -165,18 +165,18 @@
     "sepolia": {
       "network": "sepolia",
       "chain_id": 11155111,
-      "updated_at_utc": "2026-11-14T07:07:03Z",
-      "git_commit": "172b25e78cd1fe0bcb309ec8480d2a78618258c7",
+      "updated_at_utc": "2026-11-21T13:42:49Z",
+      "git_commit": "9f9a032a39f7abfa62ece4437883a5a12efa43d0",
       "contracts": {
         "D1": {
           "contract_name": "RiskAttestationRegistry",
           "source_path": "contracts/RiskAttestationRegistry.vy",
-          "source_sha256": "cae5e0b9a504f958fe2eb953606461eaad11af9d823d96c5967634d7c5e4ed0f",
+          "source_sha256": "da88689e6b7d1e8b3e818f0dfa13b897497d6bfe1f45f86c03d1919d3bdac68b",
           "vyper_version": "0.4.3",
-          "address": "0x14895F5e1f7F1aC5C58b35dA6d57674Aa5951b77",
-          "deploy_tx_hash": "0x1dce0cc71b3da6589352a103770d76cd8304b2498396477f23a69e48a9015a6d",
-          "deploy_gas_used": 7365849,
-          "block_number": 12131497,
+          "address": "0x9E01ed5Aa19f0758d8dEc7C461dc374AcDA52Fad",
+          "deploy_tx_hash": "0x01f2c85cf1b14beeb9959aa9de78324f87c6748f81f4485af07056850b853ad0",
+          "deploy_gas_used": 9751010,
+          "block_number": 12182168,
           "deployer": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
           "owner": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
           "owner_type": "eoa_demo_limit",
@@ -194,29 +194,29 @@
             "add_auditors": [
               {
                 "auditor": "0x6198B988c458DbA3a164929970e2e72AD69dFe02",
-                "tx_hash": "0xa98614537961a89c17d77329e81cc0c1405b22f1c1fde01aeb046acd74cc62d5",
-                "gas_used": 239469
+                "tx_hash": "0x4bcfad04706c8a43c3c10bcc8a2f9a4704f66c2cf7fb0c420655999f292949c4",
+                "gas_used": 459821
               },
               {
                 "auditor": "0x7E63bA07459d070587a525E68265B9aD4b6dbDD0",
-                "tx_hash": "0x3359aa9dafedd1aadc7adca28e09790e960f836efb87f35a599635cae5aa43bb",
-                "gas_used": 141549
+                "tx_hash": "0x842667479c6caa251c76400e2d480e8c629f4f5ff0f22798a3c76faa2028621a",
+                "gas_used": 263981
               },
               {
                 "auditor": "0xEDdE2D7b35C4DC6Ea7862604850530f301Dd5570",
-                "tx_hash": "0x08ad05eeaec1b8bf66269b47d1de6116f74cc6c255c58283f1f7ee934379ca0a",
-                "gas_used": 141549
+                "tx_hash": "0xebfeb8213ac6e78dad6d96ccc3684389a64cd56968281a64e3bfb8eb54ca237f",
+                "gas_used": 263981
               }
             ],
             "set_threshold": {
               "threshold": 2,
-              "tx_hash": "0x5e45f03f935c144beda71285f2d4836f14e95bc625761e59de7fa7ff78d26e18",
+              "tx_hash": "0x10a8d8a61d7be0a6c9b5bc396ed392b233d83c013b2320389d95d9a3d2daad1f",
               "gas_used": 23165
             }
           },
           "verified_explorer": true,
           "verification_receipt": {
-            "guid": "sacdc9kbykzwrbbmkhuajzzcayy94ban93jpxbiqatntjy2kse",
+            "guid": "vmeg722qikvdkyqe2yatwel41x3aqtxunsf5w8dkvpqkkwfwaw",
             "status_response": {
               "status": "1",
               "message": "OK",
@@ -227,12 +227,12 @@
         "D2": {
           "contract_name": "D2_EventOnly",
           "source_path": "contracts/variants/D2_EventOnly.vy",
-          "source_sha256": "4de211d0077a415a6e6a035065d00f2ecb6c94d0a304081becfc379326ffb5ad",
+          "source_sha256": "27d83067003eb48b3198c8ac21210ec34dbe82d17ef4b37f8cb58c5ae4a4158a",
           "vyper_version": "0.4.3",
-          "address": "0x693632c45108A9ca25a7F9d693c00554EeDD1EB1",
-          "deploy_tx_hash": "0xd9387adb0d956d9b978ee0140018ecd93c14449fc31e426a40c7bc5a4f07b5dd",
-          "deploy_gas_used": 7288546,
-          "block_number": 12131502,
+          "address": "0x33f7f3369A7b1fe3326032FeEbbdE873bD1E3f24",
+          "deploy_tx_hash": "0xb2f6f4849bb4853385123ba00141530349f5a611cb6d197ed491711f1802ab1f",
+          "deploy_gas_used": 9699930,
+          "block_number": 12182173,
           "deployer": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
           "owner": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
           "owner_type": "eoa_demo_limit",
@@ -250,29 +250,29 @@
             "add_auditors": [
               {
                 "auditor": "0x6198B988c458DbA3a164929970e2e72AD69dFe02",
-                "tx_hash": "0x7303442776679f5d8c6d2fe18c8decd5d71482f4b4784a3b64f869e148f092dd",
-                "gas_used": 239469
+                "tx_hash": "0x780b0237d2234cab2a5185a41de6c5ddac257ed2826ea957da3644ec67b3a6b0",
+                "gas_used": 459821
               },
               {
                 "auditor": "0x7E63bA07459d070587a525E68265B9aD4b6dbDD0",
-                "tx_hash": "0xc710aaad07d518f571a224120cb6d2c40fd642e5f0276bad539bbb0385f67db1",
-                "gas_used": 141549
+                "tx_hash": "0x18c603485ae86c7176f2f68b739b466c7797c920dfb80609f43cd325b36e3bcd",
+                "gas_used": 263981
               },
               {
                 "auditor": "0xEDdE2D7b35C4DC6Ea7862604850530f301Dd5570",
-                "tx_hash": "0x561f78748917c16019121661e30cca2bb0ff7b05715b75c4419a06694a0e47af",
-                "gas_used": 141549
+                "tx_hash": "0xfcafb4008c416c6bcbab177bc1988473bccfec4342187d3187fbe7db0906796e",
+                "gas_used": 263981
               }
             ],
             "set_threshold": {
               "threshold": 2,
-              "tx_hash": "0xd7d37199049b4593ad7d3eb86c95b76097aa08ec2d0d0c4a3179609748319176",
+              "tx_hash": "0xa3ccb515de93ab55a7d1759aeedb70c6ae0fb896322a262808162309e5083a77",
               "gas_used": 23165
             }
           },
           "verified_explorer": true,
           "verification_receipt": {
-            "guid": "yaarfsbzd4abxmbcnnrnp9av1rl6scxdhre1eiprmxxeeym1h8",
+            "guid": "6lmrkrfqdjrbtcrts6q1m5kihq1s5uar4pyxkaaaxr8fztsgch",
             "status_response": {
               "status": "1",
               "message": "OK",
@@ -283,12 +283,12 @@
         "D3": {
           "contract_name": "D3_MerkleBatch",
           "source_path": "contracts/variants/D3_MerkleBatch.vy",
-          "source_sha256": "8430e3fe5b17177bcc97bd316de22d63fecc1aa669c93f917e5352169cc11dc4",
+          "source_sha256": "d6362adb9e0d40534e99835ab19d2821f6d80d4ff2e73285b874cd9036562da5",
           "vyper_version": "0.4.3",
-          "address": "0xf04fd7BD0Ee4DBf28d19D7D02988ac01fD989eF2",
-          "deploy_tx_hash": "0xe55a608fa823c532fb435ba2c359a021a85c875cd1ff4228f26ee66e6fd847f8",
-          "deploy_gas_used": 7871789,
-          "block_number": 12131509,
+          "address": "0xe71C0468c32bC8ae555624b07e4B3CFDE3fb88e0",
+          "deploy_tx_hash": "0x7259f2c32b215fe9ed5b60791d3cf6cbd450a66b39572d74a2ef82361d7a250b",
+          "deploy_gas_used": 10321937,
+          "block_number": 12182178,
           "deployer": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
           "owner": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
           "owner_type": "eoa_demo_limit",
@@ -306,29 +306,29 @@
             "add_auditors": [
               {
                 "auditor": "0x6198B988c458DbA3a164929970e2e72AD69dFe02",
-                "tx_hash": "0xd061800d3157c82b8eae0192d3baa42f217ae13258b635caefe2af08f13d764f",
-                "gas_used": 239469
+                "tx_hash": "0x9e00442662b5ab7f3769c107d028a515e23b4d78e1332653ae39e121a8ce34d9",
+                "gas_used": 459821
               },
               {
                 "auditor": "0x7E63bA07459d070587a525E68265B9aD4b6dbDD0",
-                "tx_hash": "0xdb3d7b114f9fb12bc6749354623ddf7923cf87ba06437344f588c488880a0526",
-                "gas_used": 141549
+                "tx_hash": "0xfc1d0e5183d47b542363e64907ac69590f844d9e292b949bffa751f96f67f79b",
+                "gas_used": 263981
               },
               {
                 "auditor": "0xEDdE2D7b35C4DC6Ea7862604850530f301Dd5570",
-                "tx_hash": "0xa9323bb2088d4904531bccd45021e36eb1ab0bdd62660a70fc088cfb489dd815",
-                "gas_used": 141549
+                "tx_hash": "0x6d26e2120261c3cc7f493c71862ab6c77946c2eb7ab8e37eb1bc3173d556de4c",
+                "gas_used": 263981
               }
             ],
             "set_threshold": {
               "threshold": 2,
-              "tx_hash": "0xe6857969fbb4b837a9839f541a087b647fab5794b0d897799a832b23d40b5d4c",
+              "tx_hash": "0x80fc2eccd3fc08188bb53114540a63fd10c8135e08209975c8c0bef2c15104ff",
               "gas_used": 23165
             }
           },
           "verified_explorer": true,
           "verification_receipt": {
-            "guid": "adw4ppzeqn7w72yyj69bywrz2rcwg2wkpksi9ebg1ztakirv6g",
+            "guid": "ci9wy1s49wqnkjaay4dkihxfwmx5apyjqnhrh7ry6gs5kifp6z",
             "status_response": {
               "status": "1",
               "message": "OK",
@@ -341,18 +341,18 @@
     "anvil": {
       "network": "anvil",
       "chain_id": 31337,
-      "updated_at_utc": "2026-11-14T07:10:20Z",
-      "git_commit": "172b25e78cd1fe0bcb309ec8480d2a78618258c7",
+      "updated_at_utc": "2026-11-21T13:36:38Z",
+      "git_commit": "9f9a032a39f7abfa62ece4437883a5a12efa43d0",
       "contracts": {
         "D1": {
           "contract_name": "RiskAttestationRegistry",
           "source_path": "contracts/RiskAttestationRegistry.vy",
-          "source_sha256": "cae5e0b9a504f958fe2eb953606461eaad11af9d823d96c5967634d7c5e4ed0f",
+          "source_sha256": "da88689e6b7d1e8b3e818f0dfa13b897497d6bfe1f45f86c03d1919d3bdac68b",
           "vyper_version": "0.4.3",
           "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-          "deploy_tx_hash": "0x06fcfc32425ddaaecf1864c0f2594ed2ccdf691c12b7d27d3c63468c4b00e67f",
-          "deploy_gas_used": 1068183,
-          "block_number": 5,
+          "deploy_tx_hash": "0xf3f1c313e9e2e3209a4618897107431128405e8672ea3e39633d242bd063ad27",
+          "deploy_gas_used": 1400866,
+          "block_number": 1,
           "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
           "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
           "owner_type": "anvil_test_eoa",
@@ -370,23 +370,23 @@
             "add_auditors": [
               {
                 "auditor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-                "tx_hash": "0x6f5baf365f6a64476910b925c049a98338eef6f173916e4e7c30919f680f9f5d",
-                "gas_used": 69429
+                "tx_hash": "0x9e3aa834275504d66ce3c2879ed02718a25a4b4d9e516aa54c3325cc4b30623d",
+                "gas_used": 113841
               },
               {
                 "auditor": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
-                "tx_hash": "0x10ec89d9124a7513f534c9fdab45f7e7848cabf7229ecb6f40b19e656369da46",
-                "gas_used": 52317
+                "tx_hash": "0x722399822dc3d7592260ba620a085e3df76321b09ac933faa976a4eb846aa1fd",
+                "gas_used": 79629
               },
               {
                 "auditor": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
-                "tx_hash": "0x13884655099cfc37b42b6dcfedbec2e62619c912aaabe0df55c18d3db0000467",
-                "gas_used": 52329
+                "tx_hash": "0x8bd137a1ccef48cd7ce1a848e1735b07b82d99b9fb1cc2600073863ff2570c8e",
+                "gas_used": 79641
               }
             ],
             "set_threshold": {
               "threshold": 2,
-              "tx_hash": "0x6389e62c93dd2dc71fab29bb7ec791d9a717ce240d53703bc87e96f95e4cac17",
+              "tx_hash": "0x01bce740b9efb0acffa3949aa5019f4611c450e7fedc77f5478b0ca18e61b0fb",
               "gas_used": 29165
             }
           },
@@ -395,12 +395,12 @@
         "D2": {
           "contract_name": "D2_EventOnly",
           "source_path": "contracts/variants/D2_EventOnly.vy",
-          "source_sha256": "4de211d0077a415a6e6a035065d00f2ecb6c94d0a304081becfc379326ffb5ad",
+          "source_sha256": "27d83067003eb48b3198c8ac21210ec34dbe82d17ef4b37f8cb58c5ae4a4158a",
           "vyper_version": "0.4.3",
           "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
-          "deploy_tx_hash": "0xe07d75a4b3dd81d1d83c9093a8abf86c10c87bf7a7384ace3a5236f86473b82d",
-          "deploy_gas_used": 1057392,
-          "block_number": 10,
+          "deploy_tx_hash": "0x7152f5b2f65bb1a3675e8fefadf7014608d490d0d8153bda253109fe203c9662",
+          "deploy_gas_used": 1393682,
+          "block_number": 6,
           "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
           "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
           "owner_type": "anvil_test_eoa",
@@ -418,23 +418,23 @@
             "add_auditors": [
               {
                 "auditor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-                "tx_hash": "0x6ec1cb6cd8a867a70317cc60bc66df7a54f27dd18334b3a9495e7da72a244f3d",
-                "gas_used": 69429
+                "tx_hash": "0xf74c38ca1adeb3f5162433a871655234b8b6e61d80c24aa44be21d32144c6ba2",
+                "gas_used": 113841
               },
               {
                 "auditor": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
-                "tx_hash": "0x000c5c51e3540390467b39bdce068820f44712472af7fe2cc76de90ffb9e5b5b",
-                "gas_used": 52317
+                "tx_hash": "0xc386da7fec600dbad2d8552cd0e71249a065e96b0e8852c9a901ebda7ea6d43c",
+                "gas_used": 79629
               },
               {
                 "auditor": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
-                "tx_hash": "0x1c1ae5c76d322089d63e1111c5f9cc2ec8a1c4b0e2010e8f869ab4a66ddba479",
-                "gas_used": 52329
+                "tx_hash": "0xb9345e6fd57db8185ad034a507ad0250c80ec8a94755375acfc8f48509e69147",
+                "gas_used": 79641
               }
             ],
             "set_threshold": {
               "threshold": 2,
-              "tx_hash": "0x0d29314c65d9e658647c1a3b77404906d76cea299f8bad13e26a682185e6294b",
+              "tx_hash": "0xf47dff71bca7e41232eab20e52e7216a3c7e6db9ce3edf831d434ba80269c04a",
               "gas_used": 29165
             }
           },
@@ -443,12 +443,12 @@
         "D3": {
           "contract_name": "D3_MerkleBatch",
           "source_path": "contracts/variants/D3_MerkleBatch.vy",
-          "source_sha256": "8430e3fe5b17177bcc97bd316de22d63fecc1aa669c93f917e5352169cc11dc4",
+          "source_sha256": "d6362adb9e0d40534e99835ab19d2821f6d80d4ff2e73285b874cd9036562da5",
           "vyper_version": "0.4.3",
           "address": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
-          "deploy_tx_hash": "0x3d6c8c116193765cd9fdb817722fd17b0a1a924e27f3018eaebf3981625c4224",
-          "deploy_gas_used": 1139153,
-          "block_number": 15,
+          "deploy_tx_hash": "0x9804d51ea6031fc068fa0e2144c47bc896506d8a7279f3fb7a83e5c31ac399ab",
+          "deploy_gas_used": 1480957,
+          "block_number": 11,
           "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
           "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
           "owner_type": "anvil_test_eoa",
@@ -466,23 +466,23 @@
             "add_auditors": [
               {
                 "auditor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-                "tx_hash": "0x6e082685ae6e3393b2e0db06111d1a115bbc55289e63d9b31368cc7c9604675c",
-                "gas_used": 69429
+                "tx_hash": "0x076684cd55311d7613c182acaff1b053cd6115595cd9f70f0d4d472329d244b9",
+                "gas_used": 113841
               },
               {
                 "auditor": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
-                "tx_hash": "0x78bf7012de29408fdfbadcccb61424cfa9e7494b4c7993e2340d707fef4776c0",
-                "gas_used": 52317
+                "tx_hash": "0xec344628719114949f258e845e2c5d7c028e9f3765e40606b6bee9839faf3ad5",
+                "gas_used": 79629
               },
               {
                 "auditor": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
-                "tx_hash": "0xde0780321857e860349dcf931a854190096ee43f90fcb4938f81a7a56f8c1216",
-                "gas_used": 52329
+                "tx_hash": "0x8eb119cf26a3992358a6eb61ef5deb348e05c2acedbb0b76dd39884c5e4d90a7",
+                "gas_used": 79641
               }
             ],
             "set_threshold": {
               "threshold": 2,
-              "tx_hash": "0x462fcca61847547db43bd0ae1713d0dbb2b6982535554cf7ef766611d65b35ca",
+              "tx_hash": "0xe16afae6954565cfed1542cc502c41922bd56f188cbf5db3b6e0184baadc3ce4",
               "gas_used": 29165
             }
           },
@@ -493,18 +493,18 @@
     "arbitrum-sepolia": {
       "network": "arbitrum-sepolia",
       "chain_id": 421614,
-      "updated_at_utc": "2026-11-14T07:51:25Z",
-      "git_commit": "172b25e78cd1fe0bcb309ec8480d2a78618258c7",
+      "updated_at_utc": "2026-11-21T13:43:29Z",
+      "git_commit": "9f9a032a39f7abfa62ece4437883a5a12efa43d0",
       "contracts": {
         "D1": {
           "contract_name": "RiskAttestationRegistry",
           "source_path": "contracts/RiskAttestationRegistry.vy",
-          "source_sha256": "cae5e0b9a504f958fe2eb953606461eaad11af9d823d96c5967634d7c5e4ed0f",
+          "source_sha256": "da88689e6b7d1e8b3e818f0dfa13b897497d6bfe1f45f86c03d1919d3bdac68b",
           "vyper_version": "0.4.3",
-          "address": "0x14895F5e1f7F1aC5C58b35dA6d57674Aa5951b77",
-          "deploy_tx_hash": "0xcbeee4c9ec7666dbe613fe8aefb63bd9494fa4e807bcb3c4e0ed5c369007cbd6",
-          "deploy_gas_used": 1068183,
-          "block_number": 329081866,
+          "address": "0x8D757ED6419C30117c497a921ee6b685995C96B7",
+          "deploy_tx_hash": "0xd0dc7e7d3f0d093f5dada0d5320262925e45f284f2cf0b6aad686c88b2ea3390",
+          "deploy_gas_used": 1400866,
+          "block_number": 331381334,
           "deployer": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
           "owner": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
           "owner_type": "eoa_demo_limit",
@@ -522,29 +522,29 @@
             "add_auditors": [
               {
                 "auditor": "0x6198B988c458DbA3a164929970e2e72AD69dFe02",
-                "tx_hash": "0x1b6fb481f46bfd7bb68f5aaeb487b29a5e2301a8e94289d29d7087b70454ccc3",
-                "gas_used": 69429
+                "tx_hash": "0xb2b08406f23712004e5e61663f858d5b7a1b071c38577343c2a5b934b7b5c8c5",
+                "gas_used": 113841
               },
               {
                 "auditor": "0x7E63bA07459d070587a525E68265B9aD4b6dbDD0",
-                "tx_hash": "0xd54a2b4c528e985b3e9530e0a01847631b11e06b287f3603e1f7da96d5ab465d",
-                "gas_used": 52329
+                "tx_hash": "0xb9b85aa703ad148515e05eb95eb1b77e00f41608a29fa92bfabdbb1c9bc40f66",
+                "gas_used": 79641
               },
               {
                 "auditor": "0xEDdE2D7b35C4DC6Ea7862604850530f301Dd5570",
-                "tx_hash": "0x1e81885ac8c96d1108d5aae200d6392b29aff50269ea38c418fda96cb735fd30",
-                "gas_used": 52329
+                "tx_hash": "0xbac9f036dc8b9b9ce8128a8d1b8ea9f2c47b60122173d427541e568fb87920e5",
+                "gas_used": 79641
               }
             ],
             "set_threshold": {
               "threshold": 2,
-              "tx_hash": "0xcbbe2385cf3fa86fe557ae91ad834f4deeb7e81f6d6271bb4b899e558fb5671a",
+              "tx_hash": "0xd0d8ec0c6c5a14814255ca83de4f9c2aaeaa75a9cbf8ed44059e3d8dc858ac89",
               "gas_used": 29165
             }
           },
           "verified_explorer": true,
           "verification_receipt": {
-            "guid": "dnjmrkhgecz39a2y5vyatktpz28qyyakbvu1ulxt6tkeeuxkqp",
+            "guid": "cagxustsl4kulv1zdmaft3mrupfcyhda6fkm9efivfkuep6hfk",
             "status_response": {
               "status": "1",
               "message": "OK",
@@ -555,12 +555,12 @@
         "D3": {
           "contract_name": "D3_MerkleBatch",
           "source_path": "contracts/variants/D3_MerkleBatch.vy",
-          "source_sha256": "8430e3fe5b17177bcc97bd316de22d63fecc1aa669c93f917e5352169cc11dc4",
+          "source_sha256": "d6362adb9e0d40534e99835ab19d2821f6d80d4ff2e73285b874cd9036562da5",
           "vyper_version": "0.4.3",
-          "address": "0x693632c45108A9ca25a7F9d693c00554EeDD1EB1",
-          "deploy_tx_hash": "0x5c76e2b67397be6bbed3c6a39b26cad0cae7648b981436e90f9543bd66cf927f",
-          "deploy_gas_used": 1139153,
-          "block_number": 329081934,
+          "address": "0x93C99e7F0fe273fa9d9e45f43D4d24Fc8C6c70Ee",
+          "deploy_tx_hash": "0xe74cb43fb5c8744a52dd219b61bb8a14494c1e18d12ce91c2934e73593168729",
+          "deploy_gas_used": 1480957,
+          "block_number": 331381401,
           "deployer": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
           "owner": "0x950e0416b13153d542d07Bf7f9AB586B0e903465",
           "owner_type": "eoa_demo_limit",
@@ -578,29 +578,29 @@
             "add_auditors": [
               {
                 "auditor": "0x6198B988c458DbA3a164929970e2e72AD69dFe02",
-                "tx_hash": "0x81d7e4a6de28abf4ef6e3d3e90999dd7de95b500e05bfc7d2a925d4690bd1906",
-                "gas_used": 69429
+                "tx_hash": "0xe6956104f507632d1b02a7c91e50d92dc94d884078e39b68adb4c1d289785538",
+                "gas_used": 113841
               },
               {
                 "auditor": "0x7E63bA07459d070587a525E68265B9aD4b6dbDD0",
-                "tx_hash": "0x76c1b9aa1b551c8cc7a14b4ebb9adb9f215115ac6d7bd6bbd7184ed259656dbd",
-                "gas_used": 52329
+                "tx_hash": "0x9009e4b3afb37c08c7c307bcc277246c72111cddc93190587c00cf16787064fd",
+                "gas_used": 79641
               },
               {
                 "auditor": "0xEDdE2D7b35C4DC6Ea7862604850530f301Dd5570",
-                "tx_hash": "0x45d921018e2e4d4509bd69a351038b15e256b695df2736237f092edbd6db2fcd",
-                "gas_used": 52329
+                "tx_hash": "0x5512c760a2188163b5f43c076d20cba44e7e966ddf0a0da2b56876c03bd1b695",
+                "gas_used": 79641
               }
             ],
             "set_threshold": {
               "threshold": 2,
-              "tx_hash": "0xcd8507291a8ceb1cad1eb5f3c420d5e0da5885de4ea1e45b96bc755505059e1e",
+              "tx_hash": "0x3402b0a2012f457d4a747fce2f30ed832872b041d86a1307d9d6aa6dc5cf0857",
               "gas_used": 29165
             }
           },
           "verified_explorer": true,
           "verification_receipt": {
-            "guid": "ix1yduuvnqcrig3fteg15jze4szfavwpsaf3j4hr7yx7hfawcq",
+            "guid": "nt2bxapq4vmfk4rbnvberyxsjchsc5hxynjj8vhaqkakwgvh4u",
             "status_response": {
               "status": "1",
               "message": "OK",

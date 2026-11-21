@@ -13,6 +13,7 @@ import argparse
 import json
 import os
 import subprocess
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -52,6 +53,26 @@ def _tx_hash_hex(raw_hash: Any) -> str:
     return hex_str if hex_str.startswith("0x") else f"0x{hex_str}"
 
 
+def _wait_rpc_synced(
+    w3: Web3,
+    target_block: int,
+    *,
+    contract_address: str | None = None,
+    timeout_s: float = 25.0,
+) -> None:
+    """Wait until a potentially load-balanced RPC node catches up to target_block."""
+    deadline = time.perf_counter() + timeout_s
+    while time.perf_counter() < deadline:
+        try:
+            head = int(w3.eth.block_number)
+            code_ok = True if not contract_address else len(w3.eth.get_code(contract_address)) > 0
+            if head >= target_block and code_ok:
+                return
+        except Exception:
+            pass
+        time.sleep(0.5)
+
+
 def _send_tx(
     w3: Web3,
     tx_fn_or_dict: Any,
@@ -59,6 +80,7 @@ def _send_tx(
     sender_address: str,
     private_key: str | None = None,
     nonce: int | None = None,
+    priority_gwei: float | None = None,
 ) -> Any:
     if private_key is None:
         if hasattr(tx_fn_or_dict, "transact"):
@@ -79,7 +101,32 @@ def _send_tx(
         "nonce": resolved_nonce,
         "chainId": w3.eth.chain_id,
     }
+    if priority_gwei is not None:
+        latest = w3.eth.get_block("latest")
+        base_fee = int(latest.get("baseFeePerGas", 0))
+        prio_wei = int(w3.to_wei(priority_gwei, "gwei"))
+        tx_params["maxPriorityFeePerGas"] = prio_wei
+        tx_params["maxFeePerGas"] = max(base_fee * 2 + prio_wei, prio_wei * 2)
+
     if hasattr(tx_fn_or_dict, "build_transaction"):
+        if priority_gwei is not None:
+            contract_addr = getattr(tx_fn_or_dict, "address", None)
+            est = 0
+            last_err: Exception | None = None
+            for _ in range(12):
+                try:
+                    est = int(tx_fn_or_dict.estimate_gas({"from": sender_address}))
+                    if contract_addr and est < 22_000:
+                        time.sleep(0.75)
+                        continue
+                    last_err = None
+                    break
+                except Exception as exc:
+                    last_err = exc
+                    time.sleep(0.75)
+            if last_err is not None or (contract_addr and est < 22_000):
+                raise RuntimeError(f"estimate_gas failed after retries (est={est}): {last_err}")
+            tx_params["gas"] = max(int(est * 1.15), est + 25_000)
         tx = tx_fn_or_dict.build_transaction(tx_params)
     else:
         tx = dict(tx_fn_or_dict)
@@ -91,7 +138,10 @@ def _send_tx(
 
     signed = Account.sign_transaction(tx, private_key)
     tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)
-    return w3.eth.wait_for_transaction_receipt(tx_hash)
+    rc = w3.eth.wait_for_transaction_receipt(tx_hash)
+    if int(rc.status) != 1:
+        raise RuntimeError(f"Deployment/setup tx failed (status={rc.status}): {_tx_hash_hex(tx_hash)}")
+    return rc
 
 
 def _read_auditors(*prefixes: str) -> list[str]:
@@ -231,6 +281,8 @@ def deploy_network(
         next_nonce += 1
         return current
 
+    prio_gwei = 0.05 if network == "sepolia" else None
+
     deployed: dict[str, Any] = {}
     for variant in variants:
         compiled = compile_contract(variant, use_cache=True)
@@ -241,10 +293,14 @@ def deploy_network(
             sender_address=deployer,
             private_key=pk,
             nonce=_consume_nonce(),
+            priority_gwei=prio_gwei,
         )
+        if pk is not None and network not in ("local-evm", "anvil"):
+            _wait_rpc_synced(w3, int(deploy_rc.blockNumber), contract_address=deploy_rc.contractAddress)
         contract = w3.eth.contract(address=deploy_rc.contractAddress, abi=compiled.abi)
 
         setup_txs: dict[str, Any] = {"add_auditors": [], "set_threshold": None}
+        last_block = int(deploy_rc.blockNumber)
         # Only configure roster/threshold if deployer is the owner (otherwise Safe executes via multisig UI)
         if owner_addr.lower() == deployer.lower() and auditors:
             for aud in auditors:
@@ -254,23 +310,31 @@ def deploy_network(
                     sender_address=deployer,
                     private_key=pk,
                     nonce=_consume_nonce(),
+                    priority_gwei=prio_gwei,
                 )
+                last_block = max(last_block, int(rc_aud.blockNumber))
                 setup_txs["add_auditors"].append(
                     {"auditor": aud, "tx_hash": _tx_hash_hex(rc_aud.transactionHash), "gas_used": int(rc_aud.gasUsed)}
                 )
             if len(auditors) >= threshold:
+                if pk is not None and network not in ("local-evm", "anvil"):
+                    _wait_rpc_synced(w3, last_block, contract_address=deploy_rc.contractAddress)
                 rc_k = _send_tx(
                     w3,
                     contract.functions.set_threshold(threshold),
                     sender_address=deployer,
                     private_key=pk,
                     nonce=_consume_nonce(),
+                    priority_gwei=prio_gwei,
                 )
+                last_block = max(last_block, int(rc_k.blockNumber))
                 setup_txs["set_threshold"] = {
                     "threshold": threshold,
                     "tx_hash": _tx_hash_hex(rc_k.transactionHash),
                     "gas_used": int(rc_k.gasUsed),
                 }
+        if pk is not None and network not in ("local-evm", "anvil"):
+            _wait_rpc_synced(w3, last_block, contract_address=deploy_rc.contractAddress)
 
         deployed[variant] = {
             "contract_name": compiled.name,

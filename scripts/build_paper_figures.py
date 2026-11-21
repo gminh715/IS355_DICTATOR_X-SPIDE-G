@@ -24,6 +24,7 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes, mark_inset
 from scipy.stats import spearmanr
 from sklearn.metrics import precision_recall_curve
 
+from src.contracts.e5_benchmark import generate_gas_vs_batch_plot
 from src.models.phase4_xai import compute_oof_predictions_for_seed
 
 plt.rcParams.update(
@@ -312,16 +313,23 @@ def build_shap_comparison_pdf(
     return {"e4b_top10_bigrams": bg_rows[:10]}
 
 
+def build_gas_vs_batch_pdf(results_dir: Path, out_pdf: Path) -> None:
+    """Render publication-grade vector PDF (and synced PNG) of E5 gas scaling curve."""
+    gas_df = pd.read_csv(results_dir / "E5_gas.csv")
+    generate_gas_vs_batch_plot(gas_df, out_pdf)
+    generate_gas_vs_batch_plot(gas_df, out_pdf.with_suffix(".png"))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Regenerate vector PDF paper figures from results.")
     parser.add_argument("--repo-root", type=Path, default=REPO_ROOT)
-    parser.add_argument("--only", nargs="*", default=None, help="Subset: pr, ci, shap")
+    parser.add_argument("--only", nargs="*", default=None, help="Subset: pr, ci, shap, gas")
     args = parser.parse_args()
 
     root = args.repo_root.resolve()
     results_dir = root / "results"
     paper_figs = root / "paper" / "figures"
-    selected = set(args.only) if args.only else {"pr", "ci", "shap"}
+    selected = set(args.only) if args.only else {"pr", "ci", "shap", "gas"}
 
     if "pr" in selected:
         build_pr_curves_pdf(root, results_dir, paper_figs / "pr_curves.pdf")
@@ -332,6 +340,9 @@ def main() -> None:
     if "shap" in selected:
         info = build_shap_comparison_pdf(root, results_dir, paper_figs / "shap_gsem_importance.pdf")
         print(f"Saved {paper_figs / 'shap_gsem_importance.pdf'} (top bigram: {info['e4b_top10_bigrams'][0]['feature']})", flush=True)
+    if "gas" in selected:
+        build_gas_vs_batch_pdf(results_dir, paper_figs / "gas_vs_batch.pdf")
+        print(f"Saved {paper_figs / 'gas_vs_batch.pdf'}", flush=True)
 
 
 if __name__ == "__main__":

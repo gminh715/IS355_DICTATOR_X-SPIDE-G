@@ -78,9 +78,11 @@ def test_e5_gas_csv_contains_all_networks_variants_and_honest_verdicts() -> None
     assert bool(arb_d3["meets_target"]) is True
     assert float(arb_d3["actual_fee_usd"]) > 0.0
 
-    # Governance remove_auditor present for D1, D2, D3 on deterministic Anvil suite
+    # Governance remove_auditor and v1.1 revoke_removed_auditor_vote present for D1, D2, D3 on Anvil suite
     anvil_rem = df[(df["network"] == "anvil_pyevm") & (df["operation"] == "remove_auditor")]
     assert set(anvil_rem["variant"].unique()) == {"D1", "D2", "D3"}
+    anvil_rev = df[(df["network"] == "anvil_pyevm") & (df["operation"] == "revoke_removed_auditor_vote")]
+    assert set(anvil_rev["variant"].unique()) == {"D1", "D2", "D3"}
 
     # Fixed mainnet reference price anchor applied across every row
     assert (df["mainnet_ref_gas_price_gwei"] > 0.0).all()
@@ -141,10 +143,23 @@ def test_e5_summary_json_security_evidence_and_outputs() -> None:
     assert t8["verify_tampered_onchain"] is False
     assert t8["exact_evidence_hash"] != t8["tampered_1byte_hash"]
 
+    t13 = summ["live_networks"]["sepolia"]["T13_sepolia_quorum_isolation"]
+    assert t13["snapshotted_required_threshold"] == 2
+    assert t13["snapshotted_created_roster_nonce"] == 3
+    assert t13["sybil_attest_revert"]["status"] == 0
+    assert "Auditor added after case creation" in t13["sybil_attest_revert"]["eth_call_revert"]
+    assert t13["post_revoke_approve_count"] == 0
+    assert t13["post_revoke_decision"] == 0
+    assert t13["post_revoke_revision"] == 2
+
     plot_path = FIGURES_DIR / "gas_vs_batch.png"
     assert plot_path.is_file()
     assert plot_path.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
     assert plot_path.stat().st_size > 20_000
+    paper_pdf = REPO_ROOT / "paper" / "figures" / "gas_vs_batch.pdf"
+    assert paper_pdf.is_file()
+    assert paper_pdf.read_bytes()[:4] == b"%PDF"
+    assert paper_pdf.stat().st_size > 10_000
 
 
 def test_rq3_report_and_no_leaked_secrets() -> None:
@@ -155,15 +170,17 @@ def test_rq3_report_and_no_leaked_secrets() -> None:
     for required_phrase in (
         "FAIL",
         "PASS",
-        "427,461",
-        "3,574.53",
+        "484,818",
+        "4,148.10",
         "EIP-8037",
         "ProvAuditChain",
         "non-head-to-head",
         "reference-only",
-        "0x14895F5e1f7F1aC5C58b35dA6d57674Aa5951b77",
-        "0x0ff94b4e0f5076059937b331ba6fba7ed8301a034fa78c05d6f32abcb945bb19",
-        "0x56764e897eec218d260f2208723495421b1313de1ea858913f8e057c8c3e89bc",
+        "0x9E01ed5Aa19f0758d8dEc7C461dc374AcDA52Fad",
+        "0xe2beb043a6021edde8b9e9b91bc542502722713661901d32a4b96ff3f6cf482c",
+        "0x686750805433fec3bb239b722b384d9be211c08789616ccbe83a70ff9d8d208a",
+        "0x56d73080cfed7bb139bb14cdd7dd6a02d9473ba2b49edc95c1842e200fc0957d",
+        "0xcdf735c325aa0ef7034e6824f48e7e0bc6c347c4a607e0a0a02ebd99c216737e",
     ):
         assert required_phrase in text
 

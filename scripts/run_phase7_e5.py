@@ -205,7 +205,7 @@ def _send_signed_tx(
                 try:
                     est = int(fn_or_tx.estimate_gas({"from": wallet.address}))
                     # Mutating calls to a deployed contract must exceed bare EOA transfer (~21k).
-                    if contract_addr and est < 23_000:
+                    if contract_addr and est < 22_000:
                         time.sleep(poll_s)
                         continue
                     last_err = None
@@ -213,7 +213,7 @@ def _send_signed_tx(
                 except Exception as exc:
                     last_err = exc
                     time.sleep(poll_s)
-            if last_err is not None or (contract_addr and est < 23_000):
+            if last_err is not None or (contract_addr and est < 22_000):
                 raise RuntimeError(f"estimate_gas failed after retries (est={est}): {last_err}")
             tx_params["gas"] = max(int(est * gas_multiplier), est + 25_000)
         tx = fn_or_tx.build_transaction(tx_params)
@@ -330,7 +330,7 @@ def _deploy_benchmark_suite(
     meta: dict[str, Any] = {}
     gas_rows: list[dict[str, Any]] = []
     chain_id = EXPECTED_CHAIN_IDS[network]
-    prio = 0.1 if network == "sepolia" else None
+    prio = 0.05 if network == "sepolia" else None
 
     for variant in variants:
         compiled = compile_contract(variant, use_cache=True)
@@ -441,14 +441,28 @@ def _run_sepolia_t1_t6_on_main_d1(
     d1_abi = compile_contract("D1", use_cache=True).abi
     main_d1 = w3.eth.contract(address=main_d1_addr, abi=d1_abi)
 
-    # ABI immutability check: ensure zero admin edit/delete endpoints exist.
+    # ABI immutability check: ensure zero admin edit/delete endpoints exist beyond v1.1 governance + revocation.
     fn_names = sorted(
         item["name"] for item in d1_abi if item.get("type") == "function"
     )
+    mutating_fns = {
+        item["name"]
+        for item in d1_abi
+        if item.get("type") == "function" and item.get("stateMutability") not in ("view", "pure")
+    }
+    expected_mutating = {
+        "add_auditor",
+        "remove_auditor",
+        "set_threshold",
+        "register_case",
+        "attest",
+        "revoke_removed_auditor_vote",
+    }
+    assert mutating_fns == expected_mutating, f"Unexpected mutating ABI functions: {sorted(mutating_fns)}"
     forbidden = [
         nm
         for nm in fn_names
-        if any(tok in nm.lower() for tok in ("edit", "update", "delete", "remove_case", "revoke", "overwrite"))
+        if any(tok in nm.lower() for tok in ("edit", "update", "delete", "remove_case", "overwrite"))
     ]
     assert not forbidden, f"Unexpected mutable/delete functions in ABI: {forbidden}"
 
@@ -581,6 +595,118 @@ def _run_sepolia_t1_t6_on_main_d1(
     }
 
 
+def _run_sepolia_t13_on_benchmark_d1(
+    w3: Web3,
+    deployer: EphemeralWallet,
+    auditors: list[EphemeralWallet],
+    sybil_auditor: EphemeralWallet,
+    d1_inst: Any,
+) -> dict[str, Any]:
+    """Execute live Sepolia T13 proof (threshold snapshot, Sybil isolation, removed-auditor vote revocation)."""
+    prio = 0.15
+    cid = keccak(b"phase4-v11-sepolia-t13-case")
+    eh = keccak(b"phase4-v11-sepolia-t13-ev")
+    mh = keccak(b"phase4-v11-sepolia-t13-model")
+    rh = keccak(b"phase4-v11-sepolia-t13-reason")
+    subj = Web3.to_checksum_address("0x2c2e3baa2191cf325a28a01ff42340f2ae677572")
+
+    rc_reg = _send_signed_tx(
+        w3,
+        "sepolia",
+        auditors[0],
+        d1_inst.functions.register_case(cid, subj, 1, eh, mh, "ipfs://v11-t13-live"),
+        priority_gwei=prio,
+    )
+    rc_att = _send_signed_tx(
+        w3,
+        "sepolia",
+        auditors[2],
+        d1_inst.functions.attest(cid, 1, rh),
+        priority_gwei=prio,
+    )
+    rc_k1 = _send_signed_tx(
+        w3,
+        "sepolia",
+        deployer,
+        d1_inst.functions.set_threshold(1),
+        priority_gwei=prio,
+    )
+    rc_add_sybil = _send_signed_tx(
+        w3,
+        "sepolia",
+        deployer,
+        d1_inst.functions.add_auditor(sybil_auditor.address),
+        priority_gwei=prio,
+    )
+    _ensure_rpc_synced(w3, "sepolia", contract_address=d1_inst.address)
+    case_mid = d1_inst.functions.get_case(cid).call()
+    assert int(case_mid[9]) == 0, f"Expected Open status=0, got {case_mid[9]}"
+    assert int(case_mid[10]) == 2, f"Expected snapshotted required_threshold=2, got {case_mid[10]}"
+    assert int(case_mid[11]) == 3, f"Expected created_roster_nonce=3, got {case_mid[11]}"
+
+    rc_sybil_rev = _send_signed_tx(
+        w3,
+        "sepolia",
+        sybil_auditor,
+        d1_inst.functions.attest(cid, 1, rh),
+        expect_revert=True,
+        explicit_gas=150_000,
+        priority_gwei=prio,
+    )
+    rc_rm = _send_signed_tx(
+        w3,
+        "sepolia",
+        deployer,
+        d1_inst.functions.remove_auditor(auditors[2].address),
+        priority_gwei=prio,
+    )
+    rc_revoke = _send_signed_tx(
+        w3,
+        "sepolia",
+        deployer,
+        d1_inst.functions.revoke_removed_auditor_vote(cid, auditors[2].address),
+        priority_gwei=prio,
+    )
+    _ensure_rpc_synced(w3, "sepolia", contract_address=d1_inst.address)
+    case_after = None
+    att_after = None
+    for _ in range(10):
+        case_after = d1_inst.functions.get_case(cid).call()
+        att_after = d1_inst.functions.get_attestation(cid, auditors[2].address).call()
+        if int(case_after[6]) == 0 and int(att_after[0]) == 0 and int(att_after[1]) == 2:
+            break
+        time.sleep(0.75)
+    assert case_after is not None and att_after is not None
+    assert int(case_after[6]) == 0 and int(case_after[9]) == 0
+    assert int(att_after[0]) == 0 and int(att_after[1]) == 2
+
+    return {
+        "contract_address": d1_inst.address,
+        "case_id": "0x" + cid.hex(),
+        "register_tx_hash": rc_reg["tx_hash"],
+        "initial_attest_tx_hash": rc_att["tx_hash"],
+        "set_threshold_1_tx_hash": rc_k1["tx_hash"],
+        "add_sybil_auditor_tx_hash": rc_add_sybil["tx_hash"],
+        "sybil_auditor": sybil_auditor.address,
+        "snapshotted_required_threshold": int(case_mid[10]),
+        "snapshotted_created_roster_nonce": int(case_mid[11]),
+        "sybil_attest_revert": {
+            "tx_hash": rc_sybil_rev["tx_hash"],
+            "block_number": rc_sybil_rev["block_mined"],
+            "status": rc_sybil_rev["status"],
+            "gas_used": rc_sybil_rev["gas_used"],
+            "eth_call_revert": rc_sybil_rev["revert_reason"],
+        },
+        "remove_auditor_tx_hash": rc_rm["tx_hash"],
+        "revoke_removed_vote_tx_hash": rc_revoke["tx_hash"],
+        "revoke_removed_vote_gas_used": rc_revoke["gas_used"],
+        "post_revoke_approve_count": int(case_after[6]),
+        "post_revoke_status": int(case_after[9]),
+        "post_revoke_decision": int(att_after[0]),
+        "post_revoke_revision": int(att_after[1]),
+    }
+
+
 def _spot_check_and_latency_network(
     w3: Web3,
     network: str,
@@ -601,7 +727,7 @@ def _spot_check_and_latency_network(
     mh = keccak(b"e5-live-model-v1")
     rh = keccak(b"e5-live-reason")
     subj = Web3.to_checksum_address("0x2c2e3baa2191cf325a28a01ff42340f2ae677572")
-    spot_prio = 0.2 if network == "sepolia" else None
+    spot_prio = 0.15 if network == "sepolia" else None
 
     # Load real Phase 6 canonical JSON evidence for T8 if available
     ev_files = sorted(p for p in EVIDENCE_DIR.glob("0x*.json"))
@@ -852,7 +978,7 @@ def _spot_check_and_latency_network(
             priority_gwei=spot_prio,
         )
 
-    lat_prio = 0.5 if network == "sepolia" else None
+    lat_prio = 0.25 if network == "sepolia" else None
     schedule: list[tuple[int, str, bytes, EphemeralWallet]] = []
     # Round 1 (15 cold attestations): 5 cases x 3 auditors
     # Round 2 (15 warm replacement attestations): 5 cases x 3 auditors
@@ -935,21 +1061,23 @@ def run_phase7(
         main_sep_d1 = deployments["networks"]["sepolia"]["contracts"]["D1"]["address"]
 
         # --- Sepolia ---
-        print("3/4 Running Sepolia T1/T6 on main D1 + benchmark suite + 30 attest txs...", flush=True)
+        print("3/4 Running Sepolia T1/T6 on main D1 + benchmark suite + 30 attest txs + T13...", flush=True)
         w3_sep, sep_deployer = _connect_live("sepolia")
         sep_non_aud = _create_ephemeral_wallet("sep_non_auditor")
+        sep_sybil = _create_ephemeral_wallet("sep_sybil_auditor")
         sep_auds = [_create_ephemeral_wallet(f"sep_bench_aud_{i}") for i in (1, 2, 3)]
         try:
-            _fund_wallet(w3_sep, "sepolia", sep_deployer, sep_non_aud, 0.0005)
+            _fund_wallet(w3_sep, "sepolia", sep_deployer, sep_non_aud, 0.0003)
             t1_t6_evidence = _run_sepolia_t1_t6_on_main_d1(
                 w3_sep, sep_deployer, sep_non_aud, main_sep_d1
             )
             sep_insts, sep_bench_meta, sep_setup_rows = _deploy_benchmark_suite(
                 w3_sep, "sepolia", sep_deployer, sep_auds, ("D1", "D2", "D3")
             )
-            _fund_wallet(w3_sep, "sepolia", sep_deployer, sep_auds[0], 0.008)
-            _fund_wallet(w3_sep, "sepolia", sep_deployer, sep_auds[1], 0.004)
-            _fund_wallet(w3_sep, "sepolia", sep_deployer, sep_auds[2], 0.004)
+            _fund_wallet(w3_sep, "sepolia", sep_deployer, sep_auds[0], 0.0045)
+            _fund_wallet(w3_sep, "sepolia", sep_deployer, sep_auds[1], 0.0025)
+            _fund_wallet(w3_sep, "sepolia", sep_deployer, sep_auds[2], 0.0025)
+            _fund_wallet(w3_sep, "sepolia", sep_deployer, sep_sybil, 0.0003)
             sep_gas_rows, sep_lat_rows, sep_extra = _spot_check_and_latency_network(
                 w3_sep,
                 "sepolia",
@@ -959,16 +1087,20 @@ def run_phase7(
                 latency_txs=latency_txs,
                 run_t8=True,
             )
+            t13_evidence = _run_sepolia_t13_on_benchmark_d1(
+                w3_sep, sep_deployer, sep_auds, sep_sybil, sep_insts["D1"]
+            )
             all_gas_rows.extend(sep_setup_rows)
             all_gas_rows.extend(sep_gas_rows)
             all_latency_rows.extend(sep_lat_rows)
             live_meta["sepolia"] = {
                 "security_on_main_d1": t1_t6_evidence,
                 "benchmark_contracts": sep_bench_meta,
+                "T13_sepolia_quorum_isolation": t13_evidence,
                 **sep_extra,
             }
         finally:
-            for w in [sep_non_aud, *sep_auds]:
+            for w in [sep_non_aud, sep_sybil, *sep_auds]:
                 _sweep_wallet(w3_sep, "sepolia", w, sep_deployer.address)
 
         # --- Arbitrum Sepolia ---
@@ -1011,6 +1143,9 @@ def run_phase7(
     lat_df.to_csv(lat_csv_path, index=False)
 
     plot_path = generate_gas_vs_batch_plot(gas_df, FIGURES_DIR / "gas_vs_batch.png")
+    paper_figs_dir = REPO_ROOT / "paper" / "figures"
+    generate_gas_vs_batch_plot(gas_df, paper_figs_dir / "gas_vs_batch.pdf")
+    generate_gas_vs_batch_plot(gas_df, paper_figs_dir / "gas_vs_batch.png")
     lat_summary = compute_latency_summary(lat_df)
 
     summary = {
@@ -1024,6 +1159,7 @@ def run_phase7(
             "E5_gas_csv": str(gas_csv_path.relative_to(REPO_ROOT).as_posix()),
             "E5_latency_csv": str(lat_csv_path.relative_to(REPO_ROOT).as_posix()),
             "gas_vs_batch_png": str(plot_path.relative_to(REPO_ROOT).as_posix()),
+            "gas_vs_batch_pdf": "paper/figures/gas_vs_batch.pdf",
         },
     }
     summary_path = RESULTS_DIR / "E5_summary.json"

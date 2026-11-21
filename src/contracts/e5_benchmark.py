@@ -553,6 +553,36 @@ def run_anvil_gas_suite() -> list[dict[str, Any]]:
             ]
         )
 
+    # Prepare one open case (D1/D2) and one open batch (D3) with an Approve vote from a3
+    # so we can measure permissionless v1.1 `revoke_removed_auditor_vote` after removing a3.
+    revoke_units: dict[str, bytes] = {}
+    for variant in ("D1", "D2"):
+        inst = contracts[variant]
+        cid_rev = keccak(encode(["string", "string"], [f"e5-{variant}", "revoke-open"]))
+        eh_rev = keccak(encode(["string", "string"], [f"ev-{variant}", "revoke-open"]))
+        w3.eth.wait_for_transaction_receipt(
+            inst.functions.register_case(cid_rev, subject, 1, eh_rev, mh, sample_uri).transact({"from": a1})
+        )
+        w3.eth.wait_for_transaction_receipt(
+            inst.functions.attest(cid_rev, 1, rh).transact({"from": a3})
+        )
+        revoke_units[variant] = cid_rev
+
+    rev_leaf = compute_leaf(
+        keccak(b"e5-d3-revoke-case"),
+        keccak(b"e5-d3-revoke-ev"),
+        mh,
+    )
+    rev_root = MerkleTree([rev_leaf]).root
+    w3.eth.wait_for_transaction_receipt(
+        d3.functions.register_batch(rev_root, 1, sample_uri).transact({"from": a1})
+    )
+    w3.eth.wait_for_transaction_receipt(
+        d3.functions.attest_batch(rev_root, 1).transact({"from": a3})
+    )
+    revoke_units["D3"] = rev_root
+
+    outsider = w3.eth.accounts[4]
     for variant in ("D1", "D2", "D3"):
         rc_rem = w3.eth.wait_for_transaction_receipt(
             contracts[variant].functions.remove_auditor(a3).transact({"from": owner})
@@ -569,6 +599,25 @@ def run_anvil_gas_suite() -> list[dict[str, Any]]:
                 gas_per_case=rc_rem.gasUsed,
                 tx_hash=_tx_hex(rc_rem.transactionHash),
                 notes="Owner removes auditor a3 (auditor_count 3 -> 2)",
+            )
+        )
+        rc_rev = w3.eth.wait_for_transaction_receipt(
+            contracts[variant]
+            .functions.revoke_removed_auditor_vote(revoke_units[variant], a3)
+            .transact({"from": outsider})
+        )
+        rows.append(
+            _make_gas_row(
+                network=net,
+                chain_id=chain_id,
+                variant=variant,
+                operation="revoke_removed_auditor_vote",
+                storage_mode="warm_update",
+                batch_size=1,
+                gas_used=rc_rev.gasUsed,
+                gas_per_case=rc_rev.gasUsed,
+                tx_hash=_tx_hex(rc_rev.transactionHash),
+                notes="Permissionless revocation of removed auditor a3 vote on open unit (v1.1)",
             )
         )
 
@@ -753,6 +802,10 @@ def generate_gas_vs_batch_plot(
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.tight_layout()
-    fig.savefig(output_path, dpi=220)
+    if output_path.suffix.lower() == ".pdf":
+        with plt.rc_context({"pdf.fonttype": 42, "ps.fonttype": 42}):
+            fig.savefig(output_path, bbox_inches="tight")
+    else:
+        fig.savefig(output_path, dpi=220)
     plt.close(fig)
     return output_path
