@@ -197,7 +197,7 @@ The reference numbering below (`[1]`–`[14]`) is shared across the Proposal, We
 - `[5]` W. Chen et al., "Detecting Ponzi Schemes on Ethereum: Towards Healthier Blockchain Technology," in *Proc. WWW*, 2018, pp. 1409–1418, doi: `10.1145/3178876.3186046`.
 - `[6]` M. Bartoletti, S. M. Carta, T. Cimoli, and R. Saia, "Dissecting Ponzi schemes on Ethereum: Identification, analysis, and impact," *Future Gener. Comput. Syst.*, vol. 102, pp. 259–277, 2020, doi: `10.1016/j.future.2019.08.014`.
 - `[7]` S. Fan, S. Fu, H. Xu, and C. Zhu, "Expose Your Mask: Smart Ponzi Schemes Detection on Blockchain," in *Proc. IJCNN*, 2020, pp. 1–7, doi: `10.1109/IJCNN48605.2020.9207143`.
-- `[8]` W. Chen, X. Li, Y. Sui, N. He, H. Wang, L. Wu, and X. Luo, "SADPonzi: Detecting and Characterizing Ponzi Schemes in Ethereum Smart Contracts," *Proc. ACM Meas. Anal. Comput. Syst.*, vol. 5, no. 2, Art. 14, Jun. 2021, doi: `10.1145/3410220.3460105`.
+- `[8]` W. Chen, X. Li, Y. Sui, N. He, H. Wang, L. Wu, and X. Luo, "SADPonzi: Detecting and Characterizing Ponzi Schemes in Ethereum Smart Contracts," *Proc. ACM Meas. Anal. Comput. Syst.*, vol. 5, no. 2, Art. 26, pp. 26:1–26:30, Jun. 2021, doi: `10.1145/3460093`.
 - `[9]` L. Pennella, "X-SPIDE: Official Source Code and Dataset," GitHub, 2025. https://github.com/LucaPennella/x-spide-smart-ponzi-detection
 - `[10]` R. Liang et al., "PonziGuard Dataset and Tools," GitHub. https://github.com/PonziDetection/PonziGuard/tree/main/dataset
 - `[11]` Blockchain@Unica, "Ethereum Ponzi Address List," GitHub. https://github.com/blockchain-unica/ethereum-ponzi/blob/master/ponzi-addresses.csv

@@ -532,7 +532,7 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
             ("Selection Shift (Kept n=7,446 vs Dropped n=516)", "Contracts dropped from bytecode_opcode_8k.csv differ sharply on transaction behavior (KS-test):"),
             ("tx_out Median", "0.0 (kept) vs 1.0 (excluded) — KS = 0.2467, p = 2.50e-26."),
             ("lifetime Median", "15.0 days (kept) vs 2.0 days (excluded) — KS = 0.1384, p = 1.58e-08."),
-            ("total_tx Median", "5.0 vs 3.0 — KS = 0.2072, p = 1.71e-18; tx_in KS = 0.1656, p = 2.41e-12."),
+            ("tx_in & paid_rate", "tx_in median 11.0 vs 6.0 (KS = 0.1983, p = 4.28e-17); paid_rate KS = 0.1412, p = 7.43e-09."),
             ("Missing block_number (S3 Infeasible)", "100% <NA> across X-SPIDE without BigQuery access -> S3 temporal holdout formally reported unfeasible."),
         ],
         fill=SOFT_RED,
@@ -762,9 +762,9 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         3.60,
         "OOF TREEEXPLAINER METRICS (SEED 42)",
         [
-            ("call_block_ratio", "mean |SHAP| = 0.2796, Spearman r = +0.848."),
+            ("call_block_ratio", "mean |SHAP| = 0.2796, Spearman rho = +0.848."),
             ("n_loops_with_call", "mean |SHAP| = 0.2205 (SHAP +1.106 when >0 vs -0.124)."),
-            ("unresolved_jump_ratio", "mean |SHAP| = 0.1582, Spearman r = -0.844; 526/7,446 (7.06%) > 0.50 (clears Risk R4)."),
+            ("unresolved_jump_ratio", "mean |SHAP| = 0.1582, Spearman rho = -0.844; 526/7,446 (7.06%) > 0.50 (clears Risk R4: <=30%)."),
             ("n_blocks_with_call & loop", "n_blocks_with_call = 0.1493; has_loop_with_call (+0.3906 vs -0.0424); cyclomatic > 0 for 100%."),
         ],
         accent=NAVY,
@@ -848,7 +848,7 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
     _header_footer(s11, "10. Live E2E DApp Walkthrough (Case xspide_00439)", "Real browser verification: SHAP+CFG prediction -> 2-of-3 quorum -> Verified event log -> 1-byte tamper rejection", 11, total)
     shots = [
         ("1) Page 1: SHAP & CFG (score=0.998390)", "02_page1_shap_cfg.png", 0.45, 1.18),
-        ("2) Page 3: 2-of-3 Quorum Approved", "06_page3_quorum_approved.png", 4.65, 1.18),
+        ("2) Page 3: 2-of-3 Quorum Approved (v1.1 T13)", "06_page3_quorum_approved.png", 4.65, 1.18),
         ("3) Client Signer: ethers.js v6 MetaMask", "10_signer_metamask.png", 8.85, 1.18),
         ("4) Page 4: ✅ VERIFIED + Event Audit", "08_page4_verified_events.png", 0.45, 4.18),
         ("5) Page 4: ❌ 1-Byte Tamper Reject", "09_page4_tampered_reject.png", 6.78, 4.18),
@@ -966,7 +966,8 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         3.55,
         ["Deliverable", "Artifact Location", "Verification Status"],
         [
-            ["Final Report (18p)", "4_DICTATOR_IS355_Final_Report.{docx,pdf} + reports/final_report.md", "Compiled & verified"],
+            ["Final Report (19p)", "4_DICTATOR_IS355_Final_Report.{docx,pdf} + reports/final_report.md", "Compiled & verified"],
+            ["IEEE Paper (9p)", "paper/main.pdf + paper/main.tex + paper/references.bib", "9-page IEEEtran verified"],
             ["Presentation (14s)", "4_DICTATOR_IS355_Final_Presentation.{pptx,pdf}", "14 widescreen slides"],
             ["Demo Video & Script", "demo/X-SPIDE-G_demo.mp4 + reports/demo_script.md", "1080p MP4 (3–5 min)"],
             ["Traceability Matrix", "results/traceability_matrix.csv + reports/traceability_matrix.md", "40 mapped IDs"],
@@ -974,7 +975,7 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
             ["Reproducibility Suite", "requirements.txt, pyproject.toml, Makefile, scripts/run_all.py", "E1 & clean-clone tested"],
         ],
         col_widths=[1.95, 3.90, 1.70],
-        font_size=10.0,
+        font_size=9.4,
     )
     _add_card(
         s14,
@@ -1109,14 +1110,14 @@ def build_demo_video(out_mp4: Path) -> Path:
     )
     _video_frame(
         3, "CLI PROOF", "Verified Phase 6.4 CLI E2E + Sepolia Read Check",
-        "Executing scripts/run_phase6_e2e_demo confirms live read connectivity to verified D1 on Ethereum Sepolia alongside a deterministic local Anvil E2E run: after Auditor #1 registers Pending(1/2), Auditor #2 completes Approved(2/2), and a 1-byte tamper flips verify_evidence from true to false.",
+        "Executing scripts/run_phase6_e2e_demo confirms live read connectivity to verified D1 on Ethereum Sepolia alongside a deterministic local Anvil v1.1 E2E run: Auditor #1 registers Open(0/2) and attests Open(1/2), Auditor #2 completes Approved(2/2), and a 1-byte tamper flips verify_evidence from true to false.",
         card_title="TERMINAL OUTPUT: python -m scripts.run_phase6_e2e_demo",
         card_lines=[
             "$ .\\.venv\\Scripts\\python.exe -m scripts.run_phase6_e2e_demo",
             "\"sepolia_read_check\": {\"network\": \"sepolia\", \"connected\": true, \"quorum_k\": 2}",
             "\"case_id\": \"0x5b7624e00332bf67a30b0f9957113f45481522a21707a396f0d60ace93bb842a\"",
-            "\"status_after_register\": \"Pending\", \"approve_count_1\": 1",
-            "\"status_after_attest_2\": \"Approved\", \"approve_count_2\": 2",
+            "\"register_gas_used\": 220978, \"status_after_register\": \"Open (0/2)\"",
+            "\"status_after_attest_2\": \"Approved\", \"approve_count\": 2, \"required_threshold\": 2",
             "\"verify_exact\": true, \"verify_tampered_1byte\": false",
         ],
         accent=GREEN,
@@ -1156,36 +1157,36 @@ def build_demo_video(out_mp4: Path) -> Path:
     )
     _video_frame(
         7, "STEP 4", "DApp Page 2: Canonical JSON, keccak256 Hash & IPFS CIDv1",
-        "Moving to Page 2, X-SPIDE-G serializes the prediction, SHAP top drivers, and CFG metrics into canonical UTF-8 JSON with fixed 6-decimal floats. Computing keccak256 yields a deterministic evidence_hash and IPFS CIDv1 raw block while saving evidence/<case_id>.json as a local Git-verifiable mirror.",
+        "Moving to Page 2, X-SPIDE-G serializes the prediction, SHAP top drivers, and CFG metrics into canonical UTF-8 JSON (1,352 bytes, fixed 6-decimal floats). Computing keccak256 yields evidence_hash 0x5aba941d... and IPFS CIDv1 bafkreibz... while saving evidence/<case_id>.json as a Git-verifiable mirror.",
         img_path=shots / "04_page2_evidence_cid.png",
         card_title="CANONICAL EVIDENCE",
         card_lines=[
-            "Schema v1.0.0: Deterministic key ordering & fixed decimal formatting.",
-            "case_id: 0x5b7624e00332bf67...",
-            "Storage: IPFS CIDv1 URI + evidence/0x5b76...842a.json persisted on disk.",
+            "Schema v1.0: Deterministic key ordering & fixed 6-decimal formatting.",
+            "case_id: 0x5b7624e00332bf67... | hash: 0x5aba941d...",
+            "Storage: ipfs://bafkreibz... + evidence/0x5b76...842a.json saved on disk.",
         ],
         accent=BLUE_ACCENT,
     )
     _video_frame(
-        8, "STEP 5", "DApp Page 3: Auditor #1 Registers Case On-Chain (Pending 1/2)",
-        "On Page 3, Auditor #1 signs register_case on the local Anvil chain (tx 0xac93319f..., 129,311 gas), committing case_id, evidence_hash, and the IPFS URI into Vyper storage. Because quorum requires k=2 of 3 independent auditors, the verdict remains Pending.",
+        8, "STEP 5", "DApp Page 3: Auditor #1 Registers Case On-Chain (v1.1 Open 0/2)",
+        "On Page 3, Auditor #1 signs register_case on the local Anvil v1.1 chain (tx 0xff46c33c..., 220,978 gas), committing case_id, evidence_hash, and IPFS URI while snapshotting required_threshold=2 and created_roster_nonce=3. Status opens at 0/2 (Open).",
         img_path=shots / "05_page3_sign_tx.png",
-        card_title="ON-CHAIN REGISTRATION",
+        card_title="ON-CHAIN REGISTRATION (v1.1)",
         card_lines=[
-            "Function: register_case(case_id, addr, evidence_hash, ipfs_uri, verdict)",
-            "Transaction: 0xac93319f... (gasUsed = 129,311)",
-            "Quorum Rule: 1/2 signatures -> Status = Pending (cannot self-approve).",
+            "Function: register_case(case_id, subject, chain_id, hash, model_hash, uri)",
+            "Transaction: 0xff46c33c... (v1.1 Cancun gasUsed = 220,978)",
+            "v1.1 Snapshot: required_threshold = 2, created_roster_nonce = 3 -> Open (0/2).",
         ],
     )
     _video_frame(
-        9, "STEP 6", "DApp Page 3: Auditor #2 Completes k=2 Quorum -> Approved",
-        "Next, independent Auditor #2 submits attest(case_id, verdict=1). The contract increments approve_count to 2 and transitions status cleanly to 1 (Approved). Note that the DApp's built-in test signer keys are strictly gated to Anvil chainId 31337.",
+        9, "STEP 6", "DApp Page 3: Auditors #1 & #2 Complete k=2 Quorum -> Approved",
+        "Next, Auditor #1 submits attest(Approve) (129,243 gas -> Open 1/2), and independent Auditor #2 submits attest(Approve) (tx 0xebdab2b6..., 133,829 gas). Reaching approve_count = 2 >= required_threshold = 2 transitions status to 1 (Approved) in the 12-field v1.1 Case struct.",
         img_path=shots / "06_page3_quorum_approved.png",
-        card_title="QUORUM TRANSITION",
+        card_title="QUORUM TRANSITION (v1.1)",
         card_lines=[
-            "Auditor #2: Independent wallet signs attest(case_id, Approve).",
-            "Result: approve_count = 2 >= quorum_k = 2.",
-            "Final State: status = 1 (Approved) emitted permanently in Attested event.",
+            "Auditor #1 attest: 0xb313058f... (129,243 gas -> Open 1/2).",
+            "Auditor #2 attest: 0xebdab2b6... (133,829 gas -> Approved 2/2).",
+            "v1.1 Struct: status = 1 (Approved), required_threshold = 2, roster_nonce = 3.",
         ],
         accent=GREEN,
     )
@@ -1226,12 +1227,12 @@ def build_demo_video(out_mp4: Path) -> Path:
     )
     _video_frame(
         13, "STEP 10", "DApp Page 4: 1-Byte Tamper Simulation -> ❌ TAMPERED",
-        "Finally, we simulate an adversary modifying a single byte inside the evidence JSON—changing one numeric digit in the off-chain report. Recomputing keccak256 produces 0x342fecac..., and on-chain verify_evidence immediately returns False (red TAMPERED / MISMATCH alert).",
+        "Finally, we simulate an adversary modifying a single byte inside the evidence JSON—changing one digit in the threshold field (0.256746 -> 0.256747). Recomputing keccak256 produces 0x934aaa08..., and on-chain verify_evidence immediately returns False (red TAMPERED / MISMATCH alert).",
         img_path=shots / "09_page4_tampered_reject.png",
         card_title="❌ TAMPER DETECTED",
         card_lines=[
-            "Simulated Attack: 1-byte mutation inside off-chain JSON payload.",
-            "Recomputed Hash: 0x342fecac... != Anchored On-Chain Digest.",
+            "Simulated Attack: 1-byte mutation (0.256746 -> 0.256747) in off-chain JSON.",
+            "Recomputed Hash: 0x934aaa08... != On-Chain Digest 0x5aba941d...",
             "Contract Verdict: verify_evidence(...) -> False (Cryptographic Proof of Tampering).",
         ],
         accent=RED,

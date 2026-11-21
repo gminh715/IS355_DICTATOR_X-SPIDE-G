@@ -18,6 +18,7 @@
 \anonymousfalse
 
 \begin{document}
+\bstctlcite{IEEEexample:BSTcontrol}
 
 \title{X-SPIDE-G: Clone-Leakage-Free Smart Ponzi Detection and Auditable On-Chain Risk Attestation}
 
@@ -32,20 +33,20 @@
 \maketitle
 
 \begin{abstract}
-Immutable blockchains host smart contract Ponzi schemes whose opaque bytecode and widespread code reuse undermine trustworthy auditing. Existing machine learning (ML) detectors suffer inflated accuracy under random data splits and store predictions in mutable off-chain databases. To address both limitations, we propose X-SPIDE-G, combining near-clone-isolated gradient boosting with $k$-of-$n$ Vyper attestation registries. Across 7,446 Ethereum contracts (880 Ponzi), we strip compiler trailers, cluster near-clones via MinHash Locality-Sensitive Hashing (LSH, Jaccard $\ge 0.90$), and benchmark opcode bigrams, graph statistics, and control-flow loop semantics under $5\times 5$ clone-grouped nested cross-validation (CV). Clone clustering places 59.09\% of Ponzi contracts in shared families; holding the $5\times 5$ nested tuning protocol strictly fixed across random, exact-clone, and near-clone splits isolates $-0.0484$ Precision--Recall Area Under the Curve (PR-AUC) of pure clone leakage ($0.9251 \to 0.8767$: $-0.0201$ exact-clone and $-0.0283$ near-clone; $-0.0382$ net vs.\ random 5-fold \texttt{E0}). Normalized opcode bigrams raise PR-AUC by $+0.0227$ to 0.8995 ($p_{\text{Holm,NB}}=0.0093$). On-chain, hardened Merkle batching (\texttt{D3}) with per-batch threshold snapshotting and roster-nonce Sybil isolation cuts finalization gas by 99.14\% to 4,148.10 gas/case ($N=100$), while single-case \texttt{D1.attest} receipts confirm in 1.212~s median on Arbitrum Sepolia. Together, clone isolation and batched Vyper provenance deliver reproducible, low-cost risk auditing.
+Immutable blockchains host smart contract Ponzi schemes whose opaque bytecode and widespread code reuse undermine trustworthy auditing. Existing machine learning (ML) detectors suffer inflated accuracy under random data splits and store predictions in mutable off-chain databases. We present X-SPIDE-G, a framework combining near-clone-isolated gradient boosting with multi-auditor $k$-of-$n$ Vyper attestation registries. Across 7,446 Ethereum contracts (880 Ponzi), our pipeline strips compiler metadata trailers, clusters near-clones via MinHash Locality-Sensitive Hashing (LSH) at Jaccard $\ge 0.90$, and benchmarks opcode bigrams, graph statistics, and control-flow loop semantics under $5\times 5$ clone-grouped nested cross-validation (CV). Near-clone clustering places 59.09\% of Ponzi contracts in shared families and isolates $-0.0484$ Precision--Recall Area Under the Curve (PR-AUC) of pure clone leakage ($0.9251 \to 0.8767$: $-0.0201$ exact-clone and $-0.0283$ near-clone; $-0.0382$ net vs.\ a random 5-fold baseline), while normalized opcode bigrams raise PR-AUC by $+0.0227$ to 0.8995 (Holm-adjusted Nadeau--Bengio $p=0.0093$). On-chain, hardened Merkle-batched attestation with per-batch threshold snapshotting and roster-nonce Sybil isolation cuts finalization gas by 99.14\% to 4,148.10 gas/case ($N=100$), while single-case attestations confirm in 1.212~s median on Arbitrum Sepolia. In conclusion, pairing near-clone quarantine with batched Vyper provenance enables reproducible, low-cost smart contract risk auditing.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Smart contract security, Ponzi scheme detection, clone leakage, bytecode graph analysis, Ethereum, Vyper, on-chain governance.
+Smart contract security, Ponzi scheme detection, clone leakage, bytecode graph analysis, on-chain governance.
 \end{IEEEkeywords}
 
 \section{Introduction}\label{sec:intro}
 
 Autonomous smart contracts running on the Ethereum Virtual Machine (EVM) enforce irreversible financial transfers once deployed on public ledgers. Malicious actors exploit this immutability through smart Ponzi schemes that fund early payouts using subsequent investor deposits~\cite{bartoletti2020dissecting}. Supervised ML classifiers trained on opcode frequencies and account telemetry screen unverified bytecode at scale. Prior work frequently reports Receiver Operating Characteristic Area Under the Curve (ROC-AUC) above 0.97 on random splits~\cite{pennella2025xspide}.
 
-However, two structural vulnerabilities weaken the operational reliability of such detectors. First, Ethereum bytecode exhibits pervasive contract cloning~\cite{he2020clones}, with parameterized templates powering broad deployment families~\cite{kondo2020cloning}. Random train--test splits leak near-identical Ponzi variants across partitions and artificially inflate detection metrics.
+Two structural vulnerabilities weaken the operational reliability of such detectors. First, Ethereum bytecode exhibits pervasive contract cloning~\cite{he2020clones}, with parameterized templates powering broad deployment families~\cite{kondo2020cloning}. Random train--test splits leak near-identical Ponzi variants across partitions and artificially inflate detection metrics.
 
-Second, off-chain detection pipelines typically record risk scores and SHapley Additive exPlanations (SHAP) in mutable databases. Compromised servers or administrators can therefore modify historical verdicts silently. To eliminate both gaps, X-SPIDE-G integrates clone-isolated classification with immutable on-chain governance to answer three research questions:
+Second, off-chain detection pipelines typically record risk scores and SHapley Additive exPlanations (SHAP) in mutable databases. Compromised servers or administrators can therefore modify historical verdicts silently. To close both gaps, X-SPIDE-G integrates clone-isolated classification with immutable on-chain governance to answer three research questions:
 \begin{itemize}
 \item \textbf{RQ1 (Clone Leakage):} To what extent do bytecode cloning and random splitting inflate reported X-SPIDE benchmarks?
 \item \textbf{RQ2 (Structural Representations):} Do opcode bigrams, transition statistics, and control-flow graph (CFG) loop semantics significantly improve detection over X-SPIDE under strict near-clone isolation?
@@ -55,9 +56,9 @@ Second, off-chain detection pipelines typically record risk scores and SHapley A
 This work makes four contributions:
 \begin{enumerate}
 \item \emph{Corpus Audit and Clone Isolation:} We verify mainnet bytecode availability across 7,446 contracts and quantify shift across 516 excluded records. We also strip compiler trailers and cluster near-clones via MinHash LSH\@.
-\item \emph{Controlled Bytecode Ablation:} Under $5\times 5$ near-clone-grouped nested CV, we benchmark normalized opcode bigrams (\texttt{F-BIGRAM}), Markov graph statistics (\texttt{F-GSTAT}), and 15 strongly connected component (SCC) CFG semantics (\texttt{F-GSEM}), reconciling Nadeau--Bengio and Wilcoxon tests.
+\item \emph{Controlled Bytecode Ablation:} Under $5\times 5$ near-clone-grouped nested CV, we benchmark normalized opcode bigrams (\texttt{F-BIGRAM}), opcode transition-graph statistics (\texttt{F-GSTAT}), and 15 strongly connected component (SCC) CFG semantics (\texttt{F-GSEM}), reconciling Nadeau--Bengio (NB) and Wilcoxon tests.
 \item \emph{Interpretable Failure Characterization:} Applying TreeSHAP to both CFG descriptors and opcode bigrams, we isolate compiler-era idioms, benign payout false positives, and indirect-jump blind spots.
-\item \emph{Multi-Auditor Vyper Governance:} We verify three Vyper \texttt{\string^0.4.0} registries (\texttt{D1}, \texttt{D2}, \texttt{D3}) across local EVM simulation, Ethereum Sepolia under Ethereum Improvement Proposal (EIP)-8037 repricing, and Arbitrum Sepolia.
+\item \emph{Multi-Auditor Vyper Governance:} We verify three Vyper 0.4.3 (\texttt{\string^0.4.0}) registries---full-storage (\texttt{D1}), event-only (\texttt{D2}), and Merkle-batched (\texttt{D3})---across local EVM simulation, Ethereum Sepolia under Ethereum Improvement Proposal (EIP)-8037 repricing, and Arbitrum Sepolia Layer-2 (L2).
 \end{enumerate}
 
 \section{Background and Related Work}\label{sec:related}
@@ -70,7 +71,7 @@ Early Ponzi screening relied on manually identified schemes, combining account t
 
 \subsection{Bytecode CFG Recovery and Semantic Analysis}\label{sec:related_cfg}
 
-General-purpose EVM security analyzers demonstrate both the power and cost of recovering control flow without source code. Symbolic execution frameworks like Oyente~\cite{luu2016oyente} and declarative Datalog decompilers like Gigahorse~\cite{grech2019gigahorse} lift stack-based EVM bytecode into structured intermediate representations (IRs). EtherSolve~\cite{contro2021ethersolve} resolves symbolic jump targets to construct high-precision CFGs\@. Within Ponzi detection specifically, SADPonzi~\cite{chen2021sadponzi} performs semantic bytecode flow extraction, whereas PonziGuard~\cite{liang2024ponziguard,liang2025crbg} builds Contract Runtime Behavior Graphs (CRBGs) and detects dynamic reward loops at high accuracy. However, heavy symbolic tainting increases per-contract analysis latency, motivating our evaluation of lightweight static CFG invariants against compact $O(n)$ opcode bigrams.
+General-purpose EVM security analyzers demonstrate both the power and cost of recovering control flow without source code. Symbolic execution frameworks like Oyente~\cite{luu2016oyente} and declarative Datalog decompilers like Gigahorse~\cite{grech2019gigahorse} lift stack-based EVM bytecode into a structured intermediate representation (IR). EtherSolve~\cite{contro2021ethersolve} resolves symbolic jump targets to construct high-precision CFGs\@. Within Ponzi detection specifically, SADPonzi~\cite{chen2021sadponzi} performs semantic bytecode flow extraction, whereas PonziGuard~\cite{liang2024ponziguard,liang2025crbg} builds Contract Runtime Behavior Graphs (CRBGs) and detects dynamic reward loops at high accuracy. Heavy symbolic tainting increases per-contract analysis latency, motivating our evaluation of lightweight static CFG invariants against compact $O(L)$ opcode bigrams.
 
 \subsection{Smart Contract Cloning and Audit Provenance}\label{sec:related_prov}
 
@@ -115,18 +116,18 @@ Large-scale empirical studies establish that nearly 60--80\% of deployed Ethereu
 \node[box, right=of corpus] (lsh) {\textbf{Near-Clone Isolation}\\Exact hash + MinHash LSH\\$k=5$, Jaccard $\ge 0.90$};
 \node[widebox, right=of lsh] (feats) {\textbf{Static Bytecode Engine}\\Linear Sweep $\to$ Bigrams,\\Graph Stats \& 15 CFG};
 \node[widebox, right=of feats] (ml) {\textbf{Clone-Grouped ML}\\5$\times$5 LightGBM + Optuna\\+ TreeSHAP Attribution};
-\node[box, right=of ml] (json) {\textbf{Canonical Payload}\\Deterministic JSON $\mathcal{J}$\\$h_{\text{ev}}, h_{\text{model}}, \text{case\_id}$};
+\node[box, right=of ml] (json) {\textbf{Canonical Payload}\\Deterministic $\mathcal{J}$\\$h_{\text{ev}}, h_{\text{model}}, \text{case\_id}$};
 
 % Row 2: On-chain Vyper Registries & Verification
-\node[store, below=12mm of feats] (d12) {\textbf{\texttt{D1} Full / \texttt{D2} Event-Only}\\Per-case \texttt{Case} \& \texttt{Attestation}\\Role guard + \texttt{T13} snapshot};
-\node[store, right=8mm of d12, text width=31mm] (d3) {\textbf{\texttt{D3\_MerkleBatch} ($k$-of-$n$)}\\Batches $N$ leaves via root $R$\\Sorted-pair \texttt{keccak256} proof};
+\node[store, below=11mm of feats] (d12) {\textbf{\texttt{D1} Full / \texttt{D2} Event-Only}\\Per-case \texttt{Case} \& \texttt{Attestation}\\Role guard + quorum snapshot};
+\node[store, right=8mm of d12, text width=31mm] (d3) {\textbf{\texttt{D3} Merkle-Batched ($k$-of-$n$)}\\Batches $N$ leaves via root $R$\\Sorted-pair \texttt{keccak256} proof};
 \node[box, right=8mm of d3, text width=27mm, fill=green!5, draw=green!50!black] (chains) {\textbf{Live EVM Validation}\\Sepolia (EIP-8037) \&\\Arbitrum Sepolia (L2)};
-\node[box, left=8mm of d12, text width=27mm, fill=orange!6, draw=orange!60!black] (auditors) {\textbf{Four-Role Governance}\\Registrant + $n$ Auditors\\$k$-of-$n$ quorum, EOA owner};
+\node[box, left=8mm of d12, text width=27mm, fill=orange!6, draw=orange!60!black] (auditors) {\textbf{Four-Role Governance}\\Registrant + $n$ Auditors\\$k$-of-$n$ quorum, single owner};
 
-% Background Trust Boundary Frames
+% Background Trust Boundary Frames (labels placed on outer edges to avoid arrow overlap)
 \begin{scope}[on background layer]
 \node[draw=black!45, dashed, rounded corners=4pt, fill=gray!5, fit=(corpus)(lsh)(feats)(ml)(json), inner sep=5pt, label={[font=\scriptsize\bfseries, anchor=south west]north west:{Off-Chain Analysis Domain (Deterministic Pipeline \& Decision Support)}}] (bg_off) {};
-\node[draw=blue!55!black, dashed, rounded corners=4pt, fill=blue!2, fit=(auditors)(d12)(d3)(chains), inner sep=5pt, label={[font=\scriptsize\bfseries, text=blue!55!black, anchor=south west]north west:{On-Chain Trust Domain (Vyper \texttt{\string^0.4.0} Append-Only Governance \& Verification)}}] (bg_on) {};
+\node[draw=blue!55!black, dashed, rounded corners=4pt, fill=blue!2, fit=(auditors)(d12)(d3)(chains), inner sep=5pt, label={[font=\scriptsize\bfseries, text=blue!55!black, anchor=north west]south west:{On-Chain Trust Domain (Vyper 0.4.3 Append-Only Governance \& Verification)}}] (bg_on) {};
 \end{scope}
 
 \draw[arr] (corpus) -- (lsh);
@@ -176,26 +177,26 @@ Replay attack & Weak ID join & ABI \texttt{chain\_id} hash & Unit \\
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:threat_summary} contrasts our $k$-of-$n$ Vyper registry against a conventional database storing signed records. Across automated verification tests \texttt{T1}--\texttt{T13} (46 contract tests), all three Vyper variants achieve 100\% explicit \texttt{assert} branch coverage (\texttt{D1} 20/20, \texttt{D2} 20/20, \texttt{D3} 18/18) and enforce seven core invariants:
+Table~\ref{tab:threat_summary} contrasts our $k$-of-$n$ Vyper registry against a conventional database storing signed records, using Application Binary Interface (ABI) domain binding for cross-chain replay defense. Across automated verification tests \texttt{T1}--\texttt{T13} (46 contract tests), all three Vyper variants achieve 100\% explicit \texttt{assert} branch coverage (\texttt{D1} 20/20, \texttt{D2} 20/20, \texttt{D3} 18/18) and enforce seven security invariants:
 \begin{itemize}
-\item \emph{Unauthorized Access Rejection (\texttt{T1}, \texttt{T6}):} Non-auditors and the owner revert when invoking registration or attestation calls.
-\item \emph{Immutable Evidence Binding (\texttt{T2}, \texttt{T8}):} Duplicate \texttt{case\_id} submissions and zero digests revert, ensuring hash-tampered payloads fail verification.
-\item \emph{Deterministic Quorum Transitions (\texttt{T3}, \texttt{T4}, \texttt{T11}):} Status recomputation evaluates consensus deterministically on every attestation call across all 27 three-auditor decision combinations for $k=2$ of $n=3$.
-\item \emph{Monotonic Vote Versioning (\texttt{T5}, \texttt{T9}):} Vote updates increment a strict per-auditor revision counter and emit prior decision logs.
-\item \emph{Append-Only Persistence (\texttt{T6}, \texttt{T7}):} Contract interfaces expose zero deletion or case-modification functions and reject stray Ether transfers.
-\item \emph{Merkle Integrity (\texttt{T12}):} Batch inclusion proofs validate sorted-pair \texttt{keccak256} paths, rejecting single-bit leaf or proof corruptions.
-\item \emph{Quorum Snapshot, Sybil Isolation, Tie-Safety \& Revocation (\texttt{T13}):} Registration snapshots \texttt{required\_threshold} and \texttt{created\_roster\_nonce}, rejecting auditors added after creation, mapping simultaneous ties ($\text{approve}\ge k \land \text{reject}\ge k$) symmetrically to \texttt{Disputed}, and permitting permissionless cleanup of removed auditors' votes strictly on non-finalized records while finalizing verdicts immutably.
+\item \emph{Access Rejection (\texttt{T1}, \texttt{T6}):} Non-auditors and the owner revert when invoking registration or attestation calls.
+\item \emph{Evidence Binding (\texttt{T2}, \texttt{T8}):} Duplicate \texttt{case\_id} entries and zero digests revert, and hash-tampered payloads fail verification.
+\item \emph{Quorum Determinism (\texttt{T3}, \texttt{T4}, \texttt{T11}):} Status recomputation evaluates consensus across all 27 three-auditor vote combinations for $k=2$ of $n=3$.
+\item \emph{Vote Versioning (\texttt{T5}, \texttt{T9}):} Vote updates increment a strict per-auditor revision counter and emit prior decision logs.
+\item \emph{Append-Only Persistence (\texttt{T6}, \texttt{T7}):} Interfaces expose zero deletion or overwrite methods and reject stray Ether transfers.
+\item \emph{Merkle Integrity (\texttt{T12}):} Inclusion proofs check sorted-pair \texttt{keccak256} paths, rejecting single-bit leaf or proof corruptions.
+\item \emph{Quorum Isolation \& Revocation (\texttt{T13}):} Registration snapshots \texttt{required\_\allowbreak threshold} and \texttt{created\_\allowbreak roster\_\allowbreak nonce}, blocking post-creation auditors, routing ties ($\text{approve}\ge k \land \text{reject}\ge k$) symmetrically to \texttt{Disputed}, and allowing vote cleanup for removed auditors strictly on open records while locking finalized verdicts.
 \end{itemize}
 
-While \texttt{T13} enforces threshold snapshotting, Sybil roster isolation, tie-safe \texttt{Disputed} resolution, and open-case vote cleanup directly in bytecode for all existing records, this prototype retains an externally owned account (EOA) deployer key as owner (\texttt{eoa\_demo\_limit}) for \emph{future} roster and threshold updates; production deployments must migrate ownership to a multisignature timelock. Off-chain model integrity additionally remains a distinct upstream trust assumption authenticated only via its anchored SHA-256 weight digest.
+While \texttt{T13} enforces threshold snapshotting, Sybil roster isolation, tie-safe \texttt{Disputed} resolution, and open-case vote cleanup directly in bytecode for all existing records, this prototype retains a single externally owned account (EOA) deployer key as governance owner for \emph{future} roster and threshold updates; production deployments must migrate ownership to a multisignature timelock. Off-chain model integrity additionally remains a distinct upstream trust assumption authenticated only via its anchored Secure Hash Algorithm 256-bit (SHA-256) weight digest.
 
-\subsection{Corpus Audit, CBOR Stripping, and Clone Clustering}\label{sec:corpus}
+\subsection{Corpus Audit, Metadata Stripping, and Clone Clustering}\label{sec:corpus}
 
 We audit the official X-SPIDE release~\cite{pennella2025repo}, confirming 7,446 labeled contracts ($880$ Ponzi, $6{,}566$ non-Ponzi, zero label conflicts) across 23 account and 76 opcode baseline columns. Live remote procedure call (RPC) checks confirm 100.0\% active bytecode availability across all 880 Ponzi contracts and 880 sampled non-Ponzi contracts.
 
-Comparing the 7,446 retained records against the pre-filtered 7,962-contract archive exposes 516 excluded entries (54 Ponzi, 462 non-Ponzi). Kolmogorov--Smirnov (KS) tests reveal significant selection bias toward shorter-lived excluded contracts with higher outgoing activity (\texttt{tx\_out} KS $=0.2467$, $p=2.50\times 10^{-26}$). Median lifetime drops from 15 to 2 blocks among excluded contracts (KS $=0.1384$, $p=1.58\times 10^{-8}$), where 308 missing-bytecode entries return empty code (\texttt{0x}) live. Throughout this study, $S_{\text{code}}$ denotes the verified 7,446-contract corpus with recovered runtime bytecode.
+Comparing the 7,446 retained records against the pre-filtered 7,962-contract archive exposes 516 excluded entries (54 Ponzi, 462 non-Ponzi). Kolmogorov--Smirnov (KS) tests reveal significant selection bias toward shorter-lived excluded contracts with higher outgoing activity (\texttt{tx\_out} KS $=0.2467$, $p=2.50\times 10^{-26}$). Median lifetime drops from 15 to 2 days among excluded contracts (KS $=0.1384$, $p=1.58\times 10^{-8}$), where 308 missing-bytecode entries return empty code (\texttt{0x}) live. Throughout this study, $S_{\text{code}}$ denotes the verified 7,446-contract corpus with recovered runtime bytecode.
 
-Solidity ($\ge$ v0.4.7) and Vyper compilers append a Concise Binary Object Representation (CBOR) metadata trailer terminating deployed code~\cite{soliditymetadata}. Parsing the trailing 2-byte big-endian footer length and decoding payloads via \texttt{cbor2} against known keys (\texttt{solc}, \texttt{vyper}, \texttt{ipfs}, \texttt{bzzr0}, \texttt{bzzr1}) strips trailers across 6,417 contracts, leaving 1,029 legacy or hand-written bytecodes untouched. Cross-referencing external benchmarks finds 161/182 Unica addresses~\cite{unica2021ponzi} and 122/139 PonziGuard contracts~\cite{liang2024repo} already inside X-SPIDE\@. Removing overlaps yields 107 disjoint external binaries (10 unique Ponzi hashes over 11 rows, 97 non-Ponzi) used as a directional sanity screen (\texttt{E6}).
+Solidity ($\ge$ v0.4.7) and Vyper compilers append a Concise Binary Object Representation (CBOR) metadata trailer terminating deployed code~\cite{soliditymetadata}. Parsing the trailing 2-byte big-endian footer length and decoding payloads via \texttt{cbor2} against known keys (\texttt{solc}, \texttt{vyper}, \texttt{ipfs}, \texttt{bzzr0}, \texttt{bzzr1}) strips trailers across 6,417 contracts, leaving 1,029 legacy or hand-written bytecodes untouched. Cross-referencing external benchmarks finds 161/182 Unica addresses~\cite{unica2021ponzi} and 122/139 PonziGuard contracts~\cite{liang2024repo} already inside X-SPIDE\@. Removing overlaps yields 107 disjoint external binaries (10 unique Ponzi hashes over 11 rows, 97 non-Ponzi) used as an external directional sanity screen (\texttt{E6}).
 
 We construct two deterministic clone partitionings over $S_{\text{code}}$:
 \begin{enumerate}
@@ -208,6 +209,8 @@ We construct two deterministic clone partitionings over $S_{\text{code}}$:
 Building upon the verified corpus $S_{\text{code}}$ and near-clone groupings, this section details our static feature extractors, nested evaluation protocol, and Vyper storage designs.
 
 \subsection{Disassembly and Bytecode Feature Families}\label{sec:features}
+
+Our deterministic linear-sweep disassembler parses EVM bytecode up to Cancun~\cite{wood2014ethereum}, handling EIP-3855 \texttt{PUSH0} (\texttt{0x5F}), logging truncated \texttt{PUSH} immediates on 554 contracts, and marking unassigned bytes as \texttt{INVALID\_XX} on 1,163 contracts with zero failures. Instruction normalization preserves \texttt{PUSH0} and collapses parameterized opcodes (\texttt{PUSH1}--\texttt{PUSH32}, \texttt{DUP1}--\texttt{DUP16}, \texttt{SWAP1}--\texttt{SWAP16}, \texttt{LOG0}--\texttt{LOG4}) into family tokens (\texttt{PUSH}, \texttt{DUP}, \texttt{SWAP}, \texttt{LOG}). Measured on an Intel Core i5-12450H CPU (12 logical threads, 15.63~GB RAM, Python 3.12.13), end-to-end extraction requires 13.885~ms median latency per contract (Table~\ref{tab:extraction_cost}), scaling in $O(L)$ time over $L$ bytecode instructions for disassembly and bigram indexing and $O(|V_C| + |E_C|)$ time for Tarjan SCC traversal. Three static representations are extracted:
 
 \begin{table}[t]
 \centering
@@ -227,8 +230,6 @@ End-to-End Runtime & 231 & 13.885 & 50.839 & 0 \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-Our deterministic linear-sweep disassembler parses EVM bytecode up to Cancun~\cite{wood2014ethereum}, handling EIP-3855 \texttt{PUSH0} (\texttt{0x5F}), logging truncated \texttt{PUSH} immediates on 554 contracts, and marking unassigned bytes as \texttt{INVALID\_XX} on 1,163 contracts with zero failures. Instruction normalization preserves \texttt{PUSH0} and collapses parameterized opcodes (\texttt{PUSH1}--\texttt{PUSH32}, \texttt{DUP1}--\texttt{DUP16}, \texttt{SWAP1}--\texttt{SWAP16}, \texttt{LOG0}--\texttt{LOG4}) into family tokens (\texttt{PUSH}, \texttt{DUP}, \texttt{SWAP}, \texttt{LOG}). End-to-end extraction requires 13.885~ms median latency per contract (Table~\ref{tab:extraction_cost}), extracting three representations:
 
 \begin{table}[t]
 \centering
@@ -272,17 +273,17 @@ where $J_{\text{unres}}$ counts indirect jump sites lacking a preceding immediat
 
 \subsection{Nested Evaluation and Dual Statistical Protocol}\label{sec:stats}
 
-Primary models (\texttt{E1}--\texttt{E4d}) share identical $5 \times 5$ repeated \texttt{StratifiedGroupKFold} splits~\cite{pedregosa2011scikit} grouped on \texttt{group\_near} across seeds $\{42, \dots, 46\}$ (25 folds, $\approx 5{,}957$ train and $\approx 1{,}489$ test contracts). Within each outer fold, inner 3-fold \texttt{StratifiedGroupKFold} runs 30 Optuna Tree-structured Parzen Estimator (TPE) trials~\cite{akiba2019optuna} tuning LightGBM~\cite{ke2017lightgbm} depth, leaves, subsampling, regularization, and imbalance weighting to maximize PR-AUC\@. Decision thresholds $\tau^*$ maximize inner Out-of-Fold (OOF) F1, while \texttt{E2} additionally executes in-fold recursive feature elimination (RFECV).
+Primary clone-grouped models (\texttt{E1}--\texttt{E4d}) share identical $5 \times 5$ repeated \texttt{StratifiedGroupKFold} splits~\cite{pedregosa2011scikit} grouped on \texttt{group\_near} across seeds $\{42, \dots, 46\}$ (25 folds, $\approx 5{,}957$ train and $\approx 1{,}489$ test contracts). Within each outer fold, inner 3-fold \texttt{StratifiedGroupKFold} runs 30 Optuna Tree-structured Parzen Estimator (TPE) trials~\cite{akiba2019optuna} tuning LightGBM~\cite{ke2017lightgbm} depth, leaves, subsampling, regularization, and imbalance weighting to maximize PR-AUC\@. Decision thresholds $\tau^*$ maximize inner Out-of-Fold (OOF) F1, while \texttt{E2} additionally executes in-fold recursive feature elimination (RFECV).
 
-For paired fold metric differences $d_1, \dots, d_{25}$ ($n_{\text{test}}/n_{\text{train}} \approx 0.25$), we apply the Nadeau--Bengio variance-corrected $t$-test ($df=24$) in~\eqref{eq:nadeau_bengio}~\cite{nadeau2003inference}:
+For paired fold metric differences $d_1, \dots, d_{25}$ ($n_{\text{test}}/n_{\text{train}} \approx 0.25$), we apply the Nadeau--Bengio (NB) variance-corrected $t$-test ($df=24$) in~\eqref{eq:nadeau_bengio}~\cite{nadeau2003inference}:
 \begin{equation}\label{eq:nadeau_bengio}
 t_{\text{NB}} = \frac{\bar{d}}{\sqrt{\left(\frac{1}{25} + \frac{0.25}{1}\right) s_d^2}},
 \end{equation}
-where $\bar{d}$ and $s_d^2$ denote sample mean and Bessel-corrected variance across the 25 outer differences. To reconcile parametric confidence intervals (CIs) with our pre-registered test suite, we report both Holm--Bonferroni adjusted parametric values ($p_{\text{Holm,NB}}$) and pre-registered Wilcoxon signed-rank Holm adjustments ($p_{\text{Holm,W}}$) over all eight primary tests~\cite{holm1979simple}. A gain is confirmed only when meeting three criteria: $\Delta\text{PR-AUC} \ge 0.0200$ (minimum detectable effect, MDE), 95\% Nadeau--Bengio CI strictly above zero, and $p_{\text{Holm}} < 0.05$.
+where $\bar{d}$ and $s_d^2$ denote sample mean and Bessel-corrected variance across the 25 outer differences. To reconcile parametric confidence intervals (CIs) with our pre-registered test suite, we report both Holm--Bonferroni adjusted parametric values ($p_{\text{Holm,NB}}$) and pre-registered Wilcoxon signed-rank Holm adjustments ($p_{\text{Holm,W}}$) over all eight primary tests~\cite{holm1979simple}. A gain is confirmed only when meeting three criteria: $\Delta\text{PR-AUC} \ge 0.0200$ (minimum detectable effect, MDE), 95\% NB CI strictly above zero, and $p_{\text{Holm,NB}} < 0.05$.
 
 \subsection{Canonical Evidence Binding and Vyper Variants}\label{sec:variants}
 
-Once off-chain inference produces score $p$, threshold $\tau^*$, and top-$K$ TreeSHAP values~\cite{lundberg2017shap}, X-SPIDE-G serializes a canonical JSON artifact $\mathcal{J}$ (sorted keys, fixed 6-decimal strings) hashed via $h_{\text{ev}} = \texttt{evidence\_hash} = \operatorname{keccak256}(\mathcal{J})$. Weight reproducibility is pinned by $h_{\text{model}} = \texttt{model\_version\_hash}$. Contracts bind cross-chain identifiers deterministically via~\eqref{eq:case_id}:
+Once off-chain inference produces score $p$, threshold $\tau^*$, and top-$K$ TreeSHAP values~\cite{lundberg2017shap}, X-SPIDE-G serializes a canonical JavaScript Object Notation (JSON) artifact $\mathcal{J}$ (sorted keys, fixed 6-decimal strings) hashed via $h_{\text{ev}} = \texttt{evidence\_hash} = \operatorname{keccak256}(\mathcal{J})$. Weight reproducibility is pinned by $h_{\text{model}} = \texttt{model\_version\_hash}$. Contracts bind cross-chain identifiers deterministically via~\eqref{eq:case_id}:
 \begin{equation}\label{eq:case_id}
 \begin{aligned}
 \text{case\_id} = \operatorname{keccak256}\bigl(&\operatorname{abi\_encode}(\text{chain\_id},\\
@@ -291,16 +292,16 @@ Once off-chain inference produces score $p$, threshold $\tau^*$, and top-$K$ Tre
 \end{equation}
 where $\operatorname{abi\_encode}$ packs the EIP-155 network identifier, audited contract \texttt{subject}, weight digest $h_{\text{model}}$, and 32-byte execution nonce $\text{run\_id}$ (while public verification cross-checks $h_{\text{ev}}$, \texttt{subject}, \texttt{chain\_id}, $h_{\text{model}}$, and \texttt{case\_id} against on-chain \texttt{Case} records).
 
-We implement and compare three Vyper \texttt{\string^0.4.0} registry designs:
+We implement and compare three Vyper 0.4.3 (\texttt{\string^0.4.0}) registry designs:
 \begin{itemize}
-\item \emph{\texttt{D1} (\texttt{RiskAttestationRegistry.vy}):} Full-storage registry storing complete \texttt{Case} and per-auditor \texttt{Attestation} structs for direct smart-contract lookup.
-\item \emph{\texttt{D2} (\texttt{D2\_EventOnly.vy}):} Event-only design compressing storage to counts, status, and \texttt{evidence\_hash}, offloading strings and reasons to indexed logs.
-\item \emph{\texttt{D3} (\texttt{D3\_MerkleBatch.vy}):} Merkle-batched registry anchoring $N$ off-chain leaves hashed as $\operatorname{keccak256}($ $\operatorname{abi\_encode}(\text{case\_id}, h_{\text{ev}}, h_{\text{model}}))$ under a single root verified by sorted-pair proofs. Because \texttt{D3} records one quorum status per batch root, heterogeneous verdicts must be partitioned into verdict-homogeneous sub-batches before anchoring.
+\item \emph{\texttt{D1} (Full-Storage Registry):} Persists complete \texttt{Case} and per-auditor \texttt{Attestation} structs in contract storage for direct smart-contract lookup.
+\item \emph{\texttt{D2} (Event-Only Registry):} Compresses storage to vote counts, status, and \texttt{evidence\_hash}, offloading strings and reasons to indexed logs.
+\item \emph{\texttt{D3} (Merkle-Batched Registry):} Anchors $N$ off-chain leaves, each hashing the ABI-encoded tuple $(\text{case\_id}, h_{\text{ev}}, h_{\text{model}})$ via \texttt{keccak256}, under one root in $O(1)$ on-chain write gas, verified via $O(\log_2 N)$ sorted-pair proofs. Because \texttt{D3} records one quorum status per root, heterogeneous verdicts must be partitioned into verdict-homogeneous sub-batches before anchoring.
 \end{itemize}
 
 \section{Experimental Evaluation}\label{sec:eval}
 
-Our empirical study evaluates baseline leakage (\texttt{E0}--\texttt{E1}), controlled feature-family ablations (\texttt{E1}--\texttt{E4d}), preprocessing sensitivities (\texttt{S0}--\texttt{S4}, \texttt{E6}), and multi-chain Vyper attestation benchmarks (\texttt{E5}, \texttt{T1}--\texttt{T13}). All model ablations share identical 25-fold near-clone-grouped splits unless explicitly testing exact or random partitioning.
+Our empirical study evaluates paper-style baseline reproduction and clone leakage (\texttt{E0}--\texttt{E1}), controlled feature-family ablations (\texttt{E1}--\texttt{E4d}), preprocessing sensitivities (\texttt{S0}--\texttt{S4}, \texttt{E6}), and multi-chain Vyper attestation benchmarks (\texttt{E5}, \texttt{T1}--\texttt{T13}). We report PR-AUC, F1, ROC-AUC, and high-precision recall at $\ge 0.90$ precision (R@P0.9). All model ablations shared identical 25-fold near-clone-grouped splits unless explicitly testing exact or random partitioning.
 
 \subsection{RQ1: Baseline Reproduction and Clone-Leakage Quantification}\label{sec:rq1}
 
@@ -325,7 +326,7 @@ Published~\cite{pennella2025xspide} & 85/15 random & 47 & -- & 0.8670 & 0.9770 &
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:rq1_leakage} confirms reproduction fidelity while isolating split leakage from tuning-protocol shifts via a controlled three-step causal decomposition. Re-running the published 47-feature pipeline matches ROC-AUC within $+0.0002$ ($0.9772$ vs.\ $0.9770$), with F1 differing slightly ($0.8340$ vs.\ $0.8670$) due to library version evolution and unarchived thresholding~\cite{pennella2025repo}. Upgrading the 99-feature random setup from paper-style 5-fold grid search (\texttt{E0}: $0.9149$ PR-AUC, fixed $0.5$ cutoff) to $5\times 5$ nested Optuna with inner OOF thresholding (\texttt{E1-S0}: $0.9251$ PR-AUC, $0.8679$ F1) raises PR-AUC by $+0.0102$ ($+0.0090$ F1) purely from tuning protocol. Holding that identical $5\times 5$ nested protocol strictly fixed, exact deduplication (\texttt{E1-S0} $\to$ \texttt{E1-Exact}: $0.9051$) removes $-0.0201$ PR-AUC ($-0.0300$ F1) of pure exact-clone leakage, and MinHash near-clone quarantine (\texttt{E1-Exact} $\to$ \texttt{E1}: $0.8767$) removes another $-0.0283$ PR-AUC ($-0.0261$ F1). Total pure clone leakage therefore reaches $-0.0484$ PR-AUC, $-0.0561$ F1, and $-0.1252$ high-precision recall (\texttt{Recall@P>=0.9}, R@P0.9), showing that the net \texttt{E0} $\to$ \texttt{E1} drop ($-0.0382$ PR-AUC) actually underestimated true clone leakage.
+Table~\ref{tab:rq1_leakage} confirms reproduction fidelity while isolating split leakage from tuning-protocol shifts via a controlled three-step causal decomposition. Re-running the published 47-feature pipeline (\texttt{E0}) matched ROC-AUC within $+0.0002$ ($0.9772$ vs.\ $0.9770$), with F1 differing slightly ($0.8340$ vs.\ $0.8670$) due to library version evolution and unarchived thresholding~\cite{pennella2025repo}. Upgrading the 99-feature random setup from paper-style 5-fold grid search (\texttt{E0}: $0.9149$ PR-AUC, fixed $0.5$ cutoff) to $5\times 5$ nested Optuna with inner OOF thresholding (\texttt{E1-S0}: $0.9251$ PR-AUC, $0.8679$ F1) raised PR-AUC by $+0.0102$ ($+0.0090$ F1) purely from tuning protocol. Holding that identical $5\times 5$ nested protocol strictly fixed, exact deduplication (\texttt{E1-S0} $\to$ \texttt{E1-Exact}: $0.9051$) removed $-0.0201$ PR-AUC ($-0.0300$ F1) of pure exact-clone leakage, and MinHash near-clone quarantine (\texttt{E1-Exact} $\to$ \texttt{E1}: $0.8767$) removed another $-0.0283$ PR-AUC ($-0.0261$ F1). Total pure clone leakage therefore reached $-0.0484$ PR-AUC, $-0.0561$ F1, and $-0.1252$ R@P0.9, demonstrating that the net \texttt{E0} $\to$ \texttt{E1} drop ($-0.0382$ PR-AUC) actually underestimated true clone leakage.
 
 \subsection{RQ2: Bytecode Ablations and Statistical Significance}\label{sec:rq2}
 
@@ -390,9 +391,9 @@ Pairwise Comparison & $\Delta$PR-AUC & 95\% Nadeau--Bengio CI & $p_{\text{NB}}$ 
 
 Tables~\ref{tab:rq2_ablation}--\ref{tab:stat_tests} and Figs.~\ref{fig:pr_curves}--\ref{fig:forest_ci} reveal a sharp architectural contrast among static bytecode representations:
 \begin{enumerate}
-\item \emph{Local Opcode Bigrams Excel:} Adding \texttt{F-BIGRAM} over the 99 X-SPIDE baseline (\texttt{E4b} vs.\ \texttt{E1}) elevates PR-AUC by $+0.0227$ to $0.8995$ (95\% NB CI $[+0.0096, +0.0358]$, $p_{\text{Holm,NB}}=0.0093$, $p_{\text{Holm,W}}=4.77\times 10^{-7}$), clearing the pre-registered MDE\@. Remarkably, code-only \texttt{F-BIGRAM} (\texttt{E3b}) achieves $0.9013$ PR-AUC without any transaction counts.
-\item \emph{Semantic CFG Metrics vs.\ Raw Transition Statistics:} Standalone \texttt{F-GSEM} (\texttt{E3c}, $0.7832$ PR-AUC) beats \texttt{F-GSTAT} (\texttt{E3}, $0.6000$) by $+0.1832$ ($p_{\text{Holm,NB}}=4.04\times 10^{-6}$), confirming that explicit loop--call structures retain far stronger fraud signal than coarse degree averages.
-\item \emph{Marginal Utility Over Bigrams:} Adding \texttt{F-GSEM} over X-SPIDE (\texttt{E4c} vs.\ \texttt{E1}, $+0.0075$) crosses zero under the parametric NB interval ($p_{\text{Holm,NB}}=0.6036$), even though paired Wilcoxon ranks appear small ($p_{\text{Holm,W}}=2.53\times 10^{-3}$). Adding \texttt{F-GSEM} atop \texttt{F-BIGRAM} (\texttt{E4d} vs.\ \texttt{E4b}, $+0.0017$, $p_{\text{Holm,NB}}=1.0$) nudges high-precision recall slightly from $0.7548$ to $0.7677$ without improving overall PR-AUC\@. Conversely, \texttt{E3c} significantly trails \texttt{E3b} ($\Delta=-0.1181$).
+\item \emph{Local Opcode Bigrams Excel:} Adding \texttt{F-BIGRAM} over the 99 X-SPIDE baseline (\texttt{E4b} vs.\ \texttt{E1}) elevated PR-AUC by $+0.0227$ to $0.8995$ (95\% NB CI $[+0.0096, +0.0358]$, $p_{\text{Holm,NB}}=0.0093$, $p_{\text{Holm,W}}=4.77\times 10^{-7}$), clearing the pre-registered MDE\@. Code-only \texttt{F-BIGRAM} (\texttt{E3b}) reached $0.9013$ PR-AUC without any transaction counts.
+\item \emph{Semantic CFG Metrics vs.\ Raw Transition Statistics:} Standalone \texttt{F-GSEM} (\texttt{E3c}, $0.7832$ PR-AUC) outperformed \texttt{F-GSTAT} (\texttt{E3}, $0.6000$) by $+0.1832$ ($p_{\text{Holm,NB}}=4.04\times 10^{-6}$), confirming that explicit loop--call structures retain stronger fraud signal than coarse degree averages.
+\item \emph{Marginal Utility Over Bigrams:} Adding \texttt{F-GSEM} over X-SPIDE (\texttt{E4c} vs.\ \texttt{E1}, $+0.0075$) crossed zero under the parametric NB interval ($p_{\text{Holm,NB}}=0.6036$), even though paired Wilcoxon ranks appeared small ($p_{\text{Holm,W}}=2.53\times 10^{-3}$). Adding \texttt{F-GSEM} atop \texttt{F-BIGRAM} (\texttt{E4d} vs.\ \texttt{E4b}, $+0.0017$, $p_{\text{Holm,NB}}=1.0$) nudged R@P0.9 slightly from $0.7548$ to $0.7677$ without improving overall PR-AUC\@. Conversely, \texttt{E3c} trailed \texttt{E3b} significantly ($\Delta=-0.1181$).
 \end{enumerate}
 
 \begin{table}[t]
@@ -411,7 +412,7 @@ Study & Variant vs.\ Reference & PR-AUC & $\Delta$PR & Outcome \\
 \texttt{S2} & \texttt{E1} CBOR-stripped & 0.8792 & $+0.0024$ & Negligible \\
 \texttt{S2} & \texttt{E4c} \texttt{F-GSEM} raw & 0.8811 & $-0.0032$ & Negligible \\
 \texttt{S2} & \texttt{E4c} all CBOR-stripped & 0.8851 & $+0.0009$ & Negligible \\
-\texttt{S3} & Post-2023 holdout & -- & -- & Deferred (no block ID) \\
+\texttt{S3} & Latest 20\% block holdout & -- & -- & Deferred (no block ID) \\
 \texttt{S4} & \texttt{E4b} raw opcodes & 0.8969 & $-0.0025$ & Negligible \\
 \texttt{S4} & \texttt{E4c} raw PageRank & 0.8843 & $+0.0000$ & Negligible \\
 \midrule
@@ -420,9 +421,9 @@ Study & Variant vs.\ Reference & PR-AUC & $\Delta$PR & Outcome \\
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:sensitivity} isolates preprocessing sensitivities. Stripping CBOR trailers (\texttt{S2}, $|\Delta| \le 0.0032$) and retaining raw unnormalized opcodes (\texttt{S4}, $|\Delta| \le 0.0025$) produce negligible shifts. Conversely, ungrouped random splitting (\texttt{S0}, $+0.0484$) and exact-hash grouping (\texttt{S1}, $+0.026$--$0.028$) confirm substantial clone-leakage inflation.
+Table~\ref{tab:sensitivity} isolates preprocessing sensitivities. Stripping CBOR trailers (\texttt{S2}, $|\Delta| \le 0.0032$) and retaining raw unnormalized opcodes (\texttt{S4}, $|\Delta| \le 0.0025$) produced negligible shifts. Conversely, ungrouped random splitting (\texttt{S0}, $+0.0484$) and exact-hash grouping (\texttt{S1}, $+0.026$--$0.028$) confirmed substantial clone-leakage inflation.
 
-Prospective temporal holdout (\texttt{S3}) remained infeasible because the source comma-separated values (CSV) file omits creation block numbers without archival BigQuery queries. External screening on 107 non-overlapping PonziGuard binaries (\texttt{E6}, 10 unique Ponzi hashes over 11 rows, 97 non-Ponzi, 291 code features) achieves $0.6169$ PR-AUC (95\% bootstrap CI $[0.3497, 0.8784]$), $0.7804$ ROC-AUC, and $0.5882$ F1\@. We interpret \texttt{E6} strictly as an underpowered directional sanity check.
+Prospective temporal holdout (\texttt{S3}) remained infeasible because the source comma-separated values (CSV) file omits creation block numbers without archival BigQuery queries. External screening on 107 non-overlapping PonziGuard binaries (\texttt{E6}, 10 unique Ponzi hashes over 11 rows, 97 non-Ponzi, 291 code features) achieved $0.6169$ PR-AUC (95\% bootstrap CI $[0.3497, 0.8784]$), $0.7804$ ROC-AUC, and $0.5882$ F1\@. We interpret \texttt{E6} strictly as an underpowered directional sanity check.
 
 \subsection{Explainability and Error-Mode Characterization}\label{sec:xai}
 
@@ -433,23 +434,23 @@ Prospective temporal holdout (\texttt{S3}) remained infeasible because the sourc
 \label{fig:shap}
 \end{figure*}
 
-Fig.~\ref{fig:shap}(a) shows that static CFG call density (\texttt{call\_block\_ratio}, mean $|\text{SHAP}|=0.2796$, $\rho=+0.848$) and SCC-enclosed calls (\texttt{n\_loops\_with\_call}, $0.2205$, conditional SHAP $+1.1058$ when positive vs.\ $-0.1239$ at zero) dominate \texttt{F-GSEM} attributions in \texttt{E4c}. High \texttt{unresolved\_jump\_ratio} ($0.1582$) inversely lowers log-odds ($\rho=-0.844$), reflecting complex routers with indirect dispatch.
+Fig.~\ref{fig:shap}(a) shows that static CFG call density (\texttt{call\_\allowbreak block\_\allowbreak ratio}, mean $|\text{SHAP}|=0.2796$, $\rho=+0.848$) and SCC-enclosed calls (\texttt{n\_\allowbreak loops\_\allowbreak with\_\allowbreak call}, $0.2205$, conditional SHAP $+1.1058$ when positive vs.\ $-0.1239$ at zero) dominated \texttt{F-GSEM} attributions in \texttt{E4c}. High \texttt{unresolved\_\allowbreak jump\_\allowbreak ratio} ($0.1582$) inversely lowered log-odds ($\rho=-0.844$), reflecting complex routers with indirect dispatch.
 
-Fig.~\ref{fig:shap}(b) illustrates why 200-feature \texttt{F-BIGRAM} outperforms 15-feature \texttt{F-GSEM} in \texttt{E4b}: whereas \texttt{F-GSEM} compresses the graph into coarse scalar counts, adjacent pairs retain fine-grained compiler failure guards (\texttt{DUP|REVERT} $0.2522$, \texttt{JUMPI|INVALID} $0.2494$, $\rho=+0.527$) and inflow-to-limit idioms (\texttt{CALLVALUE|DUP} $\rho=+0.418$, \texttt{SLOAD|LT} $\rho=+0.498$, \texttt{CALLDATALOAD|DIV} $\rho=+0.412$).
+Fig.~\ref{fig:shap}(b) illustrates why 200-feature \texttt{F-BIGRAM} outperformed 15-feature \texttt{F-GSEM} in \texttt{E4b}: whereas \texttt{F-GSEM} compresses the graph into coarse scalar counts, adjacent pairs retained fine-grained compiler failure guards (\texttt{DUP|REVERT} $0.2522$, \texttt{JUMPI|INVALID} $0.2494$, $\rho=+0.527$) and inflow-to-limit idioms (\texttt{CALLVALUE|DUP} $\rho=+0.418$, \texttt{SLOAD|LT} $\rho=+0.498$, \texttt{CALLDATALOAD|DIV} $\rho=+0.412$).
 
-Auditing seed-42 \texttt{E4c} predictions ($\text{TP}=678$, $\text{FP}=99$, $\text{TN}=6{,}467$, $\text{FN}=202$) exposes four failure mechanisms across 24 extreme-error reviews:
+Auditing seed-42 \texttt{E4c} predictions---678 true positives (TP), 99 false positives (FP), 6,467 true negatives (TN), and 202 false negatives (FN)---exposed four failure mechanisms across 24 extreme-error reviews:
 \begin{enumerate}
-\item \emph{Benign Loops With \texttt{CALL} (3/12 audited FPs; plus 6/12 tx-asymmetry mimics):} Batch payout forwarders such as \texttt{0xdd39\ldots f347} ($p=0.9903$, $M_C=16$, one static \texttt{CALL} loop) confirm that a \texttt{CALL} inside an SCC is a structural heuristic rather than proof of Ponzi redistribution.
+\item \emph{Benign Loops With \texttt{CALL} (3/12 audited FPs; plus 6/12 tx-asymmetry mimics):} Batch payout forwarders such as \texttt{0xdd39\ldots f347} ($p=0.9903$, $M_C=16$, one static \texttt{CALL} loop) confirmed that a \texttt{CALL} inside an SCC is a structural heuristic rather than proof of Ponzi redistribution.
 \item \emph{Loop-Free Pull Ponzis (9/12 audited FNs):} Pull-withdrawal schemes like \texttt{0x4e18\ldots fd06} ($p=5.46\times 10^{-6}$, 0 static cycles) disburse funds per claim without an internal iteration loop.
-\item \emph{CFG-Fragmented Proxies (1/12 audited FPs):} Dispatchers like \texttt{0x70e2\ldots 192a} ($p=0.9921$, $r_{\text{unres}}=0.5714$, 27 blocks, 26 edges, $P=4$, $M_C=7$) receive negative \texttt{unresolved\_jump\_ratio} SHAP ($-0.330$), yet \texttt{SLOAD} ($+2.235$) and \texttt{AND} ($+1.344$) force a false positive (larger routers like \texttt{0xf302\ldots 6538} reach $r_{\text{unres}}=0.9290$ with $544$ blocks, $301$ edges, $P=250$, and $M_C=257$).
-\item \emph{Mixed-Label Clone Clusters:} Near-clone groups mixing benign and Ponzi labels account for 13/99 FPs and 38/202 FNs, reflecting up to 10\% opcode divergence within $J \ge 0.90$ clusters or dormant vs.\ active post-deployment behavior.
+\item \emph{CFG-Fragmented Proxies (1/12 audited FPs):} Dispatchers like \texttt{0x70e2\ldots 192a} ($p=0.9921$, $r_{\text{unres}}=0.5714$, 27 blocks, 26 edges, $P=4$, $M_C=7$) received negative \texttt{unresolved\_\allowbreak jump\_\allowbreak ratio} SHAP ($-0.330$), yet \texttt{SLOAD} ($+2.235$) and \texttt{AND} ($+1.344$) forced a false positive (larger routers like \texttt{0xf302\ldots 6538} reached $r_{\text{unres}}=0.9290$ with $544$ blocks, $301$ edges, $P=250$, and $M_C=257$).
+\item \emph{Mixed-Label Clone Clusters:} Near-clone groups mixing benign and Ponzi labels accounted for 13/99 FPs and 38/202 FNs, reflecting up to 10\% opcode divergence within $J \ge 0.90$ clusters or dormant vs.\ active post-deployment behavior.
 \end{enumerate}
 
 \subsection{RQ3: On-Chain Cost, Latency, and Security Verification}\label{sec:rq3}
 
 \begin{table*}[t]
 \centering
-\caption{RQ3: Per-Case Attestation Gas and United States Dollars (USD) Cost Comparison Across Cancun Simulation, Sepolia (EIP-8037), and Mainnet Anchors}
+\caption{RQ3: Gas and Anchored Cancun Cost in United States Dollars (USD) Across Simulation, Sepolia (EIP-8037), and Mainnet Regimes}
 \label{tab:rq3_gas}
 \scriptsize
 \setlength{\tabcolsep}{3.5pt}
@@ -462,8 +463,8 @@ Variant \& Operation & Cancun Sim. & Sepolia (EIP-8037) & Ref (0.9711 gwei) & St
 \texttt{D1} \texttt{remove\_auditor} (warm) & 32,542 & 36,584 & \$0.0538 & \$1.66 & -- & Governance \\
 \texttt{D1} \texttt{revoke\_removed\_auditor\_vote} & 46,864 & 63,402 & \$0.0775 & \$2.40 & -- & Open-case \texttt{T13} \\
 \texttt{D2} EventOnly finalized ($k=2$) & 352,063 & 1,220,763 & \$0.5826 & \$18.00 & $-27.38\%$ & Fail ($>250\text{k}$) \\
-\texttt{D3} MerkleBatch ($N=100$, /case) & 4,148.10 & 15,474.70 & \$0.006864 & \$0.2121 & $-99.14\%$ & Pass ($\le 10\text{k}$ L2/Cancun) \\
-\texttt{D3} MerkleBatch ($N=1000$, /case) & 414.82 & -- & \$0.000686 & \$0.0212 & $-99.91\%$ & Pass ($\le 10\text{k}$) \\
+\texttt{D3} MerkleBatch ($N=100$, /case) & 4,148.10 & 15,474.70 & \$0.0069 & \$0.21 & $-99.14\%$ & Pass ($\le 10\text{k}$ L2/Cancun) \\
+\texttt{D3} MerkleBatch ($N=1000$, /case) & 414.82 & -- & \$0.0007 & \$0.02 & $-99.91\%$ & Pass ($\le 10\text{k}$) \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -471,27 +472,27 @@ Variant \& Operation & Cancun Sim. & Sepolia (EIP-8037) & Ref (0.9711 gwei) & St
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/gas_vs_batch.pdf}
-\caption{Amortized \texttt{D3} finalization gas per contract across batch sizes $N \in \{1, 10, 100, 1000\}$ against single-case baselines (\texttt{D1}, \texttt{D2}) and Sepolia EIP-8037 repricing.}
+\caption{Amortized \texttt{D3} finalization gas per contract across batch sizes $N \in \{1, 10, 100, 1000\}$ under Cancun/L2 rules against single-case baselines (\texttt{D1}, \texttt{D2}) and measured Sepolia EIP-8037 points.}
 \label{fig:gas}
 \end{figure}
 
-Table~\ref{tab:rq3_gas} and Fig.~\ref{fig:gas} quantify single-case vs.\ batched attestation scaling for our hardened \texttt{v1.1} registries. Full-storage \texttt{D1} requires 484,818 Cancun gas ($k=2$ of $3$, adding $+57{,}357$ gas for \texttt{T13} threshold and roster-nonce snapshotting), exceeding a 250,000-gas ceiling; event compression in \texttt{D2} saves $27.38\%$ (352,063 gas) while losing native contract history queries. Merkle batching in \texttt{D3} holds total finalization flat near 414,810 gas regardless of $N$, cutting per-case cost by $99.14\%$ to 4,148.10 gas at $N=100$ and $414.82$ gas at $N=1000$ (off-chain \texttt{verify\_inclusion} requires 36,993--42,110 simulated gas). Anchored to 100 Ethereum mainnet blocks (26,463,858--26,463,957 on November 21, 2026; median $0.971057$~gwei, ETH $=\$1{,}704.05$), \texttt{D3} at $N=100$ costs \$0.006864/case in calm conditions and \$0.2121/case at 30~gwei stress. Compared qualitatively against ProvAuditChain's single-logger footprint ($\approx 173\text{k}$ gas and $\approx\$0.05$ per audit cycle)~\cite{akor2025provauditchain}, \texttt{D1} invests extra gas to enforce $k$-of-$n$ separation and \texttt{T13} isolation, whereas \texttt{D3} beats single-logger costs by nearly two orders of magnitude at batch scale.
+Table~\ref{tab:rq3_gas} and Fig.~\ref{fig:gas} quantify single-case vs.\ batched attestation scaling for our quorum-hardened registries. Full-storage \texttt{D1} required 484,818 Cancun gas ($k=2$ of $3$, adding $+57{,}357$ gas for \texttt{T13} threshold and roster-nonce snapshotting), exceeding the 250,000-gas ceiling; event compression in \texttt{D2} saved $27.38\%$ (352,063 gas) while sacrificing native contract history queries. Merkle batching in \texttt{D3} held total finalization flat near 414,810 gas regardless of $N$, cutting per-case cost by $99.14\%$ to 4,148.10 gas at $N=100$ and $414.82$ gas at $N=1000$ (off-chain \texttt{verify\_inclusion} required 36,993--42,110 simulated gas). Anchored to 100 Ethereum mainnet blocks (26,463,858--26,463,957 on November 21, 2026; median $0.971057$~gwei, Ether (ETH) $=\$1{,}704.05$), \texttt{D3} at $N=100$ cost \$0.006864/case in calm conditions and \$0.2121/case at 30~gwei stress (\$0.000686 and \$0.0212 at $N=1000$). Compared qualitatively against ProvAuditChain's single-logger footprint ($\approx 173\text{k}$ gas and $\approx\$0.05$ per audit cycle)~\cite{akor2025provauditchain}, \texttt{D1} invests extra gas to enforce $k$-of-$n$ separation and \texttt{T13} isolation, whereas \texttt{D3} beats single-logger costs by nearly two orders of magnitude at batch scale.
 
-Live testnets reveal emerging fee dynamics. Active EIP-8037 state repricing on Ethereum Sepolia raises cold writes nearly fourfold (\texttt{D1} 1,881,226 gas; \texttt{D3} 15,474.70 gas/case at $N=100$, requiring $N \ge 155$ to drop below 10,000 gas/case). On Arbitrum Sepolia, execution gas matches Cancun (484,830 \texttt{D1}; 4,148.10/case \texttt{D3}), although testnet Nitro nodes report zero L1 calldata fee (\texttt{gasUsedForL1 = 0x0}). Across 30 sequential attestations per chain, Sepolia confirms in 10.560~s median (p95 11.699~s, 1.00 block) and Arbitrum Sepolia confirms in 1.212~s median (p95 1.756~s, 4.0 L2 blocks). Finally, live Sepolia verification across our redeployed \texttt{v1.1} registries confirmed reverts on non-auditor calls (\texttt{T1}), owner writes (\texttt{T6}), 1-byte tampered evidence hashes (\texttt{T8}), and \texttt{T13} post-creation Sybil votes (reverted in 25,371 gas), alongside permissionless \texttt{revoke\_removed\_auditor\_vote} cleanup (63,402 gas) without mutating main governance counts.
+Live testnets revealed emerging fee dynamics. Active EIP-8037 state repricing on Ethereum Sepolia raised cold writes nearly fourfold (\texttt{D1} 1,881,226 gas; \texttt{D3} 15,474.70 gas/case at $N=100$, requiring $N \ge 155$ to drop below 10,000 gas/case). On Arbitrum Sepolia, execution gas matched Cancun (484,830 \texttt{D1}; 4,148.10/case \texttt{D3}), although testnet Nitro nodes reported zero Layer-1 (L1) calldata fee (\texttt{gasUsedForL1 = 0x0}). Across 30 sequential attestations per chain, Sepolia confirmed in 10.560~s median (p95 11.699~s, 1.00 block) and Arbitrum Sepolia confirmed in 1.212~s median (p95 1.756~s, 4.0 L2 blocks). Finally, live Sepolia verification across our redeployed registries confirmed on-chain reverts for non-auditor calls (\texttt{T1}), owner writes (\texttt{T6}), and post-creation Sybil votes (\texttt{T13}, reverted in 25,371 gas), verified that \texttt{verify\_evidence} (\texttt{T8}) returned \texttt{True} on exact canonical hashes and \texttt{False} under 1-byte tampering, and validated permissionless \texttt{revoke\_\allowbreak removed\_\allowbreak auditor\_\allowbreak vote} cleanup (63,402 gas) without mutating main governance counts.
 
 \section{Discussion and Threats to Validity}\label{sec:discussion}
 
 \subsection{Internal and Construct Validity}\label{sec:val_internal}
 
-Linear-sweep disassembly resolves only immediate \texttt{PUSH}-jump pairs; although adopting multi-component McCabe complexity ($M_C = |E_C|-|V_C|+2P \ge 1$) eliminates negative cyclomatic artifacts on fragmented proxies ($P > 1$), indirect dispatch still fragments static loop back-edges alongside 15-feature scalar compression. Because 24 near-clone groups contain both Ponzi and non-Ponzi labels, template reuse with divergent post-deployment activity complicates static discrimination when transaction history is sparse. On-chain, \texttt{D3} enforces batch-wide consensus status, necessitating pre-sorted homogeneous batches whenever individual verdicts disagree. Finally, reconciling $p_{\text{Holm,NB}}$ and $p_{\text{Holm,W}}$ prevents mistaking small non-parametric fold ranks (\texttt{E4c} vs.\ \texttt{E1}, $p_{\text{Holm,W}}=2.53\times 10^{-3}$) for robust parametric shifts when fold-correlated Nadeau--Bengio intervals overlap zero.
+Linear-sweep disassembly resolves only immediate \texttt{PUSH}-jump pairs; although adopting multi-component McCabe complexity ($M_C = |E_C|-|V_C|+2P \ge 1$) eliminates negative cyclomatic artifacts on fragmented proxies ($P > 1$), indirect dispatch still fragments static loop back-edges alongside 15-feature scalar compression. Because 24 near-clone groups contain both Ponzi and non-Ponzi labels, template reuse with divergent post-deployment activity complicates static discrimination when transaction history is sparse. On-chain, \texttt{D3} enforces batch-wide consensus status, necessitating pre-sorted homogeneous batches whenever individual verdicts disagree. Finally, reconciling $p_{\text{Holm,NB}}$ and $p_{\text{Holm,W}}$ prevents mistaking small non-parametric fold ranks (\texttt{E4c} vs.\ \texttt{E1}, $p_{\text{Holm,W}}=2.53\times 10^{-3}$) for statistically supported parametric shifts when fold-correlated NB intervals overlap zero.
 
 \subsection{External Validity and Operational Governance}\label{sec:val_external}
 
-Absence of creation block timestamps prevented prospective temporal splits (\texttt{S3}), while overlap with PonziGuard left only 10 distinct external Ponzi contracts (\texttt{E6}), rendering cross-corpus PR-AUC indicative only. Experimentally, while \texttt{T13} isolates all open and finalized cases from mid-case threshold reductions, Sybil injections, and tie precedence directly in bytecode, using a single EOA owner (\texttt{eoa\_demo\_limit}) still exposes \emph{future} auditor additions and thresholds to single-key compromise; production registries therefore require multisignature ownership with enforced delay timelocks.
+Absence of creation block timestamps prevented prospective temporal splits (\texttt{S3}), while overlap with PonziGuard left only 10 distinct external Ponzi contracts (\texttt{E6}), rendering cross-corpus PR-AUC indicative only. Experimentally, while \texttt{T13} isolates all open and finalized cases from mid-case threshold reductions, Sybil injections, and tie precedence directly in bytecode, single-key EOA prototype ownership still exposes \emph{future} auditor additions and thresholds to single-key compromise; production registries therefore require multisignature ownership with enforced delay timelocks.
 
 \section{Conclusion}\label{sec:conclusion}
 
-We introduced X-SPIDE-G, combining near-clone-isolated bytecode detection, paired statistical ablations, and $k$-of-$n$ Vyper attestation governance. Across 7,446 Ethereum contracts, our evaluation answers all three research questions concisely. For \textbf{RQ1}, MinHash near-clone grouping uncovers 59.09\% Ponzi family sharing; under identical $5\times 5$ nested tuning, pure clone leakage inflates PR-AUC by $0.0484$ ($0.0201$ exact-clone plus $0.0283$ near-clone; $0.0382$ net vs.\ paper-style random 5-fold \texttt{E0}). For \textbf{RQ2}, $5\times 5$ clone-grouped nested CV demonstrates that normalized opcode bigrams elevate PR-AUC by $+0.0227$ over the X-SPIDE baseline ($p_{\text{Holm,NB}}=0.0093$), whereas 15 summary CFG loop descriptors show no significant additional gain ($+0.0017$ atop bigrams). TreeSHAP further characterizes how benign call loops, pull-withdrawal Ponzis, and dynamic-jump proxies bound static detection. For \textbf{RQ3}, hardened Merkle-batched attestation (\texttt{D3}) cuts per-contract finalization gas by 99.14\% to 4,148.10 gas/case ($N=100$) under Cancun and scales under Sepolia EIP-8037 while upholding 100\% access-control and \texttt{T13} quorum-isolation branch coverage.
+We introduced X-SPIDE-G, combining audited near-clone isolation, controlled bytecode ablations, interpretable failure characterization, and $k$-of-$n$ Vyper attestation governance. Across 7,446 Ethereum contracts, our evaluation answers all three research questions concisely. For \textbf{RQ1}, MinHash near-clone grouping uncovered 59.09\% Ponzi family sharing; under identical $5\times 5$ nested tuning, pure clone leakage inflated PR-AUC by $0.0484$ ($0.0201$ exact-clone plus $0.0283$ near-clone; $0.0382$ net vs.\ paper-style random 5-fold \texttt{E0}). For \textbf{RQ2}, $5\times 5$ clone-grouped nested CV demonstrated that normalized opcode bigrams elevated PR-AUC by $+0.0227$ over the X-SPIDE baseline ($p_{\text{Holm,NB}}=0.0093$), whereas 15 summary CFG loop descriptors yielded no significant additional gain ($+0.0017$ atop bigrams). TreeSHAP further characterized how benign call loops, pull-withdrawal Ponzis, and dynamic-jump proxies bound static detection. For \textbf{RQ3}, hardened Merkle-batched attestation (\texttt{D3}) cut per-contract finalization gas by 99.14\% to 4,148.10 gas/case ($N=100$) under Cancun and scaled under Sepolia EIP-8037 while upholding 100\% access-control and \texttt{T13} quorum-isolation branch coverage.
 
 Four engineering takeaways emerge for smart contract security practice:
 \begin{enumerate}

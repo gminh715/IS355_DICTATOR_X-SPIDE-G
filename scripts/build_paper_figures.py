@@ -123,6 +123,7 @@ def build_pr_curves_pdf(
     )
     out_pdf.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_pdf, bbox_inches="tight")
+    fig.savefig(out_pdf.with_suffix(".png"), dpi=220, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -230,6 +231,7 @@ def build_delta_pr_auc_ci_pdf(results_dir: Path, out_pdf: Path) -> None:
     fig.subplots_adjust(top=0.84, bottom=0.14, left=0.28, right=0.99)
     out_pdf.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_pdf, bbox_inches="tight")
+    fig.savefig(out_pdf.with_suffix(".png"), dpi=220, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -291,7 +293,7 @@ def build_shap_comparison_pdf(
         ax.grid(axis="x", alpha=0.22, linestyle=":")
 
         for yp, v, rho in zip(y_pos, vals, rhos):
-            ax.text(v + max_v * 0.02, yp, f"{v:.3f} (r={rho:+.2f})", va="center", fontsize=8.3, color="#222222")
+            ax.text(v + max_v * 0.02, yp, f"{v:.3f} ($\\rho$={rho:+.2f})", va="center", fontsize=8.3, color="#222222")
 
     legend_handles = [
         Patch(facecolor=pos_color, label=r"Higher feature value raises Ponzi risk ($\rho > 0$)"),
@@ -308,16 +310,179 @@ def build_shap_comparison_pdf(
     fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.94], w_pad=3.2)
     out_pdf.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_pdf, bbox_inches="tight")
+    fig.savefig(out_pdf.with_suffix(".png"), dpi=220, bbox_inches="tight")
     plt.close(fig)
 
     return {"e4b_top10_bigrams": bg_rows[:10]}
 
 
 def build_gas_vs_batch_pdf(results_dir: Path, out_pdf: Path) -> None:
-    """Render publication-grade vector PDF (and synced PNG) of E5 gas scaling curve."""
+    """Render IEEE-style vector PDF (and synced PNG) of D3 scaling with verified Sepolia EIP-8037 overlays."""
     gas_df = pd.read_csv(results_dir / "E5_gas.csv")
-    generate_gas_vs_batch_plot(gas_df, out_pdf)
-    generate_gas_vs_batch_plot(gas_df, out_pdf.with_suffix(".png"))
+    anvil = gas_df[gas_df["network"] == "anvil_pyevm"]
+    sepolia = gas_df[gas_df["network"] == "sepolia"]
+
+    d1_cancun = float(
+        anvil[(anvil["variant"] == "D1") & (anvil["operation"] == "finalized_case_total")]["gas_per_case"].iloc[0]
+    )
+    d2_cancun = float(
+        anvil[(anvil["variant"] == "D2") & (anvil["operation"] == "finalized_case_total")]["gas_per_case"].iloc[0]
+    )
+    d3_curve = anvil[
+        (anvil["variant"] == "D3") & (anvil["operation"] == "batch_finalized_total")
+    ].sort_values("batch_size")
+
+    d1_sepolia = float(
+        sepolia[(sepolia["variant"] == "D1") & (sepolia["operation"] == "finalized_case_total")]["gas_per_case"].iloc[0]
+    )
+    d3_sepolia_100 = float(
+        sepolia[
+            (sepolia["variant"] == "D3")
+            & (sepolia["operation"] == "batch_finalized_total")
+            & (sepolia["batch_size"] == 100)
+        ]["gas_per_case"].iloc[0]
+    )
+
+    ns = d3_curve["batch_size"].astype(int).to_numpy()
+    per_case = d3_curve["gas_per_case"].astype(float).to_numpy()
+
+    fig, ax = plt.subplots(figsize=(6.4, 4.35))
+
+    ax.axhline(
+        d1_sepolia,
+        color="#7A3E9D",
+        linestyle=(0, (5, 2)),
+        linewidth=1.55,
+        label=f"D1 Sepolia EIP-8037 = {d1_sepolia:,.0f} gas",
+        zorder=2,
+    )
+    ax.axhline(
+        d1_cancun,
+        color="#C44E3A",
+        linestyle="-",
+        linewidth=1.7,
+        label=f"D1 Cancun / L2 = {d1_cancun:,.0f} gas",
+        zorder=2,
+    )
+    ax.axhline(
+        d2_cancun,
+        color="#E69F00",
+        linestyle="-.",
+        linewidth=1.6,
+        label=f"D2 Cancun = {d2_cancun:,.0f} gas",
+        zorder=2,
+    )
+    ax.axhline(
+        250_000,
+        color="#6E4F3A",
+        linestyle="--",
+        linewidth=1.25,
+        label="Pre-reg D1 ceiling = 250,000 gas",
+        zorder=2,
+    )
+    ax.axhline(
+        10_000,
+        color="#009E73",
+        linestyle=":",
+        linewidth=1.8,
+        label="Pre-reg D3 target = 10,000 gas/case",
+        zorder=2,
+    )
+
+    ax.plot(
+        ns,
+        per_case,
+        marker="o",
+        linewidth=2.2,
+        markersize=6.2,
+        color="#0072B2",
+        label="D3 Cancun / L2 (amortized / case)",
+        zorder=4,
+    )
+
+    for x_val, y_val in zip(ns, per_case):
+        if x_val == 1:
+            ax.annotate(
+                f"{y_val:,.0f}",
+                xy=(x_val, y_val),
+                xytext=(1.02, 740_000),
+                ha="left",
+                va="bottom",
+                fontsize=8.6,
+                fontweight="bold",
+                color="#005282",
+                arrowprops={"arrowstyle": "->", "color": "#0072B2", "lw": 0.9},
+            )
+            continue
+        elif x_val == 100:
+            xytext, va, ha = (x_val * 0.80, y_val * 0.56), "top", "right"
+        elif x_val == 1000:
+            xytext, va, ha = (x_val * 0.96, y_val * 1.75), "bottom", "right"
+        else:
+            xytext, va, ha = (x_val * 1.15, y_val * 1.28), "bottom", "left"
+        ax.annotate(
+            f"{y_val:,.0f}" if y_val >= 1000 else f"{y_val:,.1f}",
+            xy=(x_val, y_val),
+            xytext=xytext,
+            ha=ha,
+            va=va,
+            fontsize=8.6,
+            fontweight="bold",
+            color="#005282",
+        )
+
+    ax.scatter(
+        [100],
+        [d3_sepolia_100],
+        marker="D",
+        s=52,
+        color="#7A3E9D",
+        edgecolor="white",
+        linewidth=0.8,
+        label=f"D3 Sepolia EIP-8037 ($N$=100) = {d3_sepolia_100:,.0f}",
+        zorder=5,
+    )
+    ax.annotate(
+        f"{d3_sepolia_100:,.0f}\n(Sepolia)",
+        xy=(100, d3_sepolia_100),
+        xytext=(145, d3_sepolia_100 * 1.65),
+        ha="left",
+        va="bottom",
+        fontsize=8.3,
+        fontweight="bold",
+        color="#5E2A7E",
+        arrowprops={"arrowstyle": "->", "color": "#7A3E9D", "lw": 0.9},
+    )
+
+    ax.axvspan(100, 1500, color="#009E73", alpha=0.07, zorder=0)
+    ax.text(
+        420,
+        5_700,
+        r"Target Zone ($N \geq 100$)",
+        fontsize=8.3,
+        color="#007253",
+        ha="center",
+    )
+
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xticks(ns)
+    ax.set_xticklabels([str(x) for x in ns], fontsize=9.2)
+    ax.tick_params(axis="y", labelsize=9.2)
+    ax.set_xlim(0.7, 1500)
+    ax.set_ylim(180, d1_sepolia * 2.2)
+    ax.grid(True, which="both", linestyle=":", alpha=0.32)
+    ax.set_xlabel("Merkle Batch Size $N$ (cases per root)", fontsize=10.2)
+    ax.set_ylabel("Amortized Gas per Finalized Case (log scale)", fontsize=10.2)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.legend(loc="lower left", fontsize=7.6, framealpha=0.95, edgecolor="#cccccc")
+
+    out_pdf.parent.mkdir(parents=True, exist_ok=True)
+    fig.tight_layout()
+    fig.savefig(out_pdf, bbox_inches="tight")
+    fig.savefig(out_pdf.with_suffix(".png"), dpi=220, bbox_inches="tight")
+    plt.close(fig)
 
 
 def main() -> None:

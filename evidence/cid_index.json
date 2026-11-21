@@ -17,12 +17,12 @@
       "updated_at_utc": "2026-11-14T10:25:03Z"
     },
     "0x5b7624e00332bf67a30b0f9957113f45481522a21707a396f0d60ace93bb842a": {
-      "backup_uri": "git://c70e0157cbf11e7c26ee1e1774bb1dfb9e46db71/evidence/0x5b7624e00332bf67a30b0f9957113f45481522a21707a396f0d60ace93bb842a.json",
+      "backup_uri": "git://12db4b84b63dd006bccf399e54f5674ebd02beaf/evidence/0x5b7624e00332bf67a30b0f9957113f45481522a21707a396f0d60ace93bb842a.json",
       "case_id": "0x5b7624e00332bf67a30b0f9957113f45481522a21707a396f0d60ace93bb842a",
-      "cid": "bafkreif6ynchymu5qlpfxtuc5zlgb2tcw4pc5tdthqyzqdmmo63ojkdvau",
-      "evidence_hash": "0x406e33f11d983c4fdf7b0f05987079f80e3087ee8a2815c37dd96cc6838bd606",
-      "evidence_uri": "ipfs://bafkreif6ynchymu5qlpfxtuc5zlgb2tcw4pc5tdthqyzqdmmo63ojkdvau",
-      "git_commit": "c70e0157cbf11e7c26ee1e1774bb1dfb9e46db71",
+      "cid": "bafkreibzlkxtwkshawsvzc7jfsl4vg3ivr6egynczyvjrvil2xgvl6avey",
+      "evidence_hash": "0x5aba941d813894913c853f1e137307fac6f869c6cb914a0fd5ae0f8edaec473c",
+      "evidence_uri": "ipfs://bafkreibzlkxtwkshawsvzc7jfsl4vg3ivr6egynczyvjrvil2xgvl6avey",
+      "git_commit": "12db4b84b63dd006bccf399e54f5674ebd02beaf",
       "git_rel_path": "evidence/0x5b7624e00332bf67a30b0f9957113f45481522a21707a396f0d60ace93bb842a.json",
       "pin_detail": "Kubo unreachable (HTTPConnectionPool(host='127.0.0.1', port=5001): Max retries exceeded with url: /api/v0/add?pin=true&cid-version=1&raw-leaves=true (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=5001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\")))",
       "pin_status": "local_content_addressed_unpinned",
@@ -30,7 +30,7 @@
       "sample_id": "xspide_00439",
       "score": "0.998390",
       "subject_address": "0x2c2e3baa2191cf325a28a01ff42340f2ae677572",
-      "updated_at_utc": "2026-11-14T10:31:17Z"
+      "updated_at_utc": "2026-11-21T16:06:16Z"
     },
     "0x8f7a3ab788942c1ac1a68a6a6db5cfa2626d46db2da50d750e7151f55e22d609": {
       "backup_uri": "git://bf1029c8ea1dfb298f9ba02840e3bd264c0a1c84/evidence/0x8f7a3ab788942c1ac1a68a6a6db5cfa2626d46db2da50d750e7151f55e22d609.json",
