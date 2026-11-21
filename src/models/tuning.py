@@ -16,7 +16,7 @@ import optuna
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin, clone
 from sklearn.feature_selection import RFE
-from sklearn.model_selection import StratifiedGroupKFold
+from sklearn.model_selection import StratifiedGroupKFold, StratifiedKFold
 from sklearn.pipeline import Pipeline
 
 from src.models.data_prep import load_split_indices
@@ -206,7 +206,7 @@ def make_pipeline_from_params(
 def run_nested_cv_fold(
     X: pd.DataFrame | np.ndarray,
     y: np.ndarray,
-    groups: np.ndarray,
+    groups: np.ndarray | None,
     tr_idx: np.ndarray,
     te_idx: np.ndarray,
     *,
@@ -221,21 +221,29 @@ def run_nested_cv_fold(
     pipeline_pre_steps: tuple[tuple[str, Any], ...] | list[tuple[str, Any]] | None = None,
     cache_pre_steps: bool = True,
 ) -> tuple[dict[str, Any], Pipeline]:
-    """Run inner StratifiedGroupKFold Optuna tuning, OOF F1 thresholding, and outer evaluation."""
+    """Run inner CV (StratifiedGroupKFold if groups given else StratifiedKFold), Optuna, OOF F1, and outer eval."""
     t_start = time.perf_counter()
     is_df = isinstance(X, pd.DataFrame)
     X_tr = X.iloc[tr_idx] if is_df else X[tr_idx]
     X_te = X.iloc[te_idx] if is_df else X[te_idx]
     y_tr = y[tr_idx]
     y_te = y[te_idx]
-    g_tr = groups[tr_idx]
 
-    inner_cv = StratifiedGroupKFold(
-        n_splits=n_inner_splits,
-        shuffle=True,
-        random_state=seed * 10 + fold,
-    )
-    inner_splits = list(inner_cv.split(np.zeros(len(y_tr)), y_tr, g_tr))
+    if groups is not None:
+        g_tr = groups[tr_idx]
+        inner_cv = StratifiedGroupKFold(
+            n_splits=n_inner_splits,
+            shuffle=True,
+            random_state=seed * 10 + fold,
+        )
+        inner_splits = list(inner_cv.split(np.zeros(len(y_tr)), y_tr, g_tr))
+    else:
+        inner_cv = StratifiedKFold(
+            n_splits=n_inner_splits,
+            shuffle=True,
+            random_state=seed * 10 + fold,
+        )
+        inner_splits = list(inner_cv.split(np.zeros(len(y_tr)), y_tr))
     rfe_cache: dict[str, np.ndarray] = {}
 
     inner_transformed: dict[int, tuple[Any, Any]] = {}
@@ -400,7 +408,7 @@ def run_25fold_experiment(
     X: pd.DataFrame,
     *,
     split_paths: list[Path],
-    group_col: str,
+    group_col: str | None,
     experiment_id: str,
     n_trials: int = 30,
     n_inner_splits: int = 3,
@@ -409,9 +417,9 @@ def run_25fold_experiment(
     max_workers: int = 4,
     lgbm_jobs: int = 3,
 ) -> pd.DataFrame:
-    """Execute a 25-fold grouped CV experiment across frozen split JSON files."""
+    """Execute a 25-fold CV experiment (grouped or stratified random) across frozen split JSON files."""
     y = df_meta["label"].to_numpy(dtype=int)
-    groups = df_meta[group_col].astype(str).to_numpy()
+    groups = df_meta[group_col].astype(str).to_numpy() if group_col is not None else None
     meta_minimal = df_meta[["sample_id"]].copy()
 
     tasks = [

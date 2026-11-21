@@ -166,7 +166,7 @@ def load_phase4_dataset(
 
     feat_dir = repo_root / "data" / "processed"
 
-    if config_name in ("E1", "E1_S1_group_exact"):
+    if config_name in ("E1", "E1_S0_random_5x5", "E1_S1_group_exact"):
         return df_meta, X99, None
 
     if config_name == "E3":

@@ -23,6 +23,7 @@ from src.data.splits import (
     DEFAULT_SEEDS,
     generate_e0_random_splits,
     generate_grouped_cv_splits,
+    generate_random_cv_splits,
     generate_temporal_holdout,
 )
 
@@ -224,12 +225,20 @@ def run_phase1(repo_root: Path, *, skip_rpc: bool = False) -> None:
         n_splits=5,
         seeds=DEFAULT_SEEDS,
     )
+    random_5x5_files = generate_random_cv_splits(
+        df_code,
+        split_prefix="S_code_random",
+        out_dir=splits_dir,
+        n_splits=5,
+        seeds=DEFAULT_SEEDS,
+    )
     e0_files = generate_e0_random_splits(df, out_dir=splits_dir, n_splits=5, seed=42)
     temporal_fp = generate_temporal_holdout(df_code, out_dir=splits_dir)
 
     splits_summary = [
         f"`S_code_group_near_seed{{42..46}}_fold{{0..4}}.json`: **{len(near_files)}** files (`StratifiedGroupKFold(5)` × 5 repeats on `group_near`, `|S_code|={len(df_code)}`).",
         f"`S_code_group_exact_seed{{42..46}}_fold{{0..4}}.json`: **{len(exact_files)}** files (for sensitivity analysis `S1`).",
+        f"`S_code_random_seed{{42..46}}_fold{{0..4}}.json`: **{len(random_5x5_files)}** files (`StratifiedKFold(5)` × 5 repeats for controlled causal baseline `E1_S0_random_5x5`).",
         f"`S_full_E0_random_seed42_fold{{0..4}}.json`: **{len(e0_files)}** files (for `E0` paper-style random baseline reference only, `|S_full|={len(df)}`).",
         (
             f"`{temporal_fp.name}` generated for `S3`."

@@ -9,7 +9,7 @@ import pandas as pd
 
 from src.data.bytecode import strip_cbor_metadata
 from src.data.clones import cluster_clones
-from src.data.splits import generate_grouped_cv_splits
+from src.data.splits import generate_grouped_cv_splits, generate_random_cv_splits
 
 
 def test_clone_clustering_exact_near_and_missing() -> None:
@@ -65,3 +65,32 @@ def test_grouped_splits_have_zero_group_overlap(tmp_path: Path) -> None:
         tr_groups = {id_to_group[s] for s in data["train_sample_ids"]}
         te_groups = {id_to_group[s] for s in data["test_sample_ids"]}
         assert tr_groups.isdisjoint(te_groups)
+
+
+def test_random_cv_splits_stratified_and_disjoint(tmp_path: Path) -> None:
+    rows = [
+        {
+            "sample_id": f"s_{i:03d}",
+            "address": f"0x{i:040x}",
+            "label": 1 if i < 10 else 0,
+        }
+        for i in range(50)
+    ]
+    df = pd.DataFrame(rows)
+    files = generate_random_cv_splits(
+        df,
+        split_prefix="test_random",
+        out_dir=tmp_path,
+        n_splits=5,
+        seeds=(42, 43),
+    )
+    assert len(files) == 10
+    for fp in files:
+        data = json.loads(fp.read_text(encoding="utf-8"))
+        assert data["group_col"] is None
+        tr_ids = set(data["train_sample_ids"])
+        te_ids = set(data["test_sample_ids"])
+        assert tr_ids.isdisjoint(te_ids)
+        assert len(tr_ids) + len(te_ids) == 50
+        assert data["test_pos"] == 2
+        assert data["train_pos"] == 8

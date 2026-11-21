@@ -37,6 +37,7 @@ def test_all_main_and_sensitivity_fold_csvs_present_with_25_folds() -> None:
             assert (df["n_features"] == exp_nfeats).all(), f"{exp_id} feature mismatch"
 
     sens_cfgs = (
+        "E1_S0_random_5x5",
         "E1_S1_group_exact",
         "E4c_S1_group_exact",
         "E1_S2_cbor_stripped",
@@ -48,7 +49,10 @@ def test_all_main_and_sensitivity_fold_csvs_present_with_25_folds() -> None:
     for cfg in sens_cfgs:
         p = RESULTS_DIR / f"{cfg}_folds.csv"
         assert p.exists(), f"Missing sensitivity file {p}"
-        assert len(pd.read_csv(p)) == 25
+        df_s = pd.read_csv(p)
+        assert len(df_s) == 25
+        if cfg == "E1_S0_random_5x5":
+            assert (df_s["n_features"] == 99).all()
 
 
 def test_model_comparison_and_stat_tests_follow_preregistration() -> None:
@@ -81,6 +85,8 @@ def test_model_comparison_and_stat_tests_follow_preregistration() -> None:
     )
 
     sens_df = pd.read_csv(sens_p)
+    assert "S0_clone_leakage_control" in set(sens_df["study"])
+    assert "S0_exact_clone_control" in set(sens_df["study"])
     assert "S3_temporal_holdout" in set(sens_df["study"])
 
 

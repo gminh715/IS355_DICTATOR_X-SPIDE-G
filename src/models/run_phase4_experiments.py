@@ -38,7 +38,8 @@ EXPERIMENT_DESCRIPTIONS: dict[str, str] = {
     "E4d": "99 X-SPIDE + F-BIGRAM + F-GSEM",
 }
 
-SENSITIVITY_SPECS: tuple[tuple[str, str, str], ...] = (
+SENSITIVITY_SPECS: tuple[tuple[str, str, str | None], ...] = (
+    ("E1_S0_random_5x5", "S_code_random", None),
     ("E1_S1_group_exact", "S_code_group_exact", "group_exact"),
     ("E4c_S1_group_exact", "S_code_group_exact", "group_exact"),
     ("E1_S2_cbor_stripped", "S_code_group_near", "group_near"),
@@ -86,7 +87,7 @@ def _run_or_load_experiment(
     *,
     config_name: str,
     split_prefix: str,
-    group_col: str,
+    group_col: str | None,
     n_trials: int,
     n_inner_splits: int,
     max_workers: int,
@@ -394,6 +395,20 @@ def compute_phase4_summaries(repo_root: Path, results_dir: Path) -> None:
             }
         )
 
+    _add_sens_row(
+        "S0_clone_leakage_control",
+        "E1_S0_random_5x5",
+        "E1",
+        paired=False,
+        notes="random 5x5 nested vs group_near 5x5 nested under identical Optuna+tau* protocol (total pure clone leakage)",
+    )
+    _add_sens_row(
+        "S0_exact_clone_control",
+        "E1_S0_random_5x5",
+        "E1_S1_group_exact",
+        paired=False,
+        notes="random 5x5 nested vs group_exact 5x5 nested under identical Optuna+tau* protocol (pure exact-clone leakage)",
+    )
     _add_sens_row("S1_split_granularity", "E1_S1_group_exact", "E1", paired=False, notes="group_exact vs group_near (unpaired split partitions)")
     _add_sens_row("S1_split_granularity", "E4c_S1_group_exact", "E4c", paired=False, notes="group_exact vs group_near (unpaired split partitions)")
     _add_sens_row("S2_cbor_metadata", "E1_S2_cbor_stripped", "E1", paired=True, notes="76 opcodes recomputed from stripped_bytecode_hex vs raw CSV 99")

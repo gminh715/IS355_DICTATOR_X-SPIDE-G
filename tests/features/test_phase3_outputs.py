@@ -62,6 +62,7 @@ def test_phase3_parquet_outputs_complete_and_valid() -> None:
     assert set(gsem_df.columns) == {"sample_id", "address", *GSEM_FEATURE_NAMES}
     gsem_vals = gsem_df[list(GSEM_FEATURE_NAMES)].to_numpy(dtype=np.float64)
     assert np.isfinite(gsem_vals).all()
+    assert (gsem_df["cyclomatic"] >= 1.0).all(), "Multi-component McCabe cyclomatic complexity must be >= 1.0"
     assert (
         (gsem_df["unresolved_jump_ratio"] >= 0.0) & (gsem_df["unresolved_jump_ratio"] <= 1.0)
     ).all()

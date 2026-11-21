@@ -224,7 +224,7 @@ def plot_delta_pr_auc_ci(stat_df: pd.DataFrame, out_path: Path) -> None:
     span = max(0.05, max_hi - min_lo)
     ax.set_xlim(min_lo - 0.02, max(max_hi, 0.03) + span * 0.95)
     ax.grid(axis="x", alpha=0.28)
-    ax.legend(loc="lower right", fontsize=8.8)
+    ax.legend(loc="upper right", fontsize=8.8)
     plt.tight_layout()
     plt.savefig(out_path, dpi=220)
     plt.close()

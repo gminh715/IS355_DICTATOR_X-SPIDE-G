@@ -104,6 +104,46 @@ def generate_temporal_holdout(
     return fp
 
 
+def generate_random_cv_splits(
+    df: pd.DataFrame,
+    *,
+    split_prefix: str = "S_code_random",
+    out_dir: Path,
+    n_splits: int = 5,
+    seeds: tuple[int, ...] = DEFAULT_SEEDS,
+) -> list[Path]:
+    """Create deterministic repeated StratifiedKFold JSON split files (controlled random baseline)."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    saved: list[Path] = []
+
+    y = df["label"].to_numpy(dtype=int)
+    sample_ids = df["sample_id"].astype(str).to_numpy()
+    addresses = df["address"].astype(str).to_numpy()
+
+    for seed in seeds:
+        cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed)
+        for fold_idx, (tr_idx, te_idx) in enumerate(cv.split(np.zeros(len(df)), y)):
+            payload: dict[str, Any] = {
+                "split_name": f"{split_prefix}_seed{seed}_fold{fold_idx}",
+                "group_col": None,
+                "seed": seed,
+                "fold": fold_idx,
+                "n_splits": n_splits,
+                "n_train": int(len(tr_idx)),
+                "n_test": int(len(te_idx)),
+                "train_pos": int(y[tr_idx].sum()),
+                "test_pos": int(y[te_idx].sum()),
+                "train_sample_ids": sample_ids[tr_idx].tolist(),
+                "test_sample_ids": sample_ids[te_idx].tolist(),
+                "train_addresses": addresses[tr_idx].tolist(),
+                "test_addresses": addresses[te_idx].tolist(),
+            }
+            fp = out_dir / f"{split_prefix}_seed{seed}_fold{fold_idx}.json"
+            fp.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+            saved.append(fp)
+    return saved
+
+
 def generate_e0_random_splits(
     df_full: pd.DataFrame,
     *,

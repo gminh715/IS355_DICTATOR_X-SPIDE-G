@@ -76,6 +76,32 @@ def test_nested_cv_fold_with_pipeline_pre_steps_reports_exact_n_features() -> No
     assert 0.5 <= row["PR-AUC"] <= 1.0
 
 
+def test_nested_cv_fold_supports_random_stratified_s0_without_groups() -> None:
+    df_meta, X, pre_steps = load_phase4_dataset(REPO_ROOT, "E1_S0_random_5x5")
+    assert pre_steps is None
+    split_path = REPO_ROOT / "splits" / "S_code_random_seed42_fold0.json"
+    tr_idx, te_idx, _ = load_split_indices(df_meta, split_path)
+
+    row, final_pipe = run_nested_cv_fold(
+        X,
+        df_meta["label"].to_numpy(dtype=int),
+        None,
+        tr_idx,
+        te_idx,
+        seed=42,
+        fold=0,
+        experiment_id="E1_S0_smoke",
+        n_trials=2,
+        n_inner_splits=2,
+        n_jobs=3,
+        use_rfe=False,
+    )
+
+    assert row["n_features"] == 99
+    assert final_pipe.named_steps["clf"].n_features_in_ == 99
+    assert 0.5 <= row["PR-AUC"] <= 1.0
+
+
 def test_phase4_feature_builders_no_nans_and_expected_shapes() -> None:
     expected_cached_cols = {
         "E3": 16,
