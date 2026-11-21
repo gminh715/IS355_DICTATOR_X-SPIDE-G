@@ -88,10 +88,11 @@
   - `Result/verified/*.sol` (mainnet verified subset): `43/50` already present in X-SPIDE.
 - **Pre-Registered Decision for Dataset 2 (`E6`):** **SANITY_CHECK_ONLY (Risk R6 triggered)** — Because the released `PonziGuard` GitHub archive lacks contract addresses on `non-Ponzi.zip` and `verified_contract_bins`, lacks the full `6,498`-contract `314`-Ponzi XBlock split described in TOSEM [2], and yields `< 30` non-overlapping address-verified Ponzi contracts (`17` in `Ponzi/*.sol`, `11` total runtime `.bin` rows / `10` unique hashes), Dataset 2 is **downgraded to a qualitative/code-only sanity check** rather than a formal `E6` external generalization benchmark.
 
-## 5. Frozen Splits Summary (Phase 1.7)
+## 5. Frozen Splits Summary (Phase 1.7 + v1.1 Phase 3 `S0` Control = `80` Files)
 
 - `S_code_group_near_seed{42..46}_fold{0..4}.json`: **25** files (`StratifiedGroupKFold(5)` × 5 repeats on `group_near`, `|S_code|=7446`).
 - `S_code_group_exact_seed{42..46}_fold{0..4}.json`: **25** files (for sensitivity analysis `S1`).
+- `S_code_random_seed{42..46}_fold{0..4}.json`: **25** files (added in `v1.1` Phase 3 using `StratifiedKFold(5)` across seeds `42..46` for the controlled `E1_S0_random_5x5` protocol-vs-clone decomposition).
 - `S_full_E0_random_seed42_fold{0..4}.json`: **5** files (for `E0` paper-style random baseline reference only, `|S_full|=7446`).
 - `S_code_temporal_holdout.json` (`S3`): **not generated** — `block_number` is absent in X-SPIDE CSV/archives and Google BigQuery credentials (`bq_available=False`) are not configured locally.
 

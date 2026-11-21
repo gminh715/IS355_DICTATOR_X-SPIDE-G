@@ -339,10 +339,10 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
         [
             ["Course / Class", "IS355 – Blockchain Technology · Class IS355.R11.CTTT.2"],
             ["Group", "4 - DICTATOR (5 Members)"],
-            ["Repository", "https://github.com/gminh715/IS355_DICTATOR_X-SPIDE-G (Release tag: v1.0-final)"],
+            ["Repository", "https://github.com/gminh715/IS355_DICTATOR_X-SPIDE-G (Release: v1.1)"],
             ["Datasets Audited", "X-SPIDE (7,446 contracts / 880 Ponzi), PonziGuard, Blockchain@Unica"],
             ["Live Testnets", "Ethereum Sepolia (chainId 11155111) & Arbitrum Sepolia (chainId 421614)"],
-            ["Verification Status", "Vyper 0.4.3 Etherscan v2 Pass - Verified (D1/D2/D3 Sepolia; D1/D3 Arbitrum Sepolia)"],
+            ["Verification Status", "Vyper 0.4.3 v1.1 Etherscan v2 Pass - Verified (D1/D2/D3 Sepolia; D1/D3 Arbitrum Sepolia)"],
             ["Duration", "09/2026 – 12/2026 · Ho Chi Minh City, Vietnam"],
         ],
         col_widths=[2.2, 4.56],
@@ -372,34 +372,40 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
     e0_grid = facts["e0"].loc["E0_random5fold_99feats_gridbest_mean"]
     e5_sum = facts["e5_sum"]
     e5_gas = facts["e5_gas"]
+    pa = e5_sum["price_anchor"]
+    anchor_gwei = float(pa["mainnet_median_gas_price_gwei"])
+    anchor_eth = float(pa["eth_usd"])
+    s0_df = pd.read_csv(REPO_ROOT / "results" / "E1_S0_random_5x5_folds.csv")
+    s1_e1_df = pd.read_csv(REPO_ROOT / "results" / "E1_S1_group_exact_folds.csv")
     py_d1 = e5_gas[(e5_gas["network"] == "anvil_pyevm") & (e5_gas["variant"] == "D1") & (e5_gas["operation"] == "finalized_case_total")].iloc[0]
     py_d2 = e5_gas[(e5_gas["network"] == "anvil_pyevm") & (e5_gas["variant"] == "D2") & (e5_gas["operation"] == "finalized_case_total")].iloc[0]
     py_d3_100 = e5_gas[(e5_gas["network"] == "anvil_pyevm") & (e5_gas["variant"] == "D3") & (e5_gas["operation"] == "batch_finalized_total") & (e5_gas["batch_size"] == 100)].iloc[0]
     py_d3_1000 = e5_gas[(e5_gas["network"] == "anvil_pyevm") & (e5_gas["variant"] == "D3") & (e5_gas["operation"] == "batch_finalized_total") & (e5_gas["batch_size"] == 1000)].iloc[0]
+    d2_pct = 100.0 * (float(py_d2["gas_used"]) - float(py_d1["gas_used"])) / float(py_d1["gas_used"])
 
     _p(
         doc,
         f"X-SPIDE-G audits and extends the X-SPIDE Ethereum smart Ponzi detection pipeline while anchoring verifiable, "
         f"multi-auditor risk attestations on-chain. After uncovering that 59.09% of Ponzi contracts (520/880) in X-SPIDE belong "
-        f"to MinHash near-clone clusters after Solidity CBOR metadata stripping, moving from paper-style 5-fold random evaluation "
-        f"(RQ1, E0 = {e0_grid['PR-AUC']:.4f}) to leak-free 5x5 StratifiedGroupKFold nested Optuna CV "
-        f"(E1) lowers 99-feature LightGBM baseline PR-AUC to {mc.loc['E1','PR_AUC_mean']:.4f} ± {mc.loc['E1','PR_AUC_std']:.4f} "
-        f"(Delta = {mc.loc['E1','PR_AUC_mean'] - e0_grid['PR-AUC']:+.4f}, F1: {e0_grid['F1']:.4f} -> {mc.loc['E1','F1_mean']:.4f}; strictly controlled grouping sensitivity S1 isolates -0.0283 PR-AUC from group_exact -> group_near). Across our pre-registered RQ2 ablations "
-        f"(8-test Holm-Bonferroni family, Nadeau-Bengio df=24, MDE >= 0.02 PR-AUC), explicit opcode bigrams (F-BIGRAM) deliver "
+        f"to MinHash near-clone clusters after Solidity CBOR metadata stripping, holding the 5x5 nested Optuna + tau* protocol strictly fixed "
+        f"(RQ1, E1_S0_random_5x5 = {s0_df['PR-AUC'].mean():.4f} ± {s0_df['PR-AUC'].std(ddof=1):.4f} -> E1 = {mc.loc['E1','PR_AUC_mean']:.4f} ± {mc.loc['E1','PR_AUC_std']:.4f}) "
+        f"isolates {mc.loc['E1','PR_AUC_mean'] - s0_df['PR-AUC'].mean():+.4f} PR-AUC ({mc.loc['E1','F1_mean'] - s0_df['F1'].mean():+.4f} F1) of pure clone leakage "
+        f"(-0.0201 exact-clone + -0.0283 near-clone; net E0 -> E1 = {mc.loc['E1','PR_AUC_mean'] - e0_grid['PR-AUC']:+.4f} because nested tuning adds +0.0102). "
+        f"Across our pre-registered RQ2 ablations (8-test Holm-Bonferroni family, Nadeau-Bengio df=24, MDE >= 0.02 PR-AUC), explicit opcode bigrams (F-BIGRAM) deliver "
         f"a Confirmed Improvement (+0.0227 PR-AUC to {mc.loc['E4b','PR_AUC_mean']:.4f}, 95% CI [+0.0096, +0.0358], p_Holm,NB = 9.27e-3, p_Holm,W = 4.77e-7; "
-        f"code-only E3b = {mc.loc['E3b','PR_AUC_mean']:.4f}), whereas 15 basic-block CFG semantic features (F-GSEM, E4c = {mc.loc['E4c','PR_AUC_mean']:.4f}, "
-        f"Delta = +0.0058, 95% CI [-0.0037, +0.0152], p_Holm,NB = 0.8799) yield No Significant Difference and are transparently reported as a negative structural result.",
+        f"code-only E3b = {mc.loc['E3b','PR_AUC_mean']:.4f}), whereas 15 basic-block CFG semantic features using multi-component McCabe complexity (F-GSEM, E4c = {mc.loc['E4c','PR_AUC_mean']:.4f}, "
+        f"Delta = +0.0075, 95% CI [-0.0029, +0.0179], p_Holm,NB = 0.6036) yield No Significant Difference and are transparently reported as a negative structural result.",
     )
     _p(
         doc,
-        f"On the blockchain layer (RQ3 / E5), three verified Vyper 0.4.3 contracts (D1 full storage, D2 compact event-only, "
-        f"D3 Merkle-batch) enforce k-of-n quorum separation and append-only evidence anchoring. On deterministic Cancun EVM, "
+        f"On the blockchain layer (RQ3 / E5, v1.1), three verified Vyper 0.4.3 contracts (D1 full storage, D2 compact event-only, "
+        f"D3 Merkle-batch) enforce k-of-n quorum separation, on-chain T13 quorum isolation (per-case threshold snapshot, roster-nonce Sybil guard, tie-safe Disputed, non-finalized vote revocation), and append-only evidence anchoring. On deterministic Cancun EVM, "
         f"a single finalized D1 case consumes {int(py_d1['gas_used']):,} gas (FAIL vs <= 250,000 ceiling; ${py_d1['mainnet_ref_cost_usd']:.6f} "
-        f"at 0.084427 gwei / ETH = $1,900.68), D2 reduces gas by 31.06% to {int(py_d2['gas_used']):,}, and D3 amortizes gas to "
+        f"at {anchor_gwei:.6f} gwei / ETH = ${anchor_eth:,.2f}), D2 reduces gas by {abs(d2_pct):.2f}% to {int(py_d2['gas_used']):,}, and D3 amortizes gas to "
         f"{py_d3_100['gas_per_case']:.2f} gas/case at N=100 and {py_d3_1000['gas_per_case']:.2f} gas/case at N=1,000 (PASS vs <= 10,000 target). "
         f"Live 1-block receipt confirmation latency on D1.attest (n=30) meets the <= 2-block target on Sepolia (median {e5_sum['latency_summary']['sepolia']['median_blocks']:.2f} block / "
         f"{e5_sum['latency_summary']['sepolia']['median_seconds']:.3f}s) and achieves {e5_sum['latency_summary']['arbitrum-sepolia']['median_seconds']:.3f}s "
-        f"median receipt inclusion on Arbitrum Sepolia, alongside live Sepolia T1/T6/T8 security proofs and a 4-page DApp with zero-server-key MetaMask signing.",
+        f"median receipt inclusion on Arbitrum Sepolia, alongside live Sepolia T1/T6/T8/T13 security proofs and a 4-page DApp with zero-server-key MetaMask signing.",
     )
 
     _callout(
@@ -427,7 +433,7 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
         [
             ["RQ1", "How faithfully does X-SPIDE [1] reproduce on raw random splits (E0), and what performance degradation occurs once CBOR-stripped exact & near-clone groups are quarantined across folds (E1, E2)?", "Reproduce X-SPIDE [1] 47/99-feature LightGBM on S_full random splits, then measure Delta PR-AUC / F1 on S_code 5x5 StratifiedGroupKFold(group_near) and test in-fold RFECV (E2)."],
             ["RQ2", "Do bytecode transition statistics (F-GSTAT), ordered opcode bigrams (F-BIGRAM), and basic-block CFG semantic features (F-GSEM) yield >= 0.02 PR-AUC gain over E1 without transaction leakage?", "Pre-registered 8-test Holm-Bonferroni family with Nadeau-Bengio paired t-tests (df=24), S1/S2/S4 sensitivity checks, external E6 sanity check, global/local SHAP, and 24-case error analysis."],
-            ["RQ3", "Can canonical SHAP-backed ML risk evidence be anchored to an immutable k-of-n Vyper registry with deterministic 1-byte tamper rejection, bounded gas, and <= 2-block confirmation?", "Benchmark D1/D2/D3 gas on Cancun PyEVM (<= 250k single, <= 10k amortized), Sepolia & Arbitrum Sepolia latency (n=30 each, <= 2 L1 blocks), T1-T12 invariants, and client-side ethers.js v6 signing."],
+            ["RQ3", "Can canonical SHAP-backed ML risk evidence be anchored to an immutable k-of-n Vyper registry with deterministic 1-byte tamper rejection, bounded gas, and <= 2-block confirmation?", "Benchmark D1/D2/D3 v1.1 gas on Cancun PyEVM (<= 250k single, <= 10k amortized), Sepolia & Arbitrum Sepolia latency (n=30 each, <= 2 L1 blocks), T1-T13 invariants, and client-side ethers.js v6 signing."],
         ],
         col_widths=[0.6, 3.1, 3.06],
     )
@@ -476,7 +482,7 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
     )
     _p(
         doc,
-        "Explicit Non-Goals & Scope Limits: On-chain contracts intentionally do NOT execute LightGBM inference in the EVM, store unbounded JSON payloads on-chain, enforce legal fraud verdicts in court, guarantee global censorship resistance without third-party IPFS pinning, or eliminate single-owner governance risk when deployed via a testnet EOA (documented transparently in deployments.json as owner_type='eoa_demo_limit', where production requires a Safe multisig + timelock, k > n/2, and frozen rosters during open cases).",
+        "Explicit Non-Goals & Scope Limits: On-chain contracts intentionally do NOT execute LightGBM inference in the EVM, store unbounded JSON payloads on-chain, enforce legal fraud verdicts in court, guarantee global censorship resistance without third-party IPFS pinning, or eliminate single-owner governance risk for future cases when deployed via a testnet EOA (documented transparently in deployments.json as owner_type='eoa_demo_limit', where v1.1 T13 isolates existing/open cases on-chain and production requires migrating owner to a Safe multisig + timelock for future rosters/thresholds).",
     )
 
     # ---- SECTION 4 ----
@@ -526,7 +532,7 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
         f"Cross-Dataset Overlap & Frozen Splits: Blockchain@Unica overlaps X-SPIDE on 161/182 unique addresses (plus 3 exact code-hash / 4 near-clone overlaps among live disjoint checks). "
         f"PonziGuard's .bin corpus has 78/89 extracted Ponzi runtimes overlapping X-SPIDE by near-clone group, leaving only {pg['ponzi_bins']['remaining_unique_hashes']} unique non-overlapping Ponzi "
         f"bytecodes (+ {pg['non_ponzi_bins']['remaining_unique_hashes']} non-Ponzi = 107). Per pre-registered Risk R6 (< 30 independent Ponzis), E6 was formally downgraded to SANITY_CHECK_ONLY. "
-        f"Finally, 55 immutable split JSONs were frozen (25 S_code_group_near, 25 S_code_group_exact for S1, 5 S_full_E0_random). Temporal holdout S3 could not be generated because block_number is absent in X-SPIDE and BigQuery credentials are unavailable locally.",
+        f"Finally, 80 immutable split JSONs are frozen (25 S_code_group_near, 25 S_code_group_exact for S1, 25 S_code_random added in v1.1 for S0 controlled leakage decomposition, and 5 S_full_E0_random). Temporal holdout S3 could not be generated because block_number is absent in X-SPIDE and BigQuery credentials are unavailable locally.",
     )
 
     # ---- SECTION 5 ----
@@ -539,7 +545,7 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
     )
     _bullet(doc, "F-BIGRAM (In-Fold Top-200): ", "Normalized consecutive opcode pairs computed per contract and vectorized strictly inside each training fold via BigramTopKVectorizer(top_k=200), preventing test vocabulary leakage.")
     _bullet(doc, "F-GSTAT (16 Transition Statistics): ", "Directed normalized opcode transition-graph descriptors: node/edge counts, self-loop-aware density (|E|/|V|^2), total transitions, mean/max weighted in-degree & out-degree, transition Shannon entropy, self-loop ratio, and 6 instruction-length (/L) normalized variants.")
-    _bullet(doc, "F-GSEM (15 Basic-Block CFG & Semantic Descriptors): ", "Static basic-block CFG recovering JUMP/JUMPI targets via local stack-push tracking: n_blocks, n_cfg_edges, cyclomatic (|E|-|V|+2, negative on fragmented CFGs where P>1), n_scc_cycles, has_loop_with_call, n_loops_with_call, n_loops_with_sstore, path_callvalue_to_call, n_blocks_with_call, call_block_ratio, unresolved_jump_ratio, has_selfdestruct, selfdestruct_reachable, and opcode transition PageRank weights pagerank_CALL & pagerank_SSTORE.")
+    _bullet(doc, "F-GSEM (15 Basic-Block CFG & Semantic Descriptors): ", "Static basic-block CFG recovering JUMP/JUMPI targets via local stack-push tracking: n_blocks, n_cfg_edges, cyclomatic (multi-component McCabe |E|-|V|+2P >= 1 where P counts weakly connected CFG components), n_scc_cycles, has_loop_with_call, n_loops_with_call, n_loops_with_sstore, path_callvalue_to_call, n_blocks_with_call, call_block_ratio, unresolved_jump_ratio, has_selfdestruct, selfdestruct_reachable, and opcode transition PageRank weights pagerank_CALL & pagerank_SSTORE.")
 
     fx_rows = [
         [
@@ -560,7 +566,7 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
     )
     _p(
         doc,
-        f"Benchmark hardware: {fx.loc['end_to_end', 'cpu_info']}, {fx.loc['end_to_end', 'ram_gb']:.2f} GB RAM, Python {fx.loc['end_to_end', 'python_version']}. Zero failures occurred across all 7,446 contracts (16.584 ms median end-to-end; 554 truncated-PUSH contracts handled deterministically).",
+        f"Benchmark hardware: {fx.loc['end_to_end', 'cpu_info']}, {fx.loc['end_to_end', 'ram_gb']:.2f} GB RAM, Python {fx.loc['end_to_end', 'python_version']}. Zero failures occurred across all 7,446 contracts ({fx.loc['end_to_end', 'median_ms']:.3f} ms median end-to-end; 554 truncated-PUSH contracts handled deterministically).",
     )
 
     doc.add_heading("5.2 Anti-Leakage ML Pipeline & Statistical Protocol", level=2)
@@ -573,7 +579,7 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
     dep = facts["dep"]["networks"]
     _p(
         doc,
-        "Three Vyper 0.4.3 contracts share identical k-of-n governance (default k=2 of n=3 auditors; owner cannot act as auditor or alter/delete records): D1 RiskAttestationRegistry (full Case + Attestation structs), D2_EventOnly (minimal CompactCase + event payloads), and D3_MerkleBatch (OpenZeppelin-compatible sorted-pair keccak256 Merkle root batching). Phase 6 implements deterministic canonical JSON serialization (sorted UTF-8 keys, 6-decimal fixed string floats, shap_digest + keccak256 evidence_hash + ABI-encoded case_id), IPFS CIDv1 raw-block generation with Git mirror persistence (evidence/<case_id>.json), a 4-page Streamlit DApp, and a zero-server-key ethers.js v6 MetaMask signer.",
+        "Three Vyper 0.4.3 v1.1 contracts share identical k-of-n governance (default k=2 of n=3 auditors; owner cannot act as auditor or alter/delete finalized records) and on-chain T13 quorum isolation (per-case required_threshold snapshot, created_roster_nonce Sybil guard, tie-safe STATUS_DISPUTED, and permissionless non-finalized revoke_removed_auditor_vote): D1 RiskAttestationRegistry (12-field Case + Attestation structs), D2_EventOnly (minimal CompactCase + event payloads), and D3_MerkleBatch (OpenZeppelin-compatible sorted-pair keccak256 Merkle root batching). Phase 6 implements deterministic canonical JSON serialization (sorted UTF-8 keys, 6-decimal fixed string floats, shap_digest + keccak256 evidence_hash + ABI-encoded case_id), IPFS CIDv1 raw-block generation with Git mirror persistence (evidence/<case_id>.json), a 4-page Streamlit DApp, and a zero-server-key ethers.js v6 MetaMask signer.",
     )
     _table(
         doc,
@@ -607,6 +613,8 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
             ["E0 (47-feat notebook)", "Random 85/15 (seed 42)", "47", f"{e0_1009['PR-AUC']:.4f}", f"{e0_1009['ROC-AUC']:.4f}", f"{e0_1009['F1']:.4f}", f"{e0_1009['P']:.4f}", f"{e0_1009['R']:.4f}", f"{e0_1009['Accuracy']:.4f}"],
             ["E0 (43-feat notebook)", "Random 85/15 (seed 42)", "43", f"{e0_43['PR-AUC']:.4f}", f"{e0_43['ROC-AUC']:.4f}", f"{e0_43['F1']:.4f}", f"{e0_43['P']:.4f}", f"{e0_43['R']:.4f}", f"{e0_43['Accuracy']:.4f}"],
             ["E0 Random 5-fold (GridBest)", "S_full random 5-fold", "99", f"{e0_5f['PR-AUC']:.4f}", f"{e0_5f['ROC-AUC']:.4f}", f"{e0_5f['F1']:.4f}", f"{e0_5f['P']:.4f}", f"{e0_5f['R']:.4f}", f"{e0_5f['Accuracy']:.4f}"],
+            ["E1_S0 Random 5x5 (v1.1 ctrl)", "S_code_random 5x5 nested", "99", f"{s0_df['PR-AUC'].mean():.4f} ± {s0_df['PR-AUC'].std(ddof=1):.4f}", f"{s0_df['ROC-AUC'].mean():.4f}", f"{s0_df['F1'].mean():.4f} ± {s0_df['F1'].std(ddof=1):.4f}", f"{s0_df['P'].mean():.4f}", f"{s0_df['R'].mean():.4f}", f"{s0_df['Accuracy'].mean():.4f}"],
+            ["E1_S1 Group Exact (S1)", "S_code 5x5 group_exact", "99", f"{s1_e1_df['PR-AUC'].mean():.4f} ± {s1_e1_df['PR-AUC'].std(ddof=1):.4f}", f"{s1_e1_df['ROC-AUC'].mean():.4f}", f"{s1_e1_df['F1'].mean():.4f} ± {s1_e1_df['F1'].std(ddof=1):.4f}", f"{s1_e1_df['P'].mean():.4f}", f"{s1_e1_df['R'].mean():.4f}", f"{s1_e1_df['Accuracy'].mean():.4f}"],
             ["E1 Main Grouped Baseline", "S_code 5x5 group_near", "99", f"{mc.loc['E1','PR_AUC_mean']:.4f} ± {mc.loc['E1','PR_AUC_std']:.4f}", f"{mc.loc['E1','ROC_AUC_mean']:.4f}", f"{mc.loc['E1','F1_mean']:.4f} ± {mc.loc['E1','F1_std']:.4f}", f"{mc.loc['E1','P_mean']:.4f}", f"{mc.loc['E1','R_mean']:.4f}", f"{mc.loc['E1','Accuracy_mean']:.4f}"],
             ["E2 In-Fold RFECV", "S_code 5x5 group_near", str(mc.loc['E2', 'n_features']), f"{mc.loc['E2','PR_AUC_mean']:.4f} ± {mc.loc['E2','PR_AUC_std']:.4f}", f"{mc.loc['E2','ROC_AUC_mean']:.4f}", f"{mc.loc['E2','F1_mean']:.4f} ± {mc.loc['E2','F1_std']:.4f}", f"{mc.loc['E2','P_mean']:.4f}", f"{mc.loc['E2','R_mean']:.4f}", f"{mc.loc['E2','Accuracy_mean']:.4f}"],
         ],
@@ -615,7 +623,7 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
     )
     _p(
         doc,
-        f"Moving from paper-style 5-fold random evaluation (E0) to leak-free 5x5 group_near nested Optuna CV (E1) shifts PR-AUC by {mc.loc['E1','PR_AUC_mean'] - e0_5f['PR-AUC']:+.4f} and F1 by {mc.loc['E1','F1_mean'] - e0_5f['F1']:+.4f} (reflecting the combined transition in split grouping, nested tuning, and thresholding, while controlled sensitivity S1 isolates -0.0283 PR-AUC from group_exact -> group_near under identical 5x5 tuning). Because |S_code| == |S_full| (100% coverage), E1-full matches E1 in population and verifies exact pipeline alignment (0.8767). In-fold RFE (E2) prunes to 71.4 ± 16.7 features with zero meaningful gain (Delta PR-AUC = +0.00003, p_Holm = 1.0). Frozen models/baseline_v1 (seed 42 fold 0, tau* = {card['classification_threshold']:.6f}) achieves PR-AUC = {card['demo_fold_metrics']['pr_auc']:.4f} and F1 = {card['demo_fold_metrics']['f1']:.4f}.",
+        f"Holding the 5x5 nested Optuna + tau* protocol strictly fixed across E1_S0_random_5x5 ({s0_df['PR-AUC'].mean():.4f}) -> E1_S1_group_exact ({s1_e1_df['PR-AUC'].mean():.4f}) -> E1 ({mc.loc['E1','PR_AUC_mean']:.4f}) isolates {mc.loc['E1','PR_AUC_mean'] - s0_df['PR-AUC'].mean():+.4f} PR-AUC ({mc.loc['E1','F1_mean'] - s0_df['F1'].mean():+.4f} F1) of pure clone leakage (-0.0201 exact-clone + -0.0283 near-clone). Because upgrading from paper-style E0 (GridSearch + 0.5) to E1_S0 adds {s0_df['PR-AUC'].mean() - e0_5f['PR-AUC']:+.4f} PR-AUC, the net E0 -> E1 shift is {mc.loc['E1','PR_AUC_mean'] - e0_5f['PR-AUC']:+.4f} PR-AUC ({mc.loc['E1','F1_mean'] - e0_5f['F1']:+.4f} F1). Because |S_code| == |S_full| (100% coverage), E1-full matches E1 in population (0.8767). In-fold RFE (E2) prunes to 71.4 ± 16.7 features with zero meaningful gain (Delta PR-AUC = +0.00003, p_Holm = 1.0). Frozen models/baseline_v1 (seed 42 fold 0, tau* = {card['classification_threshold']:.6f}) achieves PR-AUC = {card['demo_fold_metrics']['pr_auc']:.4f} and F1 = {card['demo_fold_metrics']['f1']:.4f}.",
     )
 
     doc.add_heading("6.2 RQ2: Feature Engineering Ablations, Statistics, Sensitivity & XAI", level=2)
@@ -686,14 +694,15 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
     e6 = facts["e6"]
     _p(
         doc,
-        f"Sensitivity & External Sanity Check (S1–S4, E6): S1 demonstrates that weaker exact-clone grouping (group_exact) inflates PR-AUC by +0.0283 on E1 (0.9051 vs 0.8767) and +0.0272 on E4c (0.9097 vs 0.8825), proving that MinHash near-clone grouping prevents substantial residual leakage. Both S2 (CBOR removal/recomputation, max |Delta| = 0.0028) and S4 (raw vs normalized mnemonics, max |Delta| = 0.0025) confirm result stability. Under Risk R6, the code-only external E6 check on 107 non-overlapping PonziGuard bytecodes (10 Ponzi / 97 non-Ponzi) reaches PR-AUC = {e6.loc['pr_auc', 'point']:.4f} (95% bootstrap CI [{e6.loc['pr_auc', 'ci95_low']:.4f}, {e6.loc['pr_auc', 'ci95_high']:.4f}]) and F1 = {e6.loc['f1', 'point']:.4f} (TP=6, FP=2, TN=95, FN=4).",
+        f"Sensitivity & External Sanity Check (S0–S4, E6): Controlled S0/S1 comparisons prove that random splitting inflates PR-AUC by +0.0484 (0.9251 vs 0.8767), and weaker exact-clone grouping (group_exact) still inflates PR-AUC by +0.0283 on E1 (0.9051 vs 0.8767) and +0.0261 on E4c (0.9104 vs 0.8842), proving MinHash near-clone grouping is mandatory. Both S2 (CBOR removal/recomputation, max |Delta| = 0.0032) and S4 (raw vs normalized mnemonics, max |Delta| = 0.0025) confirm result stability. Under Risk R6, the code-only external E6 check on 107 non-overlapping PonziGuard bytecodes (10 Ponzi / 97 non-Ponzi) reaches PR-AUC = {e6.loc['pr_auc', 'point']:.4f} (95% bootstrap CI [{e6.loc['pr_auc', 'ci95_low']:.4f}, {e6.loc['pr_auc', 'ci95_high']:.4f}]) and F1 = {e6.loc['f1', 'point']:.4f} (TP=5, FP=2, TN=95, FN=5).",
     )
 
     xai = facts["xai"]
     err = facts["err"]
+    g_map = {g["feature"]: g for g in xai["gsem_shap_ranking"]}
     _p(
         doc,
-        f"Explainability & Error Analysis: Out-of-fold TreeExplainer rankings on seed-42 E4c identify call_block_ratio (mean |SHAP| = 0.2833, Spearman r = +0.874), n_loops_with_call (0.2061; E[SHAP | >0] = +1.052 vs -0.114), n_blocks_with_call (0.1707), and unresolved_jump_ratio (0.1520, Spearman r = -0.897) among top F-GSEM attributions, passing our directional sanity check (has_loop_with_call mean SHAP = +0.3191 when present vs -0.0305 when absent; note that has_loop_with_call is a static CALL-in-SCC structural heuristic rather than proof of a Ponzi payout loop). Across 7,446 contracts, 526 (7.06%) exceed unresolved_jump_ratio > 0.50 (below the 50% Risk R4 threshold). Seed-42 E4c produces TP={xai['total_tp_seed42']}, FP={xai['total_fp_seed42']}, TN={xai['total_tn_seed42']}, FN={xai['total_fn_seed42']}; inspecting top-12 FP + top-12 FN highest-margin failures shows FPs concentrate in benign distributor loops (e.g. xspide_02699) and mixed-label near-clone clusters ({xai['fp_mixed_cluster_count']} FPs, {xai['fn_mixed_cluster_count']} FNs overall), while FNs lack static loop+CALL motifs.",
+        f"Explainability & Error Analysis: Out-of-fold TreeExplainer rankings on seed-42 E4c identify call_block_ratio (mean |SHAP| = {g_map['call_block_ratio']['mean_abs_shap']:.4f}, Spearman r = {g_map['call_block_ratio']['spearman_val_vs_shap']:+.3f}), n_loops_with_call ({g_map['n_loops_with_call']['mean_abs_shap']:.4f}; E[SHAP | >0] = {g_map['n_loops_with_call']['mean_shap_when_gt0']:+.3f} vs {g_map['n_loops_with_call']['mean_shap_when_le0']:+.3f}), unresolved_jump_ratio ({g_map['unresolved_jump_ratio']['mean_abs_shap']:.4f}, Spearman r = {g_map['unresolved_jump_ratio']['spearman_val_vs_shap']:+.3f}), and n_blocks_with_call ({g_map['n_blocks_with_call']['mean_abs_shap']:.4f}) among top F-GSEM attributions, passing our directional sanity check (has_loop_with_call mean SHAP = {g_map['has_loop_with_call']['mean_shap_when_gt0']:+.4f} when present vs {g_map['has_loop_with_call']['mean_shap_when_le0']:+.4f} when absent; note that has_loop_with_call is a static CALL-in-SCC structural heuristic rather than proof of a Ponzi payout loop). Across 7,446 contracts, 526 (7.06%) exceed unresolved_jump_ratio > 0.50 (below the 50% Risk R4 threshold). Seed-42 E4c produces TP={xai['total_tp_seed42']}, FP={xai['total_fp_seed42']}, TN={xai['total_tn_seed42']}, FN={xai['total_fn_seed42']}; inspecting top-12 FP + top-12 FN highest-margin failures shows FPs concentrate in transaction-asymmetry mimics (6/12), benign distributor loops (3/12, e.g. xspide_06872), and mixed-label near-clone clusters ({xai['fp_mixed_cluster_count']} FPs, {xai['fn_mixed_cluster_count']} FNs overall), while FNs lack static loop+CALL motifs (9/12).",
     )
     _two_figures(
         doc,
@@ -705,7 +714,7 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
         doc,
         REPO_ROOT / "figures" / "cfg_tp.png",
         REPO_ROOT / "figures" / "shap_waterfall_tp.png",
-        "Figure 3. Case study TP contract (xspide_02792, P=0.9999995): Basic-Block CFG with call-in-loop SCC (left) and TreeExplainer SHAP waterfall (right).",
+        "Figure 3. Case study TP contract (xspide_02792, P=0.9999996): Basic-Block CFG with call-in-loop SCC (left) and TreeExplainer SHAP waterfall (right).",
     )
     _two_figures(
         doc,
@@ -714,42 +723,51 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
         "Figure 4. Structural failure archetypes: False Positive benign payout loop (xspide_06872, left) vs False Negative acyclic dispatcher (xspide_04097, right).",
     )
 
-    doc.add_heading("6.3 RQ3: On-Chain Gas, Cost, Latency, Security & Live DApp (E5)", level=2)
-    def _usd(gas: float, gwei: float, eth_usd: float = 1900.68) -> float:
+    doc.add_heading("6.3 RQ3: On-Chain Gas, Cost, Latency, Security & Live DApp (E5, v1.1)", level=2)
+    def _usd(gas: float, gwei: float, eth_usd: float = anchor_eth) -> float:
         return gas * gwei * 1e-9 * eth_usd
 
+    py_deploy = int(float(e5_gas[(e5_gas["network"] == "anvil_pyevm") & (e5_gas["variant"] == "D1") & (e5_gas["operation"] == "deploy")].iloc[0]["gas_used"]))
     sep_deploy = int(float(e5_gas[(e5_gas["network"] == "sepolia") & (e5_gas["variant"] == "D1") & (e5_gas["operation"] == "deploy")].iloc[0]["gas_used"]))
     sep_d1 = int(float(e5_gas[(e5_gas["network"] == "sepolia") & (e5_gas["variant"] == "D1") & (e5_gas["operation"] == "finalized_case_total")].iloc[0]["gas_used"]))
     sep_d2 = int(float(e5_gas[(e5_gas["network"] == "sepolia") & (e5_gas["variant"] == "D2") & (e5_gas["operation"] == "finalized_case_total")].iloc[0]["gas_used"]))
     sep_d3_100 = float(e5_gas[(e5_gas["network"] == "sepolia") & (e5_gas["variant"] == "D3") & (e5_gas["operation"] == "batch_finalized_total")].iloc[0]["gas_per_case"])
     py_rm = int(float(e5_gas[(e5_gas["network"] == "anvil_pyevm") & (e5_gas["variant"] == "D1") & (e5_gas["operation"] == "remove_auditor")].iloc[0]["gas_used"]))
+    py_rev = int(float(e5_gas[(e5_gas["network"] == "anvil_pyevm") & (e5_gas["variant"] == "D1") & (e5_gas["operation"] == "revoke_removed_auditor_vote")].iloc[0]["gas_used"]))
+    sep_rm = int(float(e5_gas[(e5_gas["network"] == "sepolia") & (e5_gas["variant"] == "D1") & (e5_gas["operation"] == "remove_auditor")].iloc[0]["gas_used"]))
+    sep_rev = int(float(e5_gas[(e5_gas["network"] == "sepolia") & (e5_gas["variant"] == "D1") & (e5_gas["operation"] == "revoke_removed_auditor_vote")].iloc[0]["gas_used"]))
+    d1_over_pct = 100.0 * (float(py_d1["gas_used"]) - 250000.0) / 250000.0
 
     _table(
         doc,
-        ["Variant & Operation", "Cancun PyEVM Gas", "Sepolia Live (EIP-8037)", "Mainnet Ref ($ @ 0.0844 gwei)", "Stress ($ @ 30 gwei)", "Pre-Reg Target Verdict"],
+        ["Variant & Operation", "Cancun PyEVM Gas", "Sepolia Live (EIP-8037)", f"Mainnet Ref ($ @ {anchor_gwei:.4f} gwei)", "Stress ($ @ 30 gwei)", "Pre-Reg Target Verdict"],
         [
-            ["D1 deploy (constructor)", "1,068,183", f"{sep_deploy:,}", f"${_usd(1068183, 0.084427):.6f}", f"${_usd(1068183, 30):.2f}", "One-time deployment"],
-            ["D1 register_case + 2x attest (k=2)", f"{int(py_d1['gas_used']):,}", f"{sep_d1:,} (spot)", f"${py_d1['mainnet_ref_cost_usd']:.6f}", f"${_usd(float(py_d1['gas_used']), 30):.2f}", "FAIL (> 250,000 limit)"],
-            ["D1 remove_auditor (warm)", f"{py_rm:,}", "—", "$0.005222", f"${_usd(py_rm, 30):.2f}", "Governance revocation"],
-            ["D2 EventOnly finalized (k=2)", f"{int(py_d2['gas_used']):,}", f"{sep_d2:,} (spot)", f"${py_d2['mainnet_ref_cost_usd']:.6f}", f"${_usd(float(py_d2['gas_used']), 30):.2f}", "-31.06% vs D1 (FAIL > 250k)"],
+            ["D1 deploy (constructor)", f"{py_deploy:,}", f"{sep_deploy:,}", f"${_usd(py_deploy, anchor_gwei):.6f}", f"${_usd(py_deploy, 30):.2f}", "One-time deployment"],
+            ["D1 register_case + 2x attest (k=2)", f"{int(py_d1['gas_used']):,}", f"{sep_d1:,} (spot)", f"${py_d1['mainnet_ref_cost_usd']:.6f}", f"${_usd(float(py_d1['gas_used']), 30):.2f}", f"FAIL (> 250k, +{d1_over_pct:.2f}%)"],
+            ["D1 remove_auditor (warm)", f"{py_rm:,}", f"{sep_rm:,} (T13)", f"${_usd(py_rm, anchor_gwei):.6f}", f"${_usd(py_rm, 30):.2f}", "Governance revocation"],
+            ["D1 revoke_removed_auditor_vote (v1.1)", f"{py_rev:,}", f"{sep_rev:,} (T13)", f"${_usd(py_rev, anchor_gwei):.6f}", f"${_usd(py_rev, 30):.2f}", "Open-case cleanup (T13)"],
+            ["D2 EventOnly finalized (k=2)", f"{int(py_d2['gas_used']):,}", f"{sep_d2:,} (spot)", f"${py_d2['mainnet_ref_cost_usd']:.6f}", f"${_usd(float(py_d2['gas_used']), 30):.2f}", f"{d2_pct:.2f}% vs D1 (FAIL > 250k)"],
             ["D3 MerkleBatch (N=100, /case)", f"{py_d3_100['gas_per_case']:.2f}", f"{sep_d3_100:,.2f} (spot)", f"${py_d3_100['mainnet_ref_cost_per_case_usd']:.6f}", f"${_usd(float(py_d3_100['gas_per_case']), 30):.4f}", "PASS (<= 10,000 target)"],
             ["D3 MerkleBatch (N=1,000, /case)", f"{py_d3_1000['gas_per_case']:.2f}", "—", f"${py_d3_1000['mainnet_ref_cost_per_case_usd']:.6f}", f"${_usd(float(py_d3_1000['gas_per_case']), 30):.5f}", "PASS (<= 10,000 target)"],
         ],
         col_widths=[1.75, 0.95, 1.05, 1.05, 0.85, 1.11],
-        font_size=8.0,
+        font_size=7.9,
     )
     lat_sep = e5_sum["latency_summary"]["sepolia"]
     lat_arb = e5_sum["latency_summary"]["arbitrum-sepolia"]
     sec_sep = e5_sum["live_networks"]["sepolia"]["security_on_main_d1"]
     t8_sep = e5_sum["live_networks"]["sepolia"]["T8_sepolia_verify_evidence"]
+    t13_sep = e5_sum["live_networks"]["sepolia"]["T13_sepolia_quorum_isolation"]
+    arb_d1_usd = float(e5_gas[(e5_gas["network"] == "arbitrum-sepolia") & (e5_gas["variant"] == "D1") & (e5_gas["operation"] == "finalized_case_total")].iloc[0]["actual_fee_usd"])
+    arb_d3_usd = float(e5_gas[(e5_gas["network"] == "arbitrum-sepolia") & (e5_gas["variant"] == "D3") & (e5_gas["operation"] == "batch_finalized_total")].iloc[0]["actual_fee_usd"]) / 100.0
     _p(
         doc,
-        f"Gas, Fee & Latency Findings: Cancun PyEVM results reveal a critical negative cost result: storing the 10-field Case struct plus two cold attestations costs {int(py_d1['gas_used']):,} gas in D1, exceeding the pre-registered 250,000-gas single-case threshold by 70.98%. D2 trims 31.06% ({int(py_d2['gas_used']):,} gas), while D3 Merkle batching achieves O(1) batch gas (~357,453 total regardless of N), driving amortized cost down to {py_d3_100['gas_per_case']:.2f} gas/case at N=100 (PASS <= 10k) and 357.46 gas/case at N=1,000. Note that Sepolia's Glamsterdam/EIP-8037 state-creation repricing raises live state-write gas (~7.37M deploy, 693,762 register_case), while Arbitrum Sepolia receipts reflect $0.016278 for D1 and $0.000136/case for D3 (reference-only due to gasUsedForL1 = 0x0 on testnet). Across n=30 sequential D1.attest receipt-confirmation measurements per testnet, Sepolia confirms in median {lat_sep['median_blocks']:.2f} block / {lat_sep['median_seconds']:.3f}s (p95 = {lat_sep['p95_seconds']:.3f}s, PASS <= 2 blocks) and Arbitrum Sepolia confirms in {lat_arb['median_seconds']:.3f}s (p95 = {lat_arb['p95_seconds']:.3f}s). Live Sepolia receipts confirm T1/T6 reverts (all 5 status=0, e.g., owner attest tx {sec_sep['T6_owner_attest_revert']['tx_hash'][:14]}..., main D1 state untouched) and T8 tamper rejection ({t8_sep['verify_exact_onchain']} vs {t8_sep['verify_tampered_onchain']}). Qualitative architecture comparison against ProvAuditChain [4] shows X-SPIDE-G uniquely contributes Vyper k-of-n quorum separation, EIP-170 modular batching, and client-side zero-server-key signing.",
+        f"Gas, Fee & Latency Findings (v1.1): Cancun PyEVM results reveal a critical negative cost result: storing the 12-field v1.1 Case struct (including required_threshold & created_roster_nonce snapshots) plus two cold attestations costs {int(py_d1['gas_used']):,} gas in D1, exceeding the pre-registered 250,000-gas single-case threshold by {d1_over_pct:.2f}%. D2 trims {abs(d2_pct):.2f}% ({int(py_d2['gas_used']):,} gas), while D3 Merkle batching achieves O(1) batch gas (~{int(py_d3_100['gas_used']):,} total regardless of N), driving amortized cost down to {py_d3_100['gas_per_case']:.2f} gas/case at N=100 (PASS <= 10k) and {py_d3_1000['gas_per_case']:.2f} gas/case at N=1,000. Note that Sepolia's Glamsterdam/EIP-8037 state-creation repricing raises live state-write gas (~9.75M deploy, 918,026 register_case), while Arbitrum Sepolia receipts reflect ${arb_d1_usd:.6f} for D1 and ${arb_d3_usd:.6f}/case for D3 (reference-only due to gasUsedForL1 = 0x0 on testnet). Across n=30 sequential D1.attest receipt-confirmation measurements per testnet, Sepolia confirms in median {lat_sep['median_blocks']:.2f} block / {lat_sep['median_seconds']:.3f}s (p95 = {lat_sep['p95_seconds']:.3f}s, PASS <= 2 blocks) and Arbitrum Sepolia confirms in {lat_arb['median_seconds']:.3f}s (p95 = {lat_arb['p95_seconds']:.3f}s). Live Sepolia receipts confirm T1/T6 reverts (all 5 status=0, e.g., owner attest tx {sec_sep['T6_owner_attest_revert']['tx_hash'][:14]}..., main D1 state untouched), T8 tamper rejection ({t8_sep['verify_exact_onchain']} vs {t8_sep['verify_tampered_onchain']}), and T13 quorum isolation (post-creation Sybil revert tx {t13_sep['sybil_attest_revert']['tx_hash'][:14]}... and permissionless revoke_removed_auditor_vote tx {t13_sep['revoke_removed_vote_tx_hash'][:14]}..., {t13_sep['revoke_removed_vote_gas_used']:,} gas). Qualitative architecture comparison against ProvAuditChain [4] shows X-SPIDE-G uniquely contributes Vyper k-of-n quorum separation, T13 open-case isolation, EIP-170 modular batching, and client-side zero-server-key signing.",
     )
     _figure(
         doc,
         REPO_ROOT / "figures" / "gas_vs_batch.png",
-        "Figure 5. Gas per case across D1, D2, and D3 (N = 1..1,000) vs pre-registered ceilings (Cancun PyEVM), plus Sepolia vs Arbitrum Sepolia 30-tx confirmation latency.",
+        "Figure 5. Gas per case across D1, D2, and D3 (N = 1..1,000) vs pre-registered ceilings (Cancun PyEVM v1.1), plus Sepolia vs Arbitrum Sepolia 30-tx confirmation latency.",
         width_in=6.2,
     )
     _two_figures(
@@ -768,12 +786,12 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
     # ---- SECTION 7 ----
     doc.add_heading("7. Discussion: Negative Results & Threats to Validity", level=1)
     doc.add_heading("7.1 Why F-GSEM Underperformed F-BIGRAM & Why D1 Exceeded 250k Gas", level=2)
-    _bullet(doc, "Negative ML Structural Result (F-GSEM vs F-BIGRAM): ", "Despite model utilization of call_block_ratio and loop-with-CALL indicators, adding 15 scalar CFG features to E1 (+0.0058 PR-AUC) or E4b (+0.0016) failed to pass MDE or statistical significance, whereas sparse in-fold top-200 opcode bigrams (F-BIGRAM) yielded a Confirmed +0.0227 PR-AUC gain (and code-only E3b reached 0.9013). Two plausible mechanisms explain this gap: (a) F-GSEM compresses the entire control-flow graph into 15 coarse scalar summaries whereas F-BIGRAM preserves 200 fine-grained local transitions (CALLVALUE->DUP, DUP->REVERT, SLOAD->LT), and (b) Solidity 0.4–0.5 runtime code resolves some dynamic function dispatchers and loop exit addresses via stack/memory pointers (median 19.18% and 526 contracts > 50% unresolved indirect jumps), which can fragment static loop back-edges.")
-    _bullet(doc, "Negative On-Chain Cost Result (D1 Single-Case Gas = 427,461 > 250,000): ", "Storing full 10-field structs plus per-auditor mappings incurs three separate cold SSTORE trees across register_case and two cold attest calls. Rather than relaxing thresholds post-hoc, E5 transparently flags D1 FAIL against the 250k ceiling and validates D3_MerkleBatch as the production scaling path (3,574.53 gas/case at N=100, 357.46 at N=1,000).")
+    _bullet(doc, "Negative ML Structural Result (F-GSEM vs F-BIGRAM): ", "Despite model utilization of call_block_ratio and loop-with-CALL indicators and adopting exact multi-component McCabe complexity (M_C = |E|-|V|+2P >= 1), adding 15 scalar CFG features to E1 (+0.0075 PR-AUC) or E4b (+0.0017) failed to pass MDE or statistical significance, whereas sparse in-fold top-200 opcode bigrams (F-BIGRAM) yielded a Confirmed +0.0227 PR-AUC gain (and code-only E3b reached 0.9013). Two plausible mechanisms explain this gap: (a) F-GSEM compresses the entire control-flow graph into 15 coarse scalar summaries whereas F-BIGRAM preserves 200 fine-grained local transitions (CALLVALUE->DUP, DUP->REVERT, SLOAD->LT), and (b) Solidity 0.4–0.5 runtime code resolves some dynamic function dispatchers and loop exit addresses via stack/memory pointers (median 19.18% and 526 contracts > 50% unresolved indirect jumps), which can fragment static loop back-edges.")
+    _bullet(doc, f"Negative On-Chain Cost Result (D1 Single-Case Gas = {int(py_d1['gas_used']):,} > 250,000): ", f"Storing the 12-field v1.1 Case struct plus per-auditor mappings incurs three separate cold SSTORE trees across register_case and two cold attest calls (+57,357 gas vs v1.0 for T13 quorum hardening). Rather than relaxing thresholds post-hoc, E5 transparently flags D1 FAIL against the 250k ceiling and validates D3_MerkleBatch as the production scaling path ({py_d3_100['gas_per_case']:.2f} gas/case at N=100, {py_d3_1000['gas_per_case']:.2f} at N=1,000).")
 
     doc.add_heading("7.2 Threats to Validity", level=2)
-    _bullet(doc, "Internal & Mixed-Label Clone Clusters: ", "X-SPIDE exhibits 10 exact-clone and 24 near-clone clusters containing both Ponzi and non-Ponzi labels (14 FPs and 38 FNs in seed-42 E4c), reflecting either up to 10% opcode variation within J >= 0.90 near-clone groups or post-deployment behavioral differences (e.g., dormant vs active deployments).")
-    _bullet(doc, "Construct & Governance Validity: ", "Linear-sweep stack tracking misses dynamic memory/storage jump targets (7.06% contracts > 50% unresolved jumps, making cyclomatic = |E| - |V| + 2 negative when P > 1). On-chain, _compute_status evaluates approve_count >= threshold before reject_count >= threshold, global threshold changes apply to subsequent attest calls on open cases, and remove_auditor/add_auditor retains prior tallies while allowing new auditors to vote on open cases—requiring strict majority quorums (k > n/2), multisig/timelock ownership, and no mid-case roster rotation. Testnet accounting also differs from Cancun via Sepolia EIP-8037 repricing and Arbitrum Sepolia gasUsedForL1 = 0x0.")
+    _bullet(doc, "Internal & Mixed-Label Clone Clusters: ", f"X-SPIDE exhibits 10 exact-clone and 24 near-clone clusters containing both Ponzi and non-Ponzi labels ({xai['fp_mixed_cluster_count']} FPs and {xai['fn_mixed_cluster_count']} FNs in seed-42 E4c), reflecting either up to 10% opcode variation within J >= 0.90 near-clone groups or post-deployment behavioral differences (e.g., dormant vs active deployments).")
+    _bullet(doc, "Construct & Governance Validity: ", "Linear-sweep stack tracking misses dynamic memory/storage jump targets (7.06% contracts > 50% unresolved jumps, even though v1.1 eliminates negative cyclomatic values via M_C = |E| - |V| + 2P >= 1). On-chain, v1.1 (T13) enforces per-case threshold snapshotting, created_roster_nonce Sybil isolation, tie-safe STATUS_DISPUTED, and permissionless non-finalized vote revocation in bytecode; the remaining operational scope limit is testnet EOA ownership (owner_type='eoa_demo_limit') for future cases, requiring a Safe multisig + timelock in production. Testnet accounting also differs from Cancun via Sepolia EIP-8037 repricing and Arbitrum Sepolia gasUsedForL1 = 0x0.")
     _bullet(doc, "External & Temporal Validity: ", "X-SPIDE lacks block_number (preventing S3 temporal holdout), leaving post-2023 Solidity proxy/diamond Ponzi patterns untested; additionally, bytecode_opcode_8k.csv exclusion introduces statistically significant selection bias (Risk R2), and E6 only has 10 independent non-overlapping Ponzis (Risk R6).")
 
     # ---- SECTION 8 ----

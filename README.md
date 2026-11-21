@@ -10,7 +10,7 @@
 ![Vyper](https://img.shields.io/badge/vyper-0.4.3-8a2be2)
 ![LightGBM](https://img.shields.io/badge/model-LightGBM%20%2B%20SHAP-green)
 ![Networks](https://img.shields.io/badge/testnets-Sepolia%20%7C%20Arbitrum%20Sepolia-orange)
-![Release](https://img.shields.io/badge/release-v1.0--final-success)
+![Release](https://img.shields.io/badge/release-v1.1-success)
 
 [📄 IEEE Paper (PDF)](paper/main.pdf) · [📘 Final Report](reports/final_report.md) · [🎬 Demo Video](demo/X-SPIDE-G_demo.mp4) · [🧪 Pre-Registration](docs/preregistration.md) · [🔗 Traceability Matrix](reports/traceability_matrix.md)
 
@@ -68,11 +68,11 @@ Smart Ponzi schemes disguise investor-funded redistribution loops as staking, yi
 
 | RQ | Finding | Key numbers |
 |---|---|---|
-| **RQ1** – Clone leakage | **59.09 %** of Ponzi contracts (`520/880`) have near-duplicate bytecode. Moving from random 5-fold (`E0`) to clone-grouped `5 × 5` nested CV (`E1`) lowers PR-AUC by `-0.0382`, while strictly controlled `group_exact → group_near` (`S1`) isolates `-0.0283`. | `E0 → E1`: PR-AUC `0.9149 → 0.8767` (**−0.0382**), F1 `0.8589 → 0.8118` (**−0.0471**) · `S1`: `0.9051 → 0.8767` (**−0.0283**) |
-| **RQ2** – Structural features | Explicit in-fold top-200 **opcode bigrams** give a *Confirmed Improvement*. Lightweight static **CFG semantics** (`F-GSEM`) do **not** reach the pre-registered MDE. | `E4b vs E1`: **+0.0227** PR-AUC, 95 % NB CI `[+0.0096, +0.0358]`, `p_Holm,NB = 9.27e-3` (`p_Holm,W = 4.77e-7`) · `E4c vs E1`: `+0.0058`, CI `[−0.0037, +0.0152]` (n.s.) |
-| **RQ3** – On-chain registry | Full-storage `D1` **fails** the 250k-gas/case ceiling. Merkle-batch `D3` **passes** by a wide margin. Receipt inclusion latency target met on Sepolia (`D1.attest`); ~1.2 s on Arbitrum Sepolia. | `D1` `427,461` gas (FAIL) · `D2` `294,706` (−31.06 %) · `D3` `3,574.53`/case @ N=100, `357.46` @ N=1000 (PASS ≤ 10,000) |
+| **RQ1** – Clone leakage | **59.09 %** of Ponzi contracts (`520/880`) have near-duplicate bytecode. Under identical `5 × 5` nested Optuna + $\tau^*$ tuning (`E1_S0_random_5x5 → E1`), pure clone leakage is **−0.0484** PR-AUC (**−0.0201** exact + **−0.0283** near-clone), while net `E0 → E1` is −0.0382. | `E1_S0 → E1`: PR-AUC `0.9251 → 0.8767` (**−0.0484**), F1 `0.8679 → 0.8118` (**−0.0561**) · `E0 → E1`: `0.9149 → 0.8767` (**−0.0382**) |
+| **RQ2** – Structural features | Explicit in-fold top-200 **opcode bigrams** give a *Confirmed Improvement*. Lightweight static **CFG semantics** (`F-GSEM`, with exact multi-component $M_C = |E_C|-|V_C|+2P$) do **not** reach the pre-registered MDE. | `E4b vs E1`: **+0.0227** PR-AUC, 95 % NB CI `[+0.0096, +0.0358]`, `p_Holm,NB = 9.27e-3` (`p_Holm,W = 4.77e-7`) · `E4c vs E1`: `+0.0075`, CI `[−0.0029, +0.0179]` (n.s.) |
+| **RQ3** – On-chain registry (`v1.1`) | Hardened with on-chain `T13` quorum isolation. Full-storage `D1` **fails** the 250k-gas/case ceiling. Merkle-batch `D3` **passes** by a wide margin. Receipt inclusion latency target met on Sepolia (`D1.attest`); ~1.2 s on Arbitrum Sepolia. | `D1` `484,818` gas (FAIL) · `D2` `352,063` (−27.38 %) · `D3` `4,148.10`/case @ N=100, `414.82` @ N=1000 (PASS ≤ 10,000) |
 
-Additional facts: median end-to-end feature extraction `16.58 ms/contract` (0 errors on 7,446); `100 %` revert-branch coverage on all three contracts; verified deployments on two public testnets; 1-byte evidence tamper is rejected on-chain (`verify_evidence → False`).
+Additional facts: median end-to-end feature extraction `13.88 ms/contract` (0 errors on 7,446); `100 %` revert-branch coverage on all three `v1.1` contracts (`D1` 20/20, `D2` 20/20, `D3` 18/18, `T1`–`T13`); verified deployments on two public testnets; 1-byte evidence tamper and post-creation Sybil votes are rejected on-chain.
 
 ---
 
@@ -81,9 +81,9 @@ Additional facts: median end-to-end feature extraction `16.58 ms/contract` (0 er
 ```mermaid
 flowchart TD
     subgraph A["Track A - ML and Data"]
-        D1["1. Data audit and bytecode recovery<br/>X-SPIDE, PonziGuard, Unica"] --> D2["CBOR strip + group_exact / MinHash group_near<br/>5x5 StratifiedGroupKFold (55 frozen splits)"]
+        D1["1. Data audit and bytecode recovery<br/>X-SPIDE, PonziGuard, Unica"] --> D2["CBOR strip + group_exact / MinHash group_near<br/>5x5 StratifiedGroupKFold (80 frozen splits)"]
         D2 --> F["2. Features<br/>99 X-SPIDE + F-BIGRAM + F-GSTAT + F-GSEM"]
-        F --> M["3. Nested-CV LightGBM, stats, SHAP/XAI<br/>E0-E4d, S1-S4, E6"]
+        F --> M["3. Nested-CV LightGBM, stats, SHAP/XAI<br/>E0-E4d, S0-S4, E6"]
     end
     subgraph B["Track B - Blockchain and DApp"]
         M --> E["4. Canonical evidence JSON<br/>keccak256 evidence_hash, case_id, IPFS CIDv1 + Git mirror"]
@@ -104,16 +104,17 @@ flowchart TD
 |---|---|
 | **RQ1** | Can the published X-SPIDE LightGBM baseline be reproduced, and how much does performance shift under CBOR-stripped, clone-grouped validation? |
 | **RQ2** | Do opcode bigrams (`F-BIGRAM`), transition-graph statistics (`F-GSTAT`) or basic-block CFG semantics (`F-GSEM`) improve PR-AUC over the 99-feature baseline by **ΔPR-AUC ≥ 0.02** (MDE) under `5 × 5` grouped CV? What is the per-contract extraction cost? Are SHAP attributions domain-faithful? |
-| **RQ3** | Does the k-of-n Vyper registry enforce role separation and append-only immutability (`T1`–`T12`), and which of `D1`/`D2`/`D3` meets the pre-registered gas and latency thresholds? |
+| **RQ3** | Does the k-of-n Vyper registry enforce role separation, quorum-snapshot isolation, and append-only immutability (`T1`–`T13`), and which of `D1`/`D2`/`D3` meets the pre-registered gas and latency thresholds? |
 
 | ID | Purpose | Subset | Features | Setup |
 |---|---|---|---|---|
 | `E0` | Paper reproduction | `S_full` | 47 (paper) / 99 | Paper random split & random 5-fold |
+| `E1_S0` | Controlled random 5×5 (`v1.1`) | `S_code_random` | 99 | Random `5 × 5` nested Optuna + τ* |
 | `E1-full`, **`E1`** | Grouped baseline (**primary**) | `S_full` / `S_code` | 99 | `group_near` `5 × 5` CV |
 | `E2` | In-fold feature selection | `S_code` | RFECV in-fold | `group_near` `5 × 5` CV |
 | `E3` / `E3b` / `E3c` | Code-only: GSTAT / BIGRAM / GSEM | `S_code` | 16 / 200 / 15 | `group_near` `5 × 5` CV |
 | `E4` / `E4b` / `E4c` / `E4d` | Baseline + GSTAT / BIGRAM / GSEM / BIGRAM+GSEM | `S_code` | 115 / 299 / 114 / 314 | `group_near` `5 × 5` CV |
-| `S1`–`S4` | Sensitivity: `group_exact`; ±CBOR; temporal holdout; ±opcode normalization | `S_code` | `E1`, `E4c` (`E4b`) | see [reports/rq2_results.md](reports/rq2_results.md) |
+| `S0`–`S4` | Sensitivity: random 5×5; `group_exact`; ±CBOR; temporal holdout; ±opcode norm | `S_code` | `E1`, `E4c` (`E4b`) | see [reports/rq2_results.md](reports/rq2_results.md) |
 | `E5` | On-chain benchmark | — | — | `D1`/`D2`/`D3` × local EVM / Sepolia / Arbitrum Sepolia |
 | `E6` | External transfer (conditional → sanity check) | PonziGuard (deduped) | code-only | Train `S_code`, test external |
 
@@ -129,7 +130,7 @@ flowchart TD
 2. **`group_exact`** – `keccak256(stripped_runtime_bytecode)` → `6,145` groups (25.6 % of Ponzi in multi-groups, 10 mixed-label groups).
 3. **`group_near`** – 5-gram normalized-opcode shingles, MinHash (`128` permutations), LSH Jaccard ≥ **0.90**, union-find → **`4,711` groups** (max size 99, 24 mixed-label groups, **520/880 = 59.09 % of Ponzi** in multi-member families).
 
-**Frozen splits** (`splits/`, 55 JSONs, leak-free invariant unit-tested): `25` × `S_code_group_near`, `25` × `S_code_group_exact`, `5` × `S_full_E0_random`; seeds `42..46`.
+**Frozen splits** (`splits/`, 80 JSONs, leak-free invariant unit-tested): `25` × `S_code_group_near`, `25` × `S_code_group_exact`, `25` × `S_code_random` (`v1.1` `S0` control), `5` × `S_full_E0_random`; seeds `42..46`.
 
 **Selection-bias audit (Risk R2).** The 516 rows dropped from the raw 8k table differ significantly from the kept ones (e.g. `lifetime` median 15 vs 2 days, KS = 0.138; `tx_out` KS = 0.247). See [reports/data_audit.md](reports/data_audit.md).
 
@@ -148,17 +149,17 @@ Implemented in `src/features/` on CBOR-stripped bytecode via a linear-sweep EVM 
 | **Baseline (X-SPIDE)** | 99 | 23 account/transaction features + 76 normalized opcode unigram frequencies. |
 | **`F-BIGRAM`** | 200 | Relative frequency of consecutive normalized opcode pairs; **top-200 by document frequency selected strictly inside each training fold** (`BigramTopKVectorizer`). |
 | **`F-GSTAT`** | 16 | Transition-graph statistics: node/edge counts, self-loop-aware density (`\|E\|/\|V\|^2`), total transitions, mean/max weighted in-degree & out-degree, transition Shannon entropy, self-loop ratio, and 6 `/L`-normalized variants. |
-| **`F-GSEM`** | 15 | Basic-block CFG (stack-local `JUMP/JUMPI` resolution): `n_blocks`, `n_cfg_edges`, `cyclomatic` (`\|E\|-\|V\|+2`, negative when $P>1$), `n_scc_cycles`, `has_loop_with_call`, `n_loops_with_call`, `n_loops_with_sstore`, `path_callvalue_to_call`, `call_block_ratio`, `unresolved_jump_ratio`, `has_selfdestruct`, `selfdestruct_reachable`, `pagerank_CALL`, `pagerank_SSTORE`, … |
+| **`F-GSEM`** | 15 | Basic-block CFG (stack-local `JUMP/JUMPI` resolution): `n_blocks`, `n_cfg_edges`, `cyclomatic` (multi-component McCabe $\|E\|-\|V\|+2P \ge 1$), `n_scc_cycles`, `has_loop_with_call`, `n_loops_with_call`, `n_loops_with_sstore`, `path_callvalue_to_call`, `call_block_ratio`, `unresolved_jump_ratio`, `has_selfdestruct`, `selfdestruct_reachable`, `pagerank_CALL`, `pagerank_SSTORE`, … |
 
 **Extraction cost** (i5-12450H, 15.6 GB, Python 3.12.13; 7,446 contracts, 0 errors; [`results/feature_extraction_cost.csv`](results/feature_extraction_cost.csv)):
 
 | Stage | Median (ms) | p95 (ms) |
 |---|---:|---:|
-| `disasm` | 3.90 | 14.62 |
-| `bigram` | 3.61 | 10.88 |
-| `gstat` | 1.91 | 5.65 |
-| `gsem` | 6.64 | 18.67 |
-| **end-to-end** | **16.58** | **60.21** |
+| `disasm` | 3.30 | 12.00 |
+| `bigram` | 3.07 | 9.22 |
+| `gstat` | 1.62 | 4.76 |
+| `gsem` | 5.59 | 15.98 |
+| **end-to-end** | **13.88** | **50.84** |
 
 ---
 
@@ -177,16 +178,18 @@ Implemented in `src/features/` on CBOR-stripped bytecode via a linear-sweep EVM 
 
 ## 8. Results
 
-### 8.1 RQ1 – Baseline reproduction & clone leakage (`E0`–`E2`)
+### 8.1 RQ1 – Baseline reproduction & controlled clone leakage (`E0`–`E2`)
 
 | Run | Split | Feats | PR-AUC | ROC-AUC | F1 |
 |---|---|---:|---:|---:|---:|
 | Published X-SPIDE [1] | paper 85/15 random | 47 | — | 0.9770 | 0.8670 |
-| `E0` | random 5-fold (`S_full`) | 99 | 0.9149 | 0.9768 | 0.8589 |
-| **`E1`** | `group_near` 5×5 (`S_code`) | 99 | **0.8767 ± 0.0254** | 0.9631 | 0.8118 ± 0.0275 |
+| `E0` | random 5-fold (`S_full`, fixed `0.5`) | 99 | 0.9149 | 0.9768 | 0.8589 |
+| `E1_S0_random_5x5` (`v1.1` control) | random 5×5 (`S_code_random`, Nested Optuna + τ*) | 99 | 0.9251 ± 0.0110 | 0.9785 | 0.8679 ± 0.0149 |
+| `E1_S1_group_exact` | `group_exact` 5×5 (`S_code`, Nested Optuna + τ*) | 99 | 0.9051 ± 0.0197 | 0.9730 | 0.8379 ± 0.0243 |
+| **`E1`** | `group_near` 5×5 (`S_code`, Nested Optuna + τ*) | 99 | **0.8767 ± 0.0254** | 0.9631 | 0.8118 ± 0.0275 |
 | `E2` (in-fold RFECV) | `group_near` 5×5 | 71.4 | 0.8768 ± 0.0237 | 0.9638 | 0.8095 ± 0.0264 |
 
-The frozen demo artifact [`models/baseline_v1/`](models/baseline_v1) (seed 42 / fold 0, τ* = `0.256746`) reaches PR-AUC `0.8956`, F1 `0.8222`. Detailed reproduction gaps vs. the paper: [reports/rq1_reproduction.md](reports/rq1_reproduction.md).
+The frozen demo artifact [`models/baseline_v1/`](models/baseline_v1) (seed 42 / fold 0, τ* = `0.256746`) reaches PR-AUC `0.8956`, F1 `0.8222`. Detailed 3-step causal decomposition (`+0.0102` protocol, `−0.0201` exact-clone, `−0.0283` near-clone = `−0.0484` total pure clone leakage) and reproduction gaps vs. the paper: [reports/rq1_reproduction.md](reports/rq1_reproduction.md).
 
 ### 8.2 RQ2 – Feature ablations (`5 × 5` grouped CV, 25 folds)
 
@@ -195,59 +198,60 @@ The frozen demo artifact [`models/baseline_v1/`](models/baseline_v1) (seed 42 / 
 | `E1` | 99 baseline | 99 | 0.8767 ± 0.0254 | — | 0.8118 | 0.9631 |
 | `E3` | `F-GSTAT` only | 16 | 0.6000 ± 0.0629 | −0.2767 | 0.5364 | 0.8402 |
 | `E3b` | `F-BIGRAM` only | 200 | **0.9013 ± 0.0191** | +0.0246 | 0.8247 | 0.9736 |
-| `E3c` | `F-GSEM` only | 15 | 0.7787 ± 0.0418 | −0.0980 | 0.6972 | 0.9253 |
+| `E3c` | `F-GSEM` only | 15 | 0.7832 ± 0.0421 | −0.0935 | 0.7049 | 0.9269 |
 | `E4` | 99 + `F-GSTAT` | 115 | 0.8805 ± 0.0242 | +0.0037 | 0.8140 | 0.9641 |
-| **`E4b`** | 99 + `F-BIGRAM` | 299 | 0.8995 ± 0.0212 | **+0.0227** | **0.8263** | **0.9738** |
-| `E4c` | 99 + `F-GSEM` | 114 | 0.8825 ± 0.0233 | +0.0058 | 0.8125 | 0.9649 |
-| `E4d` | 99 + `F-BIGRAM` + `F-GSEM` | 314 | 0.9010 ± 0.0216 | +0.0243 | 0.8259 | 0.9734 |
+| **`E4b`** | 99 + `F-BIGRAM` | 299 | 0.8995 ± 0.0212 | **+0.0227** | 0.8263 | **0.9738** |
+| `E4c` | 99 + `F-GSEM` | 114 | 0.8842 ± 0.0237 | +0.0075 | 0.8144 | 0.9657 |
+| `E4d` | 99 + `F-BIGRAM` + `F-GSEM` | 314 | 0.9011 ± 0.0191 | +0.0244 | **0.8267** | 0.9738 |
 
 Pre-registered hypothesis tests (Holm family of 8; `p_Holm,NB` from Nadeau–Bengio paired *t*-test and `p_Holm,W` from exact Wilcoxon; full table in [`results/stat_tests.csv`](results/stat_tests.csv)):
 
 | Comparison | ΔPR-AUC | 95 % NB CI | `p_Holm,NB` (`p_Holm,W`) | Verdict |
 |---|---:|---|---:|---|
 | `E4b vs E1` | **+0.0227** | `[+0.0096, +0.0358]` | `9.27e-3` (`4.77e-7`) | **Confirmed Improvement** |
-| `E3c vs E3` | +0.1787 | `[+0.1242, +0.2332]` | `3.75e-6` (`4.77e-7`) | **Confirmed Improvement** |
-| `E4 vs E1` | +0.0037 | `[−0.0027, +0.0102]` | `8.80e-1` (`1.38e-2`) | No Significant Difference |
-| `E4c vs E1` | +0.0058 | `[−0.0037, +0.0152]` | `8.80e-1` (`8.10e-3`) | No Significant Difference |
-| `E4d vs E4b` | +0.0016 | `[−0.0075, +0.0107]` | `1.00` (`1.00`) | No Significant Difference |
+| `E3c vs E3` | +0.1832 | `[+0.1271, +0.2394]` | `4.04e-6` (`4.77e-7`) | **Confirmed Improvement** |
+| `E4 vs E1` | +0.0037 | `[−0.0027, +0.0102]` | `7.37e-1` (`1.38e-2`) | No Significant Difference |
+| `E4c vs E1` | +0.0075 | `[−0.0029, +0.0179]` | `6.04e-1` (`2.53e-3`) | No Significant Difference |
+| `E4d vs E4b` | +0.0017 | `[−0.0091, +0.0125]` | `1.00` (`5.99e-1`) | No Significant Difference |
 | `E2 vs E1` | +0.0000 | `[−0.0070, +0.0071]` | `1.00` (`1.00`) | No Significant Difference |
-| `E4c vs E4b` | −0.0169 | `[−0.0298, −0.0041]` | `5.83e-2` (`2.98e-6`) | Inconclusive (degradation) |
-| `E3c vs E3b` | −0.1226 | `[−0.1578, −0.0874]` | `1.59e-6` (`4.77e-7`) | Inconclusive (degradation) |
+| `E4c vs E4b` | −0.0152 | `[−0.0275, −0.0030]` | `8.53e-2` (`9.83e-6`) | Inconclusive (degradation) |
+| `E3c vs E3b` | −0.1181 | `[−0.1524, −0.0838]` | `1.93e-6` (`4.77e-7`) | Inconclusive (degradation) |
 
-> Naive Wilcoxon alone would flag `E4`/`E4c` vs `E1` as significant (`p_Holm,W < 0.05`) because it treats the 25 overlapping CV folds as independent. Applying Holm–Bonferroni to the Nadeau–Bengio *t*-test (`p_Holm,NB = 0.880`) and 95 % CIs corrects for shared training folds, and both effects stay far below the 0.02 MDE.
+> Naive Wilcoxon alone would flag `E4`/`E4c` vs `E1` as significant (`p_Holm,W < 0.05`) because it treats the 25 overlapping CV folds as independent. Applying Holm–Bonferroni to the Nadeau–Bengio *t*-test (`p_Holm,NB = 0.737` and `0.604`) and 95 % CIs corrects for shared training folds, and both effects stay far below the 0.02 MDE.
 
 <p align="center">
   <img src="figures/pr_curves.png" width="46%" alt="Precision-Recall curves"/>
   <img src="figures/delta_pr_auc_ci.png" width="46%" alt="Delta PR-AUC Nadeau-Bengio confidence intervals"/>
 </p>
 
-**Sensitivity (`S1`–`S4`).**
-- `S1` – weakening grouping to `group_exact` inflates PR-AUC by **+0.028** (`E1` `0.9051`, `E4c` `0.9097`): near-clone grouping matters.
-- `S2` (CBOR stripping, max |Δ| = 0.0028) and `S4` (raw vs normalized opcodes, max |Δ| = 0.0025): negligible.
+**Sensitivity (`S0`–`S4`).**
+- `S0` & `S1` – under identical `5 × 5` nested tuning, random splitting (`E1_S0 = 0.9251`) inflates PR-AUC by **+0.0484** over `group_near` (`0.8767`), while `group_exact` (`E1 = 0.9051`, `E4c = 0.9104`) still leaves **+0.026–0.028** near-clone bias: near-clone grouping matters.
+- `S2` (CBOR stripping, max |Δ| = 0.0032) and `S4` (raw vs normalized opcodes, max |Δ| = 0.0025): negligible.
 - `S3` (temporal): `N/A` (see §5).
 
-**External sanity check (`E6`).** Only `10` non-overlapping unique PonziGuard Ponzi runtimes remain (< 30), so Risk **R6** downgrades `E6` to `SANITY_CHECK_ONLY`: PR-AUC `0.6535` (95 % bootstrap CI `[0.3965, 0.9141]`), `n_test = 107`.
+**External sanity check (`E6`).** Only `10` non-overlapping unique PonziGuard Ponzi runtimes remain (< 30), so Risk **R6** downgrades `E6` to `SANITY_CHECK_ONLY`: PR-AUC `0.6169` (95 % bootstrap CI `[0.3497, 0.8784]`), F1 `0.5882` (`TP=5, FP=2, TN=95, FN=5`), `n_test = 107`.
 
-**Explainability & error audit.** OOF TreeExplainer SHAP on `E4c` ranks `call_block_ratio` (0.283), `n_loops_with_call` (0.206), `n_blocks_with_call` (0.171), `unresolved_jump_ratio` (0.152) highest among `F-GSEM` descriptors (note that `has_loop_with_call` is a static `CALL`-in-SCC heuristic rather than proof of a Ponzi payout loop). Manual audit of 12 FP + 12 FN ([`results/error_analysis_cases.csv`](results/error_analysis_cases.csv)) links errors to legitimate distributor loops and mixed-label clone clusters (14 FP / 38 FN). Figures: [`figures/`](figures) (SHAP beeswarm/waterfall, CFG visualizations).
+**Explainability & error audit.** OOF TreeExplainer SHAP on `E4c` ranks `call_block_ratio` (0.280), `n_loops_with_call` (0.221), `unresolved_jump_ratio` (0.158), `n_blocks_with_call` (0.149) highest among `F-GSEM` descriptors (note that `has_loop_with_call` is a static `CALL`-in-SCC heuristic rather than proof of a Ponzi payout loop). Manual audit of 12 FP + 12 FN ([`results/error_analysis_cases.csv`](results/error_analysis_cases.csv)) links errors to transaction-asymmetry mimics, legitimate distributor loops, and mixed-label clone clusters (13 FP / 38 FN across `TP=678, FP=99, TN=6,467, FN=202`). Figures: [`figures/`](figures) (SHAP beeswarm/waterfall, CFG visualizations).
 
 **Why did `F-GSEM` underperform `F-BIGRAM`?** Plausibly because (1) `F-GSEM` compresses the graph into 15 coarse scalar summaries whereas `F-BIGRAM` retains 200 fine-grained local transitions (`CALLVALUE→DUP`, `DUP→REVERT`, `SLOAD→LT`), and (2) Solidity 0.4–0.5 bytecode routes some dispatchers and loop exits through indirect stack/memory jumps (median `19.18 %` unresolved jumps; `526/7,446 = 7.06 %` of contracts > 50 %), which can fragment static loop back-edges. Full discussion: [reports/rq2_results.md](reports/rq2_results.md).
 
-### 8.3 RQ3 – On-chain gas, cost, latency & security (`E5`)
+### 8.3 RQ3 – On-chain gas, cost, latency & security (`E5`, `v1.1`)
 
-Deterministic gas is measured on a Cancun-rules `PyEVMBackend` (native `anvil.exe` is blocked by Windows Application Control on the dev machine); live spot-checks run on Sepolia and Arbitrum Sepolia. USD reference: `0.084427 gwei` median Ethereum mainnet gas price (blocks `26412234..26412333`) × `ETH = $1,900.68` (fixed anchor `2026-11-14`).
+Deterministic gas is measured on a Cancun-rules `PyEVMBackend` (native `anvil.exe` is blocked by Windows Application Control on the dev machine); live spot-checks run on Sepolia and Arbitrum Sepolia. USD reference: `0.971057 gwei` median Ethereum mainnet gas price (blocks `26463858..26463957`) × `ETH = $1,704.05` (fixed anchor `2026-11-21`).
 
 | Variant / operation | Cancun PyEVM gas | Sepolia live (EIP-8037) | Mainnet ref. | Pre-registered target | Verdict |
 |---|---:|---:|---:|---|---|
-| `D1` deploy | 1,068,183 | 7,365,849 | \$0.171 | — | — |
-| `D1` finalized case (`register` + 2×`attest`) | **427,461** | 1,648,029 | \$0.0686 | ≤ 250,000 | **FAIL** (+70.98 %) |
-| `D2` finalized case | 294,706 | 987,566 | \$0.0473 | ≤ 250,000 | **FAIL** (−31.06 % vs `D1`) |
-| `D3` batch, per case, `N = 10` | 35,741.7 | — | — | — | — |
-| `D3` batch, per case, **`N = 100`** | **3,574.53** | 13,142.73 | \$0.000574 | ≤ 10,000 | **PASS** |
-| `D3` batch, per case, **`N = 1,000`** | **357.46** | — | \$0.000057 | ≤ 10,000 | **PASS** |
+| `D1` deploy | 1,400,866 | 9,751,010 | \$2.318 | — | — |
+| `D1` finalized case (`register` + 2×`attest`) | **484,818** | 1,881,226 | \$0.8022 | ≤ 250,000 | **FAIL** (+93.93 %) |
+| `D1` `revoke_removed_auditor_vote` (`v1.1`) | 46,864 | 63,402 (live `T13`) | \$0.0775 | — | Open-case cleanup |
+| `D2` finalized case | 352,063 | 1,220,763 | \$0.5826 | ≤ 250,000 | **FAIL** (−27.38 % vs `D1`) |
+| `D3` batch, per case, `N = 10` | 41,477.4 | — | \$0.0686 | — | — |
+| `D3` batch, per case, **`N = 100`** | **4,148.10** | 15,474.70 | \$0.006864 | ≤ 10,000 | **PASS** |
+| `D3` batch, per case, **`N = 1,000`** | **414.82** | — | \$0.000686 | ≤ 10,000 | **PASS** |
 
-- **Latency** (30 sequential `attest` txs per network): Sepolia median **`10.357 s` / 1.00 block** (p95 `11.217 s`) → **PASS** (≤ 2 blocks). Arbitrum Sepolia median **`1.226 s`** (p95 `1.675 s`).
-- **Security proofs:** `T1`/`T6`/`T8` exploit attempts revert (owner cannot `attest`, non-auditor cannot register) and tamper checks pass on live Sepolia, without mutating the main `D1` instance.
-- **Caveats:** Sepolia (post-Glamsterdam/EIP-8037) repricing makes state creation ~3.35×–6.90× costlier than Cancun, so `D3` at `N = 100` is `13,142.73` gas/case there and passes only for `N ≥ 132`. Arbitrum Sepolia reports `gasUsedForL1 = 0x0`, so its USD figures are testnet references only.
+- **Latency** (30 sequential `attest` txs per network): Sepolia median **`10.560 s` / 1.00 block** (p95 `11.699 s`) → **PASS** (≤ 2 blocks). Arbitrum Sepolia median **`1.212 s`** (p95 `1.756 s`).
+- **Security proofs:** `T1`/`T6`/`T8`/`T13` exploit attempts revert (owner cannot `attest`, non-auditor cannot register, post-creation Sybil auditor reverts `"Auditor added after case creation"`) and tamper + permissionless open-case vote revocation checks pass on live Sepolia, without mutating the main `D1` instance.
+- **Caveats:** Sepolia (post-Glamsterdam/EIP-8037) repricing makes state creation ~3.47×–6.97× costlier than Cancun, so `D3` at `N = 100` is `15,474.70` gas/case there and passes only for `N ≥ 155`. Arbitrum Sepolia reports `gasUsedForL1 = 0x0`, so its USD figures are testnet references only.
 - **Related work comparison** with ProvAuditChain [4] is qualitative (not head-to-head).
 
 <p align="center"><img src="figures/gas_vs_batch.png" width="70%" alt="Gas vs batch size"/></p>
@@ -256,40 +260,42 @@ Full report: [reports/rq3_onchain.md](reports/rq3_onchain.md) · data: [`E5_gas.
 
 ---
 
-## 9. Smart Contracts (Vyper `D1`/`D2`/`D3`)
+## 9. Smart Contracts (Vyper `D1`/`D2`/`D3` — `v1.1`)
 
-All contracts are written in **Vyper `0.4.3`** and share the same governance model: **k-of-n** attestation (default `k = 2`, `n = 3`), strict `owner ≠ auditor`, **zero admin override** (no function can edit/delete cases, hashes or past attestations), no `payable`/`__default__`, no `raw_call`/`delegatecall`/`selfdestruct`, and bounded `String[128]` URIs.
+All contracts are written in **Vyper `0.4.3`** and share the same `v1.1` governance model: **k-of-n** attestation (default `k = 2`, `n = 3`), strict `owner ≠ auditor`, **zero admin override** (no function can edit/delete cases, hashes, or finalized verdicts), on-chain **`T13` quorum isolation** (per-case `required_threshold` snapshot, `created_roster_nonce` Sybil guard, tie-safe `Disputed`, and permissionless non-finalized `revoke_removed_auditor_vote`), no `payable`/`__default__`, no `raw_call`/`delegatecall`/`selfdestruct`, and bounded `String[128]` URIs.
 
 | Variant | File | Stored state | Purpose |
 |---|---|---|---|
-| **`D1`** | [`contracts/RiskAttestationRegistry.vy`](contracts/RiskAttestationRegistry.vy) | Full `Case` (10 fields) + per-auditor `Attestation` | Primary full-storage baseline |
-| **`D2`** | [`contracts/variants/D2_EventOnly.vy`](contracts/variants/D2_EventOnly.vy) | Compact case (`exists`, `evidence_hash`, tallies, `status`); metadata in events | Minimal-storage variant |
-| **`D3`** | [`contracts/variants/D3_MerkleBatch.vy`](contracts/variants/D3_MerkleBatch.vy) | `Batch` keyed by Merkle `root` + batch-level attestation | Gas amortization (OpenZeppelin-compatible sorted-pair `keccak256` trees) |
+| **`D1`** | [`contracts/RiskAttestationRegistry.vy`](contracts/RiskAttestationRegistry.vy) | Full `Case` (12 fields, incl. `required_threshold` & `created_roster_nonce`) + per-auditor `Attestation` | Primary full-storage baseline |
+| **`D2`** | [`contracts/variants/D2_EventOnly.vy`](contracts/variants/D2_EventOnly.vy) | Compact case (`exists`, `evidence_hash`, tallies, `status`, `required_threshold`, `created_roster_nonce`); metadata in events | Minimal-storage variant |
+| **`D3`** | [`contracts/variants/D3_MerkleBatch.vy`](contracts/variants/D3_MerkleBatch.vy) | `Batch` keyed by Merkle `root` (incl. `required_threshold`, `created_roster_nonce`) + batch-level attestation | Gas amortization (OpenZeppelin-compatible sorted-pair `keccak256` trees) |
 
 **Roles & functions**
 
 | Role | Functions |
 |---|---|
-| `owner` | `add_auditor`, `remove_auditor` (keeps history), `set_threshold` |
+| `owner` | `add_auditor` (increments `roster_nonce`), `remove_auditor`, `set_threshold` (future cases only) |
 | `auditor` | `register_case(case_id, subject, subject_chain_id, evidence_hash, model_version_hash, evidence_uri)`, `attest(case_id, decision, reason_hash)` · `D3`: `register_batch`, `attest_batch` |
+| public (permissionless) | `revoke_removed_auditor_vote(case_id / root, auditor)` (non-finalized `Open`/`Disputed` only) |
 | public (view) | `verify_evidence(case_id, h) → bool`, `get_case`, `get_attestation` · `D3`: `verify_inclusion(leaf, proof, root)`, `compute_leaf` |
 
-**Decision / status enums.** Decision `0 Unset · 1 Approve · 2 Reject · 3 NeedsReview`. Status is recomputed on every attestation: `1 Approved` if `approve ≥ k`; else `2 Rejected` if `reject ≥ k`; else `3 Disputed` if both ≥ 1; else `0 Open`.
+**Decision / status enums.** Decision `0 Unset · 1 Approve · 2 Reject · 3 NeedsReview`. Status is recomputed against the case/batch's snapshotted `required_threshold`: `3 Disputed` if both `approve ≥ k` and `reject ≥ k` (tie-safe); else `1 Approved` if `approve ≥ k`; else `2 Rejected` if `reject ≥ k`; else `3 Disputed` if both ≥ 1; else `0 Open`.
 
-**Events (append-only ledger):** `AuditorAdded`, `AuditorRemoved`, `ThresholdChanged`, `CaseRegistered`, `Attested`, `StatusChanged` (+ `BatchRegistered`, `BatchAttested`, `BatchStatusChanged` in `D3`).
+**Events (append-only ledger):** `AuditorAdded`, `AuditorRemoved`, `ThresholdChanged`, `CaseRegistered`, `Attested`, `StatusChanged`, `RemovedAuditorVoteRevoked` (+ `BatchRegistered`, `BatchAttested`, `BatchStatusChanged`, `RemovedAuditorBatchVoteRevoked` in `D3`).
 
-**Verification suite `T1`–`T12`** (`tests/contracts/`, `PyEVMBackend`):
+**Verification suite `T1`–`T13`** (`tests/contracts/`, `46` contract tests, `PyEVMBackend`):
 
 | ID | Target | ID | Target |
 |---|---|---|---|
-| `T1` | Non-auditor `register_case`/`attest` reverts | `T7` | Removed auditor reverts; history intact |
-| `T2` | Duplicate `case_id` reverts | `T8` | `verify_evidence`: exact → `True`, 1-byte tamper → `False` |
-| `T3` | Invalid decision reverts | `T9` | All 6 event types emit exact args |
-| `T4` | Exhaustive `k=2, n=3` quorum sequences | `T10` | Invalid `set_threshold` / `remove_auditor` revert |
-| `T5` | Attestation replacement increments `revision` | `T11` | Hypothesis differential fuzz vs. Python reference |
-| `T6` | Owner cannot alter/delete anything | `T12` | `D3` Merkle leaf/proof (valid, tampered, unregistered) |
+| `T1` | Non-auditor `register_case`/`attest` reverts | `T8` | `verify_evidence`: exact → `True`, 1-byte tamper → `False` |
+| `T2` | Duplicate `case_id` reverts | `T9` | All event types emit exact args |
+| `T3` | Invalid decision reverts | `T10` | Invalid `set_threshold` / `remove_auditor` revert |
+| `T4` | Exhaustive `k=2, n=3` quorum sequences | `T11` | Hypothesis differential fuzz vs. Python reference |
+| `T5` | Attestation replacement increments `revision` | `T12` | `D3` Merkle leaf/proof (valid, tampered, unregistered) |
+| `T6` | Owner cannot alter/delete anything | `T13` | `v1.1` Threshold snapshot, Sybil roster-nonce guard, tie-safe `Disputed` & non-finalized vote revocation (`D1`/`D2`/`D3`) |
+| `T7` | Removed auditor reverts; finalized history intact | — | — |
 
-**Coverage:** every explicit `assert` revert guard is exercised – `D1` 16/16, `D2` 16/16, `D3` 14/14 (100 %). See [docs/contract_spec.md](docs/contract_spec.md), [docs/security_review.md](docs/security_review.md), [reports/contract_coverage.md](reports/contract_coverage.md). Third-party Vyper static analyzers (e.g. Slither) were **not** run; assurance comes from manual audit, exhaustive sequences, and differential fuzzing.
+**Coverage:** every explicit `assert` revert guard is exercised – `D1` 20/20, `D2` 20/20, `D3` 18/18 (100 %). See [docs/contract_spec.md](docs/contract_spec.md), [docs/security_review.md](docs/security_review.md), [reports/contract_coverage.md](reports/contract_coverage.md). Third-party Vyper static analyzers (e.g. Slither) were **not** run; assurance comes from manual audit, exhaustive sequences, and differential fuzzing.
 
 ---
 
@@ -339,27 +345,27 @@ The full walkthrough (holdout contract `xspide_00439`, score `0.998390 ≥ τ* =
 |---|---|---|---|
 | Operator alters score/SHAP after publication | Undetectable without external anchor | Recomputed `keccak256` ≠ on-chain `evidence_hash` | `T8`, DApp page 4 |
 | Single compromised auditor | Accepted immediately | Stays `Open` until `k = 2` agree | `T4`, `T5` |
-| Owner tries direct attestation | Can override rows | Reverts (not an auditor) | `T6` (Sepolia tx `0x56764e897eec…`) |
+| Owner tries direct attestation or mid-case Sybil/threshold attack | Can override rows | Reverts (`T6` not an auditor; `T13` post-creation Sybil rejected, threshold snapshotted per case) | `T6` (`0x686750805433…`), `T13` (`0x56d73080cfed…`) |
 | Replay / overwrite of `case_id` | Possible with upsert | Duplicate reverts; roots append-only | `T2`, `T12` |
 
 **Explicit non-goals:** no on-chain inference, no storage of arbitrary JSON on-chain, no legal finality, no defense against ≥ `k` colluding auditors, and availability of off-chain JSON depends on IPFS pinning / the Git mirror. Details: [docs/threat_model.md](docs/threat_model.md).
 
 ---
 
-## 12. Deployed Contracts
+## 12. Deployed Contracts (`v1.1`)
 
 Source of truth: [`deployments.json`](deployments.json). Each deployment has `3` auditors and `threshold = 2`.
 
-| Network | Chain ID | Variant | Address | Etherscan |
+| Network | Chain ID | Variant | Address (`v1.1`) | Etherscan |
 |---|---:|---|---|---|
-| Ethereum Sepolia | `11155111` | `D1` | `0x14895F5e1f7F1aC5C58b35dA6d57674Aa5951b77` | Pass – Verified |
-| Ethereum Sepolia | `11155111` | `D2` | `0x693632c45108A9ca25a7F9d693c00554EeDD1EB1` | Pass – Verified |
-| Ethereum Sepolia | `11155111` | `D3` | `0xf04fd7BD0Ee4DBf28d19D7D02988ac01fD989eF2` | Pass – Verified |
-| Arbitrum Sepolia | `421614` | `D1` | `0x14895F5e1f7F1aC5C58b35dA6d57674Aa5951b77` | Pass – Verified |
-| Arbitrum Sepolia | `421614` | `D3` | `0x693632c45108A9ca25a7F9d693c00554EeDD1EB1` | Pass – Verified |
+| Ethereum Sepolia | `11155111` | `D1` | `0x9E01ed5Aa19f0758d8dEc7C461dc374AcDA52Fad` | Pass – Verified |
+| Ethereum Sepolia | `11155111` | `D2` | `0x33f7f3369A7b1fe3326032FeEbbdE873bD1E3f24` | Pass – Verified |
+| Ethereum Sepolia | `11155111` | `D3` | `0xe71C0468c32bC8ae555624b07e4B3CFDE3fb88e0` | Pass – Verified |
+| Arbitrum Sepolia | `421614` | `D1` | `0x8D757ED6419C30117c497a921ee6b685995C96B7` | Pass – Verified |
+| Arbitrum Sepolia | `421614` | `D3` | `0x93C99e7F0fe273fa9d9e45f43D4d24Fc8C6c70Ee` | Pass – Verified |
 | Anvil (local PyEVM RPC) | `31337` | `D1`/`D2`/`D3` | `0x5FbDB…0aa3` / `0x5FC8d…5707` / `0x61017…D788` | Local dev |
 
-> **Governance limitation.** Live deployments use an EOA owner (`0x950e0416b13153d542d07Bf7f9AB586B0e903465`, recorded as `owner_type = "eoa_demo_limit"`) instead of a Safe multisig. While the owner cannot call `attest` directly or delete history, a compromised owner key could add a Sybil auditor address or lower the global `threshold` (affecting open/existing cases upon a subsequent `attest`), and rotating auditors mid-case preserves prior tally counts while allowing new auditors to vote; moreover, `_compute_status` evaluates `approve_count >= k` before `reject_count >= k`, requiring strict majority quorums ($k > n/2$). Live Sepolia auditor accounts hold `0 ETH`; Sepolia writes via the DApp use the MetaMask signer once funded from a faucet (read-only verification is live).
+> **Governance limitation.** Live deployments use an EOA owner (`0x950e0416b13153d542d07Bf7f9AB586B0e903465`, recorded as `owner_type = "eoa_demo_limit"`) instead of a Safe multisig. In `v1.1` (`T13`), on-chain `required_threshold` snapshotting, `created_roster_nonce` Sybil isolation, tie-safe `Disputed`, and permissionless non-finalized vote revocation protect all existing/open cases from retroactive owner manipulation; however, a compromised EOA owner still controls rosters/thresholds for *future* cases, so production deployments must use a Safe multisig + timelock. Live Sepolia auditor accounts hold `0 ETH`; Sepolia writes via the DApp use the MetaMask signer once funded from a faucet (read-only verification is live).
 
 ---
 
@@ -382,7 +388,7 @@ Source of truth: [`deployments.json`](deployments.json). Each deployment has `3`
 │   └── evidence/                   # canonical JSON, IPFS/Git storage, inference, chain client
 ├── scripts/                        # run_all, deploy/verify contracts, run_phase6/7, local RPC, DApp launcher, report builders
 ├── tests/                          # data / features / models / stats / contracts / evidence / deliverables
-├── splits/                         # 55 frozen CV split JSONs
+├── splits/                         # 80 frozen CV split JSONs (incl. S_code_random)
 ├── models/baseline_v1/             # Frozen LightGBM baseline + model_card.json + feature_schema.json
 ├── data/manifest.json              # Pinned dataset sources (raw/processed data git-ignored)
 ├── results/                        # CSV/JSON outputs for E0–E6, stats, XAI, traceability
@@ -438,12 +444,12 @@ pip install -r requirements.txt && pip install -e . --no-deps
 | Phase | Deliverable | Command |
 |---|---|---|
 | 0 | Design freeze, threat model, pre-registration | [`docs/`](docs) |
-| 1 | Data audit, CBOR strip, clone clusters, 55 splits | `python -m src.data.download` → `python -m src.data.pipeline --skip-rpc` |
+| 1 | Data audit, CBOR strip, clone clusters, 80 splits | `python -m src.data.download` → `python -m src.data.pipeline --skip-rpc` |
 | 2 | `E0`–`E2`, frozen `baseline_v1` | `python -m src.models.run_phase2` |
 | 3 | `F-BIGRAM` / `F-GSTAT` / `F-GSEM` + cost table | `python -m src.features.pipeline` |
-| 4 | `E3`–`E4d`, `S1`–`S4`, `E6`, stats | `python -m src.models.run_phase4_experiments` |
+| 4 | `E3`–`E4d`, `S0`–`S4`, `E6`, stats | `python -m src.models.run_phase4_experiments` |
 | 4 (XAI) | SHAP, CFG figures, error audit | `python -m src.models.phase4_xai` |
-| 5 | Contracts + `T1`–`T12` + coverage | `python -m pytest tests/contracts --cov=src/contracts --cov-report=term-missing -v` |
+| 5 | Contracts + `T1`–`T13` + coverage | `python -m pytest tests/contracts --cov=src/contracts --cov-report=term-missing -v` |
 | 5 | Deploy / verify | `python -m scripts.deploy_contracts --network <local-evm\|sepolia\|arbitrum-sepolia>` · `python -m scripts.verify_contracts --network arbitrum-sepolia --variants D1 D3` |
 | 6 | Evidence + DApp E2E demo | `python -m scripts.run_phase6_e2e_demo` |
 | 7 | `E5` (offline, deterministic) | `python -m scripts.run_phase7_e5 --skip-live` |
@@ -452,7 +458,7 @@ pip install -r requirements.txt && pip install -e . --no-deps
 
 (Prefix each with `.\.venv\Scripts\python.exe` on Windows, e.g. `.\.venv\Scripts\python.exe -m src.models.run_phase2`.)
 
-> ⚠️ Full ML runs are long (the 25-fold, 30-trial Optuna experiments take hours; mean per-fold train time ranges from ~73 s to ~857 s depending on configuration). `run_phase7_e5` **without** `--skip-live` sends real testnet transactions and overwrites live E5 metrics; `--mode verify` is the safe, non-destructive option.
+> ⚠️ Full ML runs are long (the 25-fold, 30-trial Optuna experiments take hours; mean per-fold train time ranges from ~110 s to ~857 s depending on configuration). `run_phase7_e5` **without** `--skip-live` sends real testnet transactions and overwrites live E5 metrics; `--mode verify` is the safe, non-destructive option.
 
 ---
 
@@ -473,8 +479,8 @@ Copy [`.env.example`](.env.example) to `.env` (git-ignored) and fill in only wha
 ## 17. Testing
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest -v                                   # full suite (100+ tests)
-.\.venv\Scripts\python.exe -m pytest tests/contracts -v                   # T1–T12, fuzz, Merkle, E5, deploy scripts
+.\.venv\Scripts\python.exe -m pytest -v                                   # full suite (113 tests)
+.\.venv\Scripts\python.exe -m pytest tests/contracts -v                   # T1–T13, fuzz, Merkle, E5, deploy scripts
 .\.venv\Scripts\python.exe -m pytest tests/evidence -v                    # canonical vectors, tamper, security, Anvil E2E
 ```
 
@@ -488,13 +494,13 @@ Coverage of the suite by area: data & clone splits (leak-free invariant), disass
 
 All of the following are reported *without* post-hoc changes to pre-registered thresholds:
 
-1. **`F-GSEM` failed the MDE** (`E4c` +0.0058, `E4d vs E4b` +0.0016) despite plausible SHAP attributions; static CFG recovery is limited by indirect jumps.
-2. **`D1` fails the 250k-gas ceiling** (427,461); `D2` also fails (294,706). Only `D3` batching meets the budget. On Sepolia with EIP-8037 repricing, `D3` needs `N ≥ 132`.
+1. **`F-GSEM` failed the MDE** (`E4c` +0.0075, `E4d vs E4b` +0.0017) despite plausible SHAP attributions and the `v1.1` multi-component McCabe fix ($M_C = |E_C|-|V_C|+2P$); static CFG recovery is limited by indirect jumps.
+2. **`D1` fails the 250k-gas ceiling** (`484,818` in `v1.1`); `D2` also fails (`352,063`). Only `D3` batching meets the budget (`4,148.10` gas/case at `N = 100`). On Sepolia with EIP-8037 repricing, `D3` needs `N ≥ 155`.
 3. **`S3` temporal holdout infeasible** (`block_number` missing, no BigQuery access).
 4. **`E6` downgraded to a sanity check** (Risk R6; only 10 non-overlapping Ponzi contracts, wide CI).
 5. **Label & clone noise:** 10 exact-clone and 24 near-clone groups contain conflicting labels, directly causing FP/FN.
 6. **Selection bias (R2)** from the 8k-table filtering; labels derive from the X-SPIDE corpus.
-7. **Governance & infra:** EOA owner on testnets (`eoa_demo_limit`); Anvil replaced by PyEVM bridge on the dev machine; Arbitrum Sepolia has no L1 fee data; no Slither run; IPFS evidence may be unpinned locally.
+7. **Governance & infra:** EOA owner on testnets (`eoa_demo_limit`, scoped to *future* cases after `v1.1` `T13` open-case isolation); Anvil replaced by PyEVM bridge on the dev machine; Arbitrum Sepolia has no L1 fee data; no Slither run; IPFS evidence may be unpinned locally.
 8. **Scope:** testnet-only; the project does not publish accusations against live mainnet contracts.
 
 **Future work:** Safe 2-of-3 multisig owner and `D3`-based anchoring on Arbitrum One; symbolic/abstract-interpretation CFG lifting (Gigahorse/Vandal-style) and post-2024 timestamped corpora for `S3`; redundant pinning (Pinata/Web3.Storage) and EIP-712 off-chain quorum signature aggregation.
@@ -518,7 +524,7 @@ All of the following are reported *without* post-hoc changes to pre-registered t
 | Phase 8 final synthesis | [reports/final_report.md](reports/final_report.md) · [paper/main.pdf](paper/main.pdf) · [traceability](reports/traceability_matrix.md) · [defense Q&A](reports/defense_qa.md) · [demo script](reports/demo_script.md) |
 | Frozen baseline model card | [models/baseline_v1/model_card.json](models/baseline_v1/model_card.json) |
 
-**Project status:** all phases (0–8) are complete and tagged **`v1.0-final`**; every headline claim is mapped to a script/output in the 39-row [traceability matrix](results/traceability_matrix.csv).
+**Project status:** all phases (0–8 + `v1.1` hardening) are complete; every headline claim is mapped to a script/output in the 40-row [traceability matrix](results/traceability_matrix.csv).
 
 ---
 
@@ -531,10 +537,10 @@ All of the following are reported *without* post-hoc changes to pre-registered t
 | Phạm Vũ Gia Minh | 23520948 | Leader | Architecture freeze, Phase 1 clone audit/splits, Phase 5/7 Vyper & Sepolia `E5`, Phase 8 synthesis |
 | Vũ Thế Vinh | 23521801 | Member | Phase 2 `E0`–`E2`, in-fold Optuna & RFECV pipeline, `baseline_v1` freeze |
 | Hoàng Phan Anh Sơn | 23521354 | Member | Phase 3 disassembly, CFG builder, `F-BIGRAM`/`F-GSTAT`/`F-GSEM`, extraction benchmark |
-| Nguyễn Thiện Nhân | 23521084 | Member | Phase 4 ablations, Nadeau–Bengio & Holm stats, `S1`–`S4`, OOF SHAP & error audit |
+| Nguyễn Thiện Nhân | 23521084 | Member | Phase 4 ablations, Nadeau–Bengio & Holm stats, `S0`–`S4`, OOF SHAP & error audit |
 | Võ Minh Quân | 23521274 | Member | Phase 6 canonical JSON, IPFS CIDv1 + Git mirror, Streamlit DApp, `ethers.js` signer, demo |
 
-Repository: <https://github.com/gminh715/IS355_DICTATOR_X-SPIDE-G> (release `v1.0-final`). No open-source license file is currently included; please contact the authors before reuse.
+Repository: <https://github.com/gminh715/IS355_DICTATOR_X-SPIDE-G> (release `v1.1`). No open-source license file is currently included; please contact the authors before reuse.
 
 ---
 
@@ -545,7 +551,7 @@ Repository: <https://github.com/gminh715/IS355_DICTATOR_X-SPIDE-G> (release `v1.
   title  = {X-SPIDE-G: Clone-Leakage-Free Smart Ponzi Detection and Auditable On-Chain Risk Attestation},
   author = {Pham, Vu Gia Minh and Vu, The Vinh and Hoang, Phan Anh Son and Nguyen, Thien Nhan and Vo, Minh Quan},
   year   = {2026},
-  note   = {IS355 Blockchain Technology, UIT -- VNU-HCM. Release v1.0-final},
+  note   = {IS355 Blockchain Technology, UIT -- VNU-HCM. Release v1.1},
   url    = {https://github.com/gminh715/IS355_DICTATOR_X-SPIDE-G}
 }
 ```

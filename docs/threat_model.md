@@ -1,8 +1,8 @@
 # Threat Model & "Why Blockchain?" Justification
 
 **Project:** X-SPIDE-G (`RiskAttestationRegistry` + Off-Chain ML/Evidence Pipeline)  
-**Version:** v2.0 (Phase 0 Freeze, 2026-11-13)  
-**Companion Specs:** [design_v2.md](design_v2.md) · [preregistration.md](preregistration.md)
+**Version:** v2.1 (`v1.1` On-Chain Quorum Hardening Sync, 2026-11-21)  
+**Companion Specs:** [design_v2.md](design_v2.md) · [preregistration.md](preregistration.md) · [contract_spec.md](contract_spec.md)
 
 ---
 
@@ -34,7 +34,7 @@ A common architectural challenge is whether a centralized relational database st
 |---|---|---|---|---|
 | 1 | **Operator alters score, threshold, or SHAP evidence post-publication** | Signature mismatch detects tampering if verifier holds the old snapshot, **but** DB admin can replace both row and signature with a newer timestamped payload or drop the old record. | `evidence_hash` (`keccak256` of canonical JSON), `model_version_hash`, and `block.timestamp` are permanently anchored on-chain; `register_case` reverts on duplicate `case_id`. | `T2`, `T8` (1-byte JSON tamper → `verify_evidence == false` / `❌`) |
 | 2 | **Auditor repudiates a past decision** | Mitigated if digital signatures are stored and unalterable. | Auditor must sign an EVM transaction from their own MetaMask wallet; every change increments `revision` and emits an append-only `Attested` event. | `T5`, `T9` |
-| 3 | **Admin / Owner rewrites, revokes, or deletes audit history** | **Vulnerable:** DB superuser can `UPDATE`/`DELETE` rows, truncate audit tables, or silence records unless an external transparency log is added. | **Owner has zero functions** to modify or delete cases, alter `evidence_hash`, or revoke/edit attestations. Removing an auditor (`remove_auditor`) keeps their historical attestations intact. | `T6`, `T7` (enforced on Anvil & Sepolia) |
+| 3 | **Admin / Owner rewrites, revokes, or deletes audit history** | **Vulnerable:** DB superuser can `UPDATE`/`DELETE` rows, truncate audit tables, or silence records unless an external transparency log is added. | **Owner has zero functions** to modify or delete cases, alter `evidence_hash`, or alter finalized verdicts (`Approved`/`Rejected`). Removing an auditor (`remove_auditor`) preserves history by default; `revoke_removed_auditor_vote` is permissionless and strictly restricted to non-finalized (`Open`/`Disputed`) cases for already-removed auditors (`T13`). | `T6`, `T7`, `T13` (enforced on Anvil & Sepolia) |
 | 4 | **Single-auditor compromise or unilateral collusion** | Single compromised auditor key or single insider signs and finalizes a biased verdict. | Case reaches `1 Approved` or `2 Rejected` **only** when $\ge k$ distinct authorized auditors agree (`k = 2` of `n = 3` by default); conflicting votes yield `3 Disputed`. | `T4`, `T10` (`auditor_count >= threshold`) |
 | 5 | **Third-party verification without trusting project server** | Verifier must rely on the operator's API returning complete, uncensored rows. | Verifier queries public EVM state/events directly, fetches JSON from `evidenceURI` (`ipfs://<CID>` or Git commit mirror), and recomputes `keccak256` locally. | Phase 6 Public Verifier E2E + tamper test |
 | 6 | **Server-side private key theft (Streamlit compromise)** | Server hosting signing keys leaks all auditor identities upon host compromise. | Streamlit **never holds** Sepolia/auditor keys; signing is delegated to static `signer/index.html` (`ethers.js` + MetaMask). Local Anvil test keys are explicitly labeled `"TEST KEY – ANVIL ONLY"`. | Phase 6 code audit + zero-secret Git history |
@@ -43,14 +43,15 @@ A common architectural challenge is whether a centralized relational database st
 
 ---
 
-## 4. Contract Security Invariants (Mapped to `T1`–`T12`)
+## 4. Contract Security Invariants (Mapped to `T1`–`T13`)
 
-1. **Authorization Isolation (`T1`, `T6`, `T7`):** Non-auditors (including `owner`) cannot call `register_case` or `attest`. Removed auditors cannot submit new attestations, while their prior attestations remain valid in storage/events.
+1. **Authorization Isolation (`T1`, `T6`, `T7`):** Non-auditors (including `owner`) cannot call `register_case` or `attest`. Removed auditors cannot submit new attestations, while their prior attestations remain intact on finalized cases.
 2. **Role Disjointness:** `add_auditor(a)` reverts if `a == owner` or `a == 0x0` or `is_auditor[a] == True`.
 3. **Quorum Preservation (`T10`):** `set_threshold(k)` reverts if `k == 0` or `k > auditor_count`; `remove_auditor(a)` reverts if `auditor_count - 1 < threshold`.
 4. **Immutable Case Binding (`T2`, `T8`):** Duplicate `case_id` reverts; zero hashes revert; `verify_evidence(case_id, h)` returns `true` iff stored `evidence_hash == h`.
-5. **State Machine Integrity (`T4`, `T5`, `T11`):** Across arbitrary random sequences of `register_case` and `attest`, `approve_count + reject_count + review_count` always equals the count of auditors with `decision != 0` for that case, and `status` strictly matches the deterministic specification (`Open / Approved / Rejected / Disputed`).
-6. **ETH Safety & Minimal Attack Surface:** No `payable` endpoints or `__default__` payable fallback, no `raw_call`, no `selfdestruct`, bounded `String[128]` for `evidence_uri`.
+5. **State Machine Integrity (`T4`, `T5`, `T11`):** Across arbitrary random sequences of `register_case`, `attest`, and `revoke_removed_auditor_vote`, `approve_count + reject_count + review_count` always equals the count of auditors with `decision != 0` for that case, and `status` strictly matches the deterministic specification (`Open / Approved / Rejected / Disputed`).
+6. **Quorum Snapshot, Sybil Isolation, Tie-Safety & Non-Finalized Revocation (`T13`, enforced on-chain in `v1.1`):** Every case/batch snapshots `required_threshold` and `created_roster_nonce` at creation. Subsequent `set_threshold` calls cannot lower quorum for already-open cases; auditors added after `created_roster_nonce` revert with `"Auditor added after case/batch creation"`; ties (`approve_count >= required_threshold and reject_count >= required_threshold`) resolve symmetrically to `STATUS_DISPUTED`; and `revoke_removed_auditor_vote` cleans up a removed auditor's vote strictly on non-finalized cases/batches while reverting on finalized `Approved`/`Rejected` verdicts.
+7. **ETH Safety & Minimal Attack Surface:** No `payable` endpoints or `__default__` payable fallback, no `raw_call`, no `selfdestruct`, bounded `String[128]` for `evidence_uri`.
 
 ---
 
@@ -60,6 +61,6 @@ To maintain academic honesty, X-SPIDE-G explicitly documents what the blockchain
 
 1. **Does not certify ML accuracy or ground truth:** A `2-of-3 Approved` on-chain status attests that two authorized reviewers agreed with the recorded ML risk assessment and its canonical evidence bundle—not that the target smart contract is mathematically proven to be a Ponzi scheme.
 2. **Does not prevent $\ge k$ auditor collusion:** If $k$ or more of the $n$ auditors collude or lose their private keys simultaneously (e.g., 2 of 3), they can finalize an arbitrary `Approved` or `Rejected` status.
-3. **Residual `owner` key & roster-rotation risk if EOA is used in demo:** While `owner` can never delete cases/attestations or call `attest` from the `owner` address, a compromised `owner` could add a Sybil auditor address it controls (`add_auditor`) and/or lower global `threshold` (`set_threshold(1)`), influencing both new and pre-existing cases upon a subsequent `attest` call. Moreover, because `remove_auditor` preserves prior vote tallies while newly added auditors can still attest to older cases, and `_compute_status` checks `approve_count >= threshold` before `reject_count >= threshold`, governance must enforce $k > n/2$ under a Safe multisig + timelock and avoid rotating auditors while cases remain open.
+3. **Residual `owner` key risk for *future* cases if EOA is used in demo (`eoa_demo_limit`):** In `v1.1` (`T13`), on-chain threshold snapshotting, `roster_nonce` Sybil isolation, tie-safe `STATUS_DISPUTED`, and permissionless non-finalized vote revocation prevent even a compromised `owner` from altering quorum rules or injecting Sybil auditors into *already-open* or *finalized* cases. However, testnet deployments still use an EOA `owner` (`owner_type = "eoa_demo_limit"`), which retains authority to change rosters or thresholds for *future newly created* cases; production deployments must therefore migrate `owner` to a **Safe multisig + timelock**.
 4. **Off-chain data availability dependence:** Ethereum does not store the full JSON evidence payload (`D1`–`D3` store only `bytes32` commitments and emit `evidenceURI`). If both the IPFS pinning service and the Git repository lose the JSON file, third parties can verify on-chain status history but cannot re-verify feature/SHAP contents against `evidence_hash`.
 5. **Ethical & Mainnet Scope Boundary:** Testnet contracts (`Anvil`, `Sepolia`, `L2 testnet`) are used exclusively for evaluation; the group does not publish public Ponzi accusations for live mainnet contracts on Ethereum mainnet.
