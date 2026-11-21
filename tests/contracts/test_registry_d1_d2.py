@@ -203,13 +203,26 @@ def test_t6_owner_cannot_modify_cases_attestations_or_become_auditor(evm: EvmCon
         "Only auditor",
     )
 
-    # Check ABI: no non-view mutating functions exist beyond governance + register_case + attest
+    # Check ABI: no non-view mutating functions exist beyond governance + register_case + attest + revoke_removed_auditor_vote
     mutating_fns = {
         item["name"]
         for item in c.abi
         if item.get("type") == "function" and item.get("stateMutability") not in ("view", "pure")
     }
-    assert mutating_fns == {"add_auditor", "remove_auditor", "set_threshold", "register_case", "attest"}
+    assert mutating_fns == {
+        "add_auditor",
+        "remove_auditor",
+        "set_threshold",
+        "register_case",
+        "attest",
+        "revoke_removed_auditor_vote",
+    }
+
+    # Owner cannot revoke an active auditor's vote
+    assert_reverts(
+        lambda: evm.send(c.functions.revoke_removed_auditor_vote(cid, evm.auditors[0]), evm.owner),
+        "Auditor is still active",
+    )
 
     # Contract rejects direct ETH transfers (non-payable)
     assert_reverts(lambda: evm.w3.eth.send_transaction({"from": evm.owner, "to": c.address, "value": 1}))
@@ -217,6 +230,15 @@ def test_t6_owner_cannot_modify_cases_attestations_or_become_auditor(evm: EvmCon
     # Original case and attestation remain untouched
     assert c.functions.verify_evidence(cid, eh).call() is True
     assert unpack_attestation(variant, c.functions.get_attestation(cid, evm.auditors[0]).call())["decision"] == DECISION_APPROVE
+
+    # Once finalized (Approved), even removing an auditor does not allow owner to revoke that historical vote
+    evm.send(c.functions.attest(cid, DECISION_APPROVE, ZERO_BYTES32), evm.auditors[1])
+    assert unpack_case(variant, c.functions.get_case(cid).call())["status"] == STATUS_APPROVED
+    evm.send(c.functions.remove_auditor(evm.auditors[0]), evm.owner)
+    assert_reverts(
+        lambda: evm.send(c.functions.revoke_removed_auditor_vote(cid, evm.auditors[0]), evm.owner),
+        "Case already finalized",
+    )
 
 
 @pytest.mark.parametrize("variant", ["D1", "D2"])

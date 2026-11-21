@@ -25,6 +25,7 @@ OP_REMOVE_AUDITOR = "remove_auditor"
 OP_SET_THRESHOLD = "set_threshold"
 OP_REGISTER_CASE = "register_case"
 OP_ATTEST = "attest"
+OP_REVOKE_REMOVED_VOTE = "revoke_removed_auditor_vote"
 
 op_strategy = st.lists(
     st.one_of(
@@ -33,6 +34,7 @@ op_strategy = st.lists(
         st.tuples(st.just(OP_SET_THRESHOLD), st.integers(0, 4), st.integers(0, 5)),
         st.tuples(st.just(OP_REGISTER_CASE), st.integers(0, 4), st.integers(0, 2)),
         st.tuples(st.just(OP_ATTEST), st.integers(0, 4), st.integers(0, 2), st.integers(0, 4)),
+        st.tuples(st.just(OP_REVOKE_REMOVED_VOTE), st.integers(0, 4), st.integers(0, 2), st.integers(0, 4)),
     ),
     min_size=12,
     max_size=24,
@@ -158,15 +160,46 @@ def test_t11_property_fuzz_state_and_invariants(ops: list[tuple[int | str, ...]]
                     contract.functions.attest(cid, decision, ZERO_BYTES32).transact({"from": caller})
                 )
 
+        elif op == OP_REVOKE_REMOVED_VOTE:
+            caller = actors[step[1]]
+            cid = case_ids[int(step[2])]
+            removed_aud = actors[step[3]]
+            try:
+                ref.revoke_removed_auditor_vote(caller, cid, removed_aud)
+            except ValueError as err:
+                assert_reverts(
+                    lambda: w3.eth.wait_for_transaction_receipt(
+                        contract.functions.revoke_removed_auditor_vote(cid, removed_aud).transact(
+                            {"from": caller}
+                        )
+                    ),
+                    str(err),
+                )
+            else:
+                w3.eth.wait_for_transaction_receipt(
+                    contract.functions.revoke_removed_auditor_vote(cid, removed_aud).transact(
+                        {"from": caller}
+                    )
+                )
+
         # Verify global governance parity after every step
         assert contract.functions.auditor_count().call() == ref.auditor_count
         assert contract.functions.threshold().call() == ref.threshold
+        assert contract.functions.roster_nonce().call() == ref.roster_nonce
+        for actor in actors:
+            assert contract.functions.auditor_added_at(actor).call() == ref.auditor_added_at.get(actor, 0)
 
         # Verify per-case invariants: tally sum == non-zero auditor attestations & status == compute_status(...)
         for cid, ref_case in ref.cases.items():
             ref.assert_invariants(cid)
             onchain_case = contract.functions.get_case(cid).call()
-            approve_c, reject_c, review_c, status_c = onchain_case[6], onchain_case[7], onchain_case[8], onchain_case[9]
+            approve_c, reject_c, review_c, status_c = (
+                onchain_case[6],
+                onchain_case[7],
+                onchain_case[8],
+                onchain_case[9],
+            )
+            req_k_c, nonce_c = onchain_case[10], onchain_case[11]
 
             non_zero_onchain = sum(
                 1 for actor in actors if contract.functions.get_attestation(cid, actor).call()[0] != 0
@@ -177,12 +210,13 @@ def test_t11_property_fuzz_state_and_invariants(ops: list[tuple[int | str, ...]]
                 ref_case.reject_count,
                 ref_case.review_count,
             )
-            assert status_c == compute_status(approve_c, reject_c, ref_case.last_eval_threshold)
+            assert (req_k_c, nonce_c) == (ref_case.required_threshold, ref_case.created_roster_nonce)
+            assert status_c == compute_status(approve_c, reject_c, req_k_c)
             assert status_c == ref_case.status
 
 
-def test_t11_set_threshold_recomputation_deferral_matches_spec() -> None:
-    """Regression check for Hypothesis seed where set_threshold follows attest without re-attesting."""
+def test_t11_threshold_snapshot_isolates_existing_case() -> None:
+    """Regression check: lowering global threshold does not retroactively alter pre-existing cases."""
     w3 = Web3(EthereumTesterProvider(EthereumTester(PyEVMBackend())))
     accounts = w3.eth.accounts
     owner, aud0, aud1, aud2, subject = accounts[0], accounts[1], accounts[2], accounts[3], accounts[6]
@@ -197,30 +231,47 @@ def test_t11_set_threshold_recomputation_deferral_matches_spec() -> None:
         w3.eth.wait_for_transaction_receipt(contract.functions.add_auditor(aud).transact({"from": owner}))
         ref.add_auditor(owner, aud)
 
-    cid = keccak(b"threshold-deferral-case")
-    eh = keccak(b"threshold-deferral-ev")
-    mh = keccak(b"threshold-deferral-model")
+    cid = keccak(b"threshold-snapshot-case")
+    eh = keccak(b"threshold-snapshot-ev")
+    mh = keccak(b"threshold-snapshot-model")
     w3.eth.wait_for_transaction_receipt(
         contract.functions.register_case(cid, subject, 1, eh, mh, "ipfs://reg").transact({"from": aud0})
     )
     ref.register_case(aud0, cid, subject, 1, eh, mh)
 
-    # Reject count=1 at threshold=2 keeps case Open
+    # Reject count=1 at snapshotted required_threshold=2 keeps case Open
     w3.eth.wait_for_transaction_receipt(
         contract.functions.attest(cid, DECISION_REJECT, ZERO_BYTES32).transact({"from": aud0})
     )
     ref.attest(aud0, cid, DECISION_REJECT)
 
-    # Lower threshold to 1: stored case.status remains Open until next attest triggers _compute_status
+    # Lower global threshold to 1: pre-existing case keeps required_threshold=2 and remains Open
     w3.eth.wait_for_transaction_receipt(contract.functions.set_threshold(1).transact({"from": owner}))
     ref.set_threshold(owner, 1)
     ref.assert_invariants(cid)
-    assert contract.functions.get_case(cid).call()[9] == STATUS_OPEN == ref.cases[cid].status
+    case_state = contract.functions.get_case(cid).call()
+    assert case_state[9] == STATUS_OPEN == ref.cases[cid].status
+    assert case_state[10] == 2 == ref.cases[cid].required_threshold
 
-    # Subsequent attest recomputes case status under threshold=1 -> Rejected
+    # Subsequent attest on old case STILL evaluates under required_threshold=2 -> remains Open
     w3.eth.wait_for_transaction_receipt(
         contract.functions.attest(cid, DECISION_NEEDS_REVIEW, ZERO_BYTES32).transact({"from": aud1})
     )
     ref.attest(aud1, cid, DECISION_NEEDS_REVIEW)
     ref.assert_invariants(cid)
-    assert contract.functions.get_case(cid).call()[9] == STATUS_REJECTED == ref.cases[cid].status
+    assert contract.functions.get_case(cid).call()[9] == STATUS_OPEN == ref.cases[cid].status
+
+    # Newly registered case after set_threshold(1) snapshots required_threshold=1 -> 1 Reject finalizes it
+    cid_new = keccak(b"threshold-snapshot-new-case")
+    w3.eth.wait_for_transaction_receipt(
+        contract.functions.register_case(cid_new, subject, 1, eh, mh, "ipfs://reg-new").transact({"from": aud0})
+    )
+    ref.register_case(aud0, cid_new, subject, 1, eh, mh)
+    w3.eth.wait_for_transaction_receipt(
+        contract.functions.attest(cid_new, DECISION_REJECT, ZERO_BYTES32).transact({"from": aud0})
+    )
+    ref.attest(aud0, cid_new, DECISION_REJECT)
+    ref.assert_invariants(cid_new)
+    new_case_state = contract.functions.get_case(cid_new).call()
+    assert new_case_state[10] == 1 == ref.cases[cid_new].required_threshold
+    assert new_case_state[9] == STATUS_REJECTED == ref.cases[cid_new].status

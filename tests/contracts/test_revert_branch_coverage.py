@@ -56,8 +56,37 @@ def test_every_revert_reason_triggered_across_d1_d2_d3(evm: EvmContext) -> None:
         check(lambda: evm.send(c.functions.register_case(cid, evm.subject, 1, eh, mh, "ipfs://c"), evm.auditors[0]), "Case already exists")
         check(lambda: evm.send(c.functions.attest(cid, 0, ZERO_BYTES32), evm.auditors[0]), "Invalid decision")
 
+        # v1.1 roster isolation: newly added auditor cannot attest to pre-existing case
+        evm.send(c.functions.add_auditor(evm.extra_auditor), evm.owner)
+        check(
+            lambda: evm.send(c.functions.attest(cid, DECISION_APPROVE, ZERO_BYTES32), evm.extra_auditor),
+            "Auditor added after case creation",
+        )
+
+        # v1.1 revoke_removed_auditor_vote revert branches
+        check(
+            lambda: evm.send(c.functions.revoke_removed_auditor_vote(keccak(b"missing"), evm.auditors[2]), evm.outsider),
+            "Case does not exist",
+        )
+        check(
+            lambda: evm.send(c.functions.revoke_removed_auditor_vote(cid, evm.auditors[0]), evm.outsider),
+            "Auditor is still active",
+        )
+        check(
+            lambda: evm.send(c.functions.revoke_removed_auditor_vote(cid, evm.auditors[2]), evm.outsider),
+            "No vote to revoke",
+        )
+
         evm.send(c.functions.attest(cid, DECISION_APPROVE, ZERO_BYTES32), evm.auditors[0])
         check(lambda: evm.send(c.functions.attest(cid, DECISION_APPROVE, ZERO_BYTES32), evm.auditors[0]), "Same decision as current")
+
+        # Finalize case (2 of 3 Approve) -> revoking removed auditor vote must revert
+        evm.send(c.functions.attest(cid, DECISION_APPROVE, ZERO_BYTES32), evm.auditors[1])
+        evm.send(c.functions.remove_auditor(evm.auditors[0]), evm.owner)
+        check(
+            lambda: evm.send(c.functions.revoke_removed_auditor_vote(cid, evm.auditors[0]), evm.outsider),
+            "Case already finalized",
+        )
 
         assert observed == expected_reasons
 
@@ -91,8 +120,36 @@ def test_every_revert_reason_triggered_across_d1_d2_d3(evm: EvmContext) -> None:
     evm.send(d3.functions.register_batch(root, 1, "ipfs://b"), evm.auditors[0])
     check_d3(lambda: evm.send(d3.functions.register_batch(root, 1, "ipfs://b"), evm.auditors[0]), "Batch already exists")
     check_d3(lambda: evm.send(d3.functions.attest_batch(root, 99), evm.auditors[0]), "Invalid decision")
+
+    # v1.1 roster isolation & revoke branches on D3
+    evm.send(d3.functions.add_auditor(evm.extra_auditor), evm.owner)
+    check_d3(
+        lambda: evm.send(d3.functions.attest_batch(root, DECISION_APPROVE), evm.extra_auditor),
+        "Auditor added after batch creation",
+    )
+    check_d3(
+        lambda: evm.send(d3.functions.revoke_removed_auditor_vote(keccak(b"missing-root"), evm.auditors[2]), evm.outsider),
+        "Batch does not exist",
+    )
+    check_d3(
+        lambda: evm.send(d3.functions.revoke_removed_auditor_vote(root, evm.auditors[0]), evm.outsider),
+        "Auditor is still active",
+    )
+    check_d3(
+        lambda: evm.send(d3.functions.revoke_removed_auditor_vote(root, evm.auditors[2]), evm.outsider),
+        "No vote to revoke",
+    )
+
     evm.send(d3.functions.attest_batch(root, DECISION_APPROVE), evm.auditors[0])
     check_d3(lambda: evm.send(d3.functions.attest_batch(root, DECISION_APPROVE), evm.auditors[0]), "Same decision as current")
+
+    # Finalize batch (2 of 3 Approve) -> revoking removed auditor vote must revert
+    evm.send(d3.functions.attest_batch(root, DECISION_APPROVE), evm.auditors[1])
+    evm.send(d3.functions.remove_auditor(evm.auditors[0]), evm.owner)
+    check_d3(
+        lambda: evm.send(d3.functions.revoke_removed_auditor_vote(root, evm.auditors[0]), evm.outsider),
+        "Batch already finalized",
+    )
 
     # Rejects direct ETH transfers
     assert_reverts(lambda: evm.w3.eth.send_transaction({"from": evm.owner, "to": d3.address, "value": 1}))

@@ -218,12 +218,17 @@
       "function threshold() view returns (uint256)",
       "function is_auditor(address) view returns (bool)",
       "function verify_evidence(bytes32, bytes32) view returns (bool)",
-      "function get_case(bytes32) view returns (tuple(address subject, uint256 subject_chain_id, bytes32 evidence_hash, bytes32 model_version_hash, address registrant, uint256 created_at, uint256 approve_count, uint256 reject_count, uint256 review_count, uint8 status))",
+      "function get_case(bytes32) view returns (tuple(address subject, uint256 subject_chain_id, bytes32 evidence_hash, bytes32 model_version_hash, address registrant, uint256 created_at, uint256 approve_count, uint256 reject_count, uint256 review_count, uint8 status, uint256 required_threshold, uint256 created_roster_nonce))",
       "function register_case(bytes32 case_id, address subject, uint256 subject_chain_id, bytes32 evidence_hash, bytes32 model_version_hash, string evidence_uri)",
       "function attest(bytes32 case_id, uint8 decision, bytes32 reason_hash)",
+      "function revoke_removed_auditor_vote(bytes32 case_id, address removed_auditor)",
       "event CaseRegistered(bytes32 indexed case_id, address indexed subject, bytes32 evidence_hash, bytes32 model_version_hash, string evidence_uri, address registrant)",
       "event Attested(bytes32 indexed case_id, address indexed auditor, uint8 decision, uint256 revision, bytes32 reason_hash)",
+      "event RemovedAuditorVoteRevoked(bytes32 indexed case_id, address indexed auditor, uint8 previous_decision, uint256 revision, address caller)",
       "event StatusChanged(bytes32 indexed case_id, uint8 old_status, uint8 new_status)"
+    ];
+    const REGISTRY_ABI_V1_CASE = [
+      "function get_case(bytes32) view returns (tuple(address subject, uint256 subject_chain_id, bytes32 evidence_hash, bytes32 model_version_hash, address registrant, uint256 created_at, uint256 approve_count, uint256 reject_count, uint256 review_count, uint8 status))"
     ];
 
     const CHAIN_CONFIGS = {
@@ -381,7 +386,14 @@
       try {
         const { contractAddr, caseId } = validateCommonInputs();
         const c = new ethers.Contract(contractAddr, REGISTRY_ABI, provider);
-        const [k, n, cs] = await Promise.all([c.threshold(), c.auditor_count(), c.get_case(caseId)]);
+        const [k, n] = await Promise.all([c.threshold(), c.auditor_count()]);
+        let cs;
+        try {
+          cs = await c.get_case(caseId);
+        } catch (_err) {
+          const cV1 = new ethers.Contract(contractAddr, REGISTRY_ABI_V1_CASE, provider);
+          cs = await cV1.get_case(caseId);
+        }
         const exists = cs.registrant !== ethers.ZeroAddress;
         const summary = {
           contract: contractAddr,
@@ -397,6 +409,8 @@
           reject_count: Number(cs.reject_count),
           review_count: Number(cs.review_count),
           status: `${Number(cs.status)} (${STATUS_NAMES[Number(cs.status)] || "Unknown"})`,
+          ...(cs.required_threshold !== undefined ? { required_threshold: Number(cs.required_threshold) } : {}),
+          ...(cs.created_roster_nonce !== undefined ? { created_roster_nonce: Number(cs.created_roster_nonce) } : {}),
         };
         logMsg(JSON.stringify(summary, null, 2));
       } catch (err) {

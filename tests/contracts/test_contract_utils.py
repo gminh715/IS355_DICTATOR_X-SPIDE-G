@@ -52,4 +52,8 @@ def test_reference_compute_status_boundaries() -> None:
     assert compute_status(1, 1, 2) == STATUS_DISPUTED
     assert compute_status(2, 1, 2) == STATUS_APPROVED
     assert compute_status(0, 2, 2) == STATUS_REJECTED
+    # Tie-safe quorum boundary: simultaneous approve >= k and reject >= k must resolve to Disputed.
+    assert compute_status(1, 1, 1) == STATUS_DISPUTED
+    assert compute_status(2, 2, 2) == STATUS_DISPUTED
+    assert compute_status(3, 2, 2) == STATUS_DISPUTED
     assert DECISION_APPROVE == 1 and DECISION_REJECT == 2

@@ -159,6 +159,7 @@ def test_t12_d3_batch_governance_quorum_and_reverts(evm: EvmContext) -> None:
         "set_threshold",
         "register_batch",
         "attest_batch",
+        "revoke_removed_auditor_vote",
     }
     assert_reverts(lambda: evm.w3.eth.send_transaction({"from": evm.owner, "to": c.address, "value": 1}))
     assert_reverts(lambda: evm.send(c.functions.add_auditor(evm.owner), evm.owner), "Owner cannot be auditor")

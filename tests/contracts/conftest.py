@@ -76,6 +76,8 @@ def unpack_case(variant: str, raw: tuple[Any, ...]) -> dict[str, Any]:
             "reject_count": raw[7],
             "review_count": raw[8],
             "status": raw[9],
+            "required_threshold": raw[10],
+            "created_roster_nonce": raw[11],
         }
     return {
         "exists": raw[0],
@@ -84,6 +86,23 @@ def unpack_case(variant: str, raw: tuple[Any, ...]) -> dict[str, Any]:
         "reject_count": raw[3],
         "review_count": raw[4],
         "status": raw[5],
+        "required_threshold": raw[6],
+        "created_roster_nonce": raw[7],
+    }
+
+
+def unpack_batch(raw: tuple[Any, ...]) -> dict[str, Any]:
+    """Normalize D3 Batch tuple into a dict."""
+    return {
+        "n_leaves": raw[0],
+        "registrant": raw[1],
+        "created_at": raw[2],
+        "approve_count": raw[3],
+        "reject_count": raw[4],
+        "review_count": raw[5],
+        "status": raw[6],
+        "required_threshold": raw[7],
+        "created_roster_nonce": raw[8],
     }
 
 

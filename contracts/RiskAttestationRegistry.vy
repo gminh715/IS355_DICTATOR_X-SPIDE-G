@@ -1,11 +1,13 @@
 # pragma version ^0.4.0
 
 """
-@title RiskAttestationRegistry (D1 - Full Storage)
+@title RiskAttestationRegistry (D1 - Full Storage, v1.1)
 @notice Multi-auditor k-of-n Ponzi risk attestation registry for X-SPIDE-G.
-@dev Enforces role separation (owner != auditor) and append-only auditability.
+@dev Enforces role separation (owner != auditor), per-case threshold snapshotting,
+     roster-nonce Sybil isolation, tie-safe quorum status evaluation, and
+     permissionless revocation of removed auditors' votes on non-finalized cases.
      No function permits editing or deleting registered cases, evidence hashes,
-     or existing attestations.
+     or finalized verdicts.
 """
 
 DECISION_UNSET: public(constant(uint8)) = 0
@@ -30,6 +32,8 @@ struct Case:
     reject_count: uint256
     review_count: uint256
     status: uint8
+    required_threshold: uint256
+    created_roster_nonce: uint256
 
 
 struct Attestation:
@@ -74,10 +78,20 @@ event StatusChanged:
     new_status: uint8
 
 
+event RemovedAuditorVoteRevoked:
+    case_id: indexed(bytes32)
+    auditor: indexed(address)
+    previous_decision: uint8
+    revision: uint256
+    caller: address
+
+
 owner: public(address)
 is_auditor: public(HashMap[address, bool])
 auditor_count: public(uint256)
 threshold: public(uint256)
+roster_nonce: public(uint256)
+auditor_added_at: public(HashMap[address, uint256])
 cases: public(HashMap[bytes32, Case])
 attestations: public(HashMap[bytes32, HashMap[address, Attestation]])
 
@@ -105,11 +119,13 @@ def _only_auditor():
 
 
 @internal
-@view
-def _compute_status(approve_count: uint256, reject_count: uint256) -> uint8:
-    if approve_count >= self.threshold:
+@pure
+def _compute_status(approve_count: uint256, reject_count: uint256, req_threshold: uint256) -> uint8:
+    if approve_count >= req_threshold and reject_count >= req_threshold:
+        return STATUS_DISPUTED
+    elif approve_count >= req_threshold:
         return STATUS_APPROVED
-    elif reject_count >= self.threshold:
+    elif reject_count >= req_threshold:
         return STATUS_REJECTED
     elif approve_count >= 1 and reject_count >= 1:
         return STATUS_DISPUTED
@@ -125,6 +141,8 @@ def add_auditor(a: address):
 
     self.is_auditor[a] = True
     self.auditor_count += 1
+    self.roster_nonce += 1
+    self.auditor_added_at[a] = self.roster_nonce
     log AuditorAdded(auditor=a)
 
 
@@ -176,6 +194,8 @@ def register_case(
         reject_count=0,
         review_count=0,
         status=STATUS_OPEN,
+        required_threshold=self.threshold,
+        created_roster_nonce=self.roster_nonce,
     )
 
     log CaseRegistered(
@@ -192,6 +212,9 @@ def register_case(
 def attest(case_id: bytes32, decision: uint8, reason_hash: bytes32):
     self._only_auditor()
     assert self.cases[case_id].registrant != empty(address), "Case does not exist"
+    assert (
+        self.auditor_added_at[msg.sender] <= self.cases[case_id].created_roster_nonce
+    ), "Auditor added after case creation"
     assert (
         decision == DECISION_APPROVE
         or decision == DECISION_REJECT
@@ -234,6 +257,51 @@ def attest(case_id: bytes32, decision: uint8, reason_hash: bytes32):
     new_status: uint8 = self._compute_status(
         self.cases[case_id].approve_count,
         self.cases[case_id].reject_count,
+        self.cases[case_id].required_threshold,
+    )
+    if new_status != old_status:
+        self.cases[case_id].status = new_status
+        log StatusChanged(case_id=case_id, old_status=old_status, new_status=new_status)
+
+
+@external
+def revoke_removed_auditor_vote(case_id: bytes32, removed_auditor: address):
+    assert self.cases[case_id].registrant != empty(address), "Case does not exist"
+    old_status: uint8 = self.cases[case_id].status
+    assert (
+        old_status == STATUS_OPEN or old_status == STATUS_DISPUTED
+    ), "Case already finalized"
+    assert not self.is_auditor[removed_auditor], "Auditor is still active"
+
+    prev: Attestation = self.attestations[case_id][removed_auditor]
+    assert prev.decision != DECISION_UNSET, "No vote to revoke"
+
+    if prev.decision == DECISION_APPROVE:
+        self.cases[case_id].approve_count -= 1
+    elif prev.decision == DECISION_REJECT:
+        self.cases[case_id].reject_count -= 1
+    elif prev.decision == DECISION_NEEDS_REVIEW:
+        self.cases[case_id].review_count -= 1
+
+    new_revision: uint256 = prev.revision + 1
+    self.attestations[case_id][removed_auditor] = Attestation(
+        decision=DECISION_UNSET,
+        revision=new_revision,
+        timestamp=block.timestamp,
+    )
+
+    log RemovedAuditorVoteRevoked(
+        case_id=case_id,
+        auditor=removed_auditor,
+        previous_decision=prev.decision,
+        revision=new_revision,
+        caller=msg.sender,
+    )
+
+    new_status: uint8 = self._compute_status(
+        self.cases[case_id].approve_count,
+        self.cases[case_id].reject_count,
+        self.cases[case_id].required_threshold,
     )
     if new_status != old_status:
         self.cases[case_id].status = new_status

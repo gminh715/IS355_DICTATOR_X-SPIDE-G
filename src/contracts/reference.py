@@ -1,4 +1,4 @@
-"""Pure-Python reference state machine for RiskAttestationRegistry (D1/D2)."""
+"""Pure-Python reference state machine for RiskAttestationRegistry (D1/D2, v1.1)."""
 
 from __future__ import annotations
 
@@ -16,7 +16,9 @@ STATUS_DISPUTED = 3
 
 
 def compute_status(approve_count: int, reject_count: int, threshold: int) -> int:
-    """Mirror _compute_status from RiskAttestationRegistry.vy."""
+    """Mirror tie-safe _compute_status from RiskAttestationRegistry.vy (v1.1)."""
+    if approve_count >= threshold and reject_count >= threshold:
+        return STATUS_DISPUTED
     if approve_count >= threshold:
         return STATUS_APPROVED
     if reject_count >= threshold:
@@ -43,16 +45,19 @@ class ReferenceCase:
     reject_count: int = 0
     review_count: int = 0
     status: int = STATUS_OPEN
-    last_eval_threshold: int = 2
+    required_threshold: int = 2
+    created_roster_nonce: int = 0
 
 
 @dataclass
 class ReferenceRegistryState:
-    """Exact off-chain mirror of RiskAttestationRegistry state transitions."""
+    """Exact off-chain mirror of RiskAttestationRegistry v1.1 state transitions."""
 
     owner: str
     threshold: int = 2
+    roster_nonce: int = 0
     auditors: set[str] = field(default_factory=set)
+    auditor_added_at: dict[str, int] = field(default_factory=dict)
     cases: dict[bytes, ReferenceCase] = field(default_factory=dict)
     attestations: dict[bytes, dict[str, ReferenceAttestation]] = field(default_factory=dict)
 
@@ -70,6 +75,8 @@ class ReferenceRegistryState:
         if auditor in self.auditors:
             raise ValueError("Already auditor")
         self.auditors.add(auditor)
+        self.roster_nonce += 1
+        self.auditor_added_at[auditor] = self.roster_nonce
 
     def remove_auditor(self, caller: str, auditor: str) -> None:
         if caller != self.owner:
@@ -115,7 +122,8 @@ class ReferenceRegistryState:
             evidence_hash=evidence_hash,
             model_version_hash=model_version_hash,
             registrant=caller,
-            last_eval_threshold=self.threshold,
+            required_threshold=self.threshold,
+            created_roster_nonce=self.roster_nonce,
         )
         self.attestations[case_id] = {}
 
@@ -124,10 +132,13 @@ class ReferenceRegistryState:
             raise ValueError("Only auditor")
         if case_id not in self.cases:
             raise ValueError("Case does not exist")
+
+        case = self.cases[case_id]
+        if self.auditor_added_at.get(caller, 0) > case.created_roster_nonce:
+            raise ValueError("Auditor added after case creation")
         if decision not in (DECISION_APPROVE, DECISION_REJECT, DECISION_NEEDS_REVIEW):
             raise ValueError("Invalid decision")
 
-        case = self.cases[case_id]
         case_atts = self.attestations[case_id]
         prev = case_atts.get(caller, ReferenceAttestation())
         if prev.decision == decision:
@@ -148,13 +159,41 @@ class ReferenceRegistryState:
             case.review_count += 1
 
         case_atts[caller] = ReferenceAttestation(decision=decision, revision=prev.revision + 1)
-        case.last_eval_threshold = self.threshold
-        case.status = compute_status(case.approve_count, case.reject_count, self.threshold)
+        case.status = compute_status(case.approve_count, case.reject_count, case.required_threshold)
+
+    def revoke_removed_auditor_vote(self, caller: str, case_id: bytes, removed_auditor: str) -> None:
+        _ = caller  # Permissionless O(1) cleanup of removed auditor's vote on non-finalized case.
+        if case_id not in self.cases:
+            raise ValueError("Case does not exist")
+
+        case = self.cases[case_id]
+        if case.status not in (STATUS_OPEN, STATUS_DISPUTED):
+            raise ValueError("Case already finalized")
+        if removed_auditor in self.auditors:
+            raise ValueError("Auditor is still active")
+
+        case_atts = self.attestations[case_id]
+        prev = case_atts.get(removed_auditor, ReferenceAttestation())
+        if prev.decision == DECISION_UNSET:
+            raise ValueError("No vote to revoke")
+
+        if prev.decision == DECISION_APPROVE:
+            case.approve_count -= 1
+        elif prev.decision == DECISION_REJECT:
+            case.reject_count -= 1
+        elif prev.decision == DECISION_NEEDS_REVIEW:
+            case.review_count -= 1
+
+        case_atts[removed_auditor] = ReferenceAttestation(
+            decision=DECISION_UNSET,
+            revision=prev.revision + 1,
+        )
+        case.status = compute_status(case.approve_count, case.reject_count, case.required_threshold)
 
     def assert_invariants(self, case_id: bytes) -> None:
         case = self.cases[case_id]
         non_zero = sum(1 for att in self.attestations[case_id].values() if att.decision != 0)
         assert case.approve_count + case.reject_count + case.review_count == non_zero
         assert case.status == compute_status(
-            case.approve_count, case.reject_count, case.last_eval_threshold
+            case.approve_count, case.reject_count, case.required_threshold
         )

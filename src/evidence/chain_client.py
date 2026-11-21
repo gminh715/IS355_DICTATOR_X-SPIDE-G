@@ -151,16 +151,17 @@ def read_registry_meta(contract: Any, *, known_auditors: list[str] | None = None
 
 
 def read_case(contract: Any, case_id_hex: str) -> dict[str, Any]:
-    """Read D1 Case struct from chain and return normalized dictionary."""
+    """Read D1 Case or D2 CompactCase struct from chain (supports v1.0 & v1.1 layouts)."""
     cid = _bytes32_arg(case_id_hex)
     raw = contract.functions.get_case(cid).call()
     # D1 Case tuple: (subject, subject_chain_id, evidence_hash, model_version_hash,
-    #                 registrant, created_at, approve_count, reject_count, review_count, status)
-    if len(raw) == 10:
+    #                 registrant, created_at, approve_count, reject_count, review_count, status[,
+    #                 required_threshold, created_roster_nonce])
+    if len(raw) in (10, 12):
         registrant = str(raw[4])
         exists = int(registrant, 16) != 0
         status = int(raw[9])
-        return {
+        result: dict[str, Any] = {
             "exists": exists,
             "case_id": normalize_bytes32_hex(case_id_hex),
             "subject": str(raw[0]).lower(),
@@ -175,9 +176,14 @@ def read_case(contract: Any, case_id_hex: str) -> dict[str, Any]:
             "status": status,
             "status_label": STATUS_LABELS.get(status, f"Unknown({status})"),
         }
-    # D2 CompactCase tuple: (exists, evidence_hash, approve_count, reject_count, review_count, status)
+        if len(raw) == 12:
+            result["required_threshold"] = int(raw[10])
+            result["created_roster_nonce"] = int(raw[11])
+        return result
+    # D2 CompactCase tuple: (exists, evidence_hash, approve_count, reject_count, review_count, status[,
+    #                        required_threshold, created_roster_nonce])
     status = int(raw[5])
-    return {
+    result = {
         "exists": bool(raw[0]),
         "case_id": normalize_bytes32_hex(case_id_hex),
         "evidence_hash": _hex32(raw[1]),
@@ -187,6 +193,10 @@ def read_case(contract: Any, case_id_hex: str) -> dict[str, Any]:
         "status": status,
         "status_label": STATUS_LABELS.get(status, f"Unknown({status})"),
     }
+    if len(raw) == 8:
+        result["required_threshold"] = int(raw[6])
+        result["created_roster_nonce"] = int(raw[7])
+    return result
 
 
 def verify_evidence_onchain(contract: Any, case_id_hex: str, evidence_hash_hex: str) -> bool:
@@ -313,7 +323,7 @@ def inspect_tx_receipt(w3: Web3, contract: Any, tx_hash: str) -> dict[str, Any]:
     """Fetch transaction receipt and decode registry events without touching private keys."""
     receipt = w3.eth.get_transaction_receipt(tx_hash.strip())
     decoded_events: list[dict[str, Any]] = []
-    for event_name in ("CaseRegistered", "Attested", "StatusChanged"):
+    for event_name in ("CaseRegistered", "Attested", "RemovedAuditorVoteRevoked", "StatusChanged"):
         try:
             ev_logs = getattr(contract.events, event_name)().process_receipt(receipt)
             for ev in ev_logs:
