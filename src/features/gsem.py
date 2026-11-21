@@ -250,7 +250,9 @@ def extract_gsem_features(
 
     graph = cfg_res.graph
     n_edges = graph.number_of_edges()
-    cyclomatic = float(n_edges - n_blocks + 2)
+    # Multi-component McCabe cyclomatic complexity: M = E - V + 2P (>= P >= 1 for V >= 1).
+    n_components = nx.number_weakly_connected_components(graph)
+    cyclomatic = float(n_edges - n_blocks + 2 * n_components)
 
     loop_sccs: list[set[int]] = []
     for scc in nx.strongly_connected_components(graph):
