@@ -173,9 +173,29 @@ def test_phase6_full_e2e_and_tamper_on_anvil_rpc_bridge(tmp_path: Path) -> None:
             evidence_dir=ev_dir,
             repo_root=tmp_path,
         )
-        ok_local, diag_ok = verify_evidence_payload(raw_ok, final_case["evidence_hash"])
+        ok_local, diag_ok = verify_evidence_payload(
+            raw_ok,
+            final_case["evidence_hash"],
+            expected_case_id_hex=cid_case,
+            expected_subject=final_case["subject"],
+            expected_subject_chain_id=final_case["subject_chain_id"],
+            expected_model_version_hash_hex=final_case["model_version_hash"],
+        )
         assert ok_local is True
+        assert diag_ok["identity_match"] is True
         assert verify_evidence_onchain(contract, cid_case, diag_ok["recomputed_hash"]) is True
+
+        # 4b. Identity mismatch (wrong on-chain subject) must fail verification even if hash matches.
+        ok_wrong_subj, diag_wrong_subj = verify_evidence_payload(
+            raw_ok,
+            final_case["evidence_hash"],
+            expected_case_id_hex=cid_case,
+            expected_subject="0x000000000000000000000000000000000000dead",
+            expected_subject_chain_id=final_case["subject_chain_id"],
+            expected_model_version_hash_hex=final_case["model_version_hash"],
+        )
+        assert ok_wrong_subj is False
+        assert diag_wrong_subj["identity_match"] is False
 
         # 5. Tamper test: mutate 1 byte of off-chain JSON -> ❌
         stored = ev_dir / f"{cid_case}.json"
@@ -189,7 +209,14 @@ def test_phase6_full_e2e_and_tamper_on_anvil_rpc_bridge(tmp_path: Path) -> None:
             evidence_dir=ev_dir,
             repo_root=tmp_path,
         )
-        ok_bad, diag_bad = verify_evidence_payload(raw_bad, final_case["evidence_hash"])
+        ok_bad, diag_bad = verify_evidence_payload(
+            raw_bad,
+            final_case["evidence_hash"],
+            expected_case_id_hex=cid_case,
+            expected_subject=final_case["subject"],
+            expected_subject_chain_id=final_case["subject_chain_id"],
+            expected_model_version_hash_hex=final_case["model_version_hash"],
+        )
         assert ok_bad is False
         assert verify_evidence_onchain(contract, cid_case, diag_bad["recomputed_hash"]) is False
     finally:

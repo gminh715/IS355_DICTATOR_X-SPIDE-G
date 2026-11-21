@@ -447,7 +447,7 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
         ["Gap / Innovation", "Identified Limitation in Literature", "X-SPIDE-G Solution (I1, I2)"],
         [
             ["G1 / I1 (Methodological + Structural ML)", "Random splits leak exact/near-clone contracts; black-box or unigram bytecode models lack head-to-head comparison against ordered opcode bigrams & CFG semantics under strict anti-leakage CV.", "Quarantine clones via CBOR stripping + MinHash (group_near, 5x5 grouped CV); benchmark F-GSTAT (16), F-BIGRAM (in-fold top-200), and F-GSEM (15 CFG/SCC/PageRank) with pre-registered Holm-adjusted Nadeau-Bengio stats."],
-            ["G2 / I2 (Blockchain Governance & Evidence)", "ML risk scores lack deterministic canonicalization, tamper detection, and neutral multi-auditor finality without custodial server keys.", "Schema v1.0 canonical JSON (6-decimal fixed strings, sorted UTF-8) + IPFS CIDv1/Git mirror + Vyper 0.4.3 k-of-n registry (D1/D2/D3) + zero-server-key ethers.js v6 MetaMask signer."],
+            ["G2 / I2 (Blockchain Governance & Evidence)", "ML risk scores lack deterministic canonicalization, tamper detection, and neutral multi-auditor quorum consensus without custodial server keys.", "Schema v1.0 canonical JSON (6-decimal fixed strings, sorted UTF-8) + IPFS CIDv1/Git mirror + Vyper 0.4.3 k-of-n registry (D1/D2/D3) + zero-server-key ethers.js v6 MetaMask signer."],
         ],
         col_widths=[1.4, 2.5, 2.86],
     )
@@ -456,7 +456,7 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
     doc.add_heading("3. Threat Model & \"Why Blockchain?\"", level=1)
     _p(
         doc,
-        "Per docs/threat_model.md, our system separates four explicit actors: (1) Owner (governance multisig on production/Sepolia; manages authorized auditor roster and threshold k, prohibited from registering cases or attesting), (2) Auditors (k-of-n security analysts operating independent wallets who register canonical cases and submit Approve/Reject/NeedsReview attestations), (3) ML Service / DApp Operator (untrusted off-chain inference & packaging node; possesses zero private keys for live networks), and (4) Public Verifiers (any ecosystem participant recomputing keccak256 over fetched evidence JSON and calling view verify_evidence).",
+        "Per docs/threat_model.md, our system separates four explicit actors: (1) Owner (governance multisig on production/Sepolia; manages authorized auditor roster and threshold k, prohibited from registering cases or attesting), (2) Auditors (k-of-n security analysts operating independent wallets who register canonical cases and submit Approve/Reject/NeedsReview attestations), (3) ML Service / DApp Operator (untrusted off-chain inference & packaging node; possesses zero private keys for live networks), and (4) Public Verifiers (any ecosystem participant recomputing keccak256 over fetched evidence JSON, verifying identity bindings against on-chain Case records, and calling view verify_evidence).",
     )
     _table(
         doc,
@@ -476,7 +476,7 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
     )
     _p(
         doc,
-        "Explicit Non-Goals & Scope Limits: On-chain contracts intentionally do NOT execute LightGBM inference in the EVM, store unbounded JSON payloads on-chain, enforce fraud finality in court, guarantee global censorship resistance without third-party IPFS pinning, or eliminate single-owner admin risk when deployed via a testnet EOA (documented transparently in deployments.json as owner_type='eoa_demo_limit').",
+        "Explicit Non-Goals & Scope Limits: On-chain contracts intentionally do NOT execute LightGBM inference in the EVM, store unbounded JSON payloads on-chain, enforce legal fraud verdicts in court, guarantee global censorship resistance without third-party IPFS pinning, or eliminate single-owner governance risk when deployed via a testnet EOA (documented transparently in deployments.json as owner_type='eoa_demo_limit', where production requires a Safe multisig + timelock, k > n/2, and frozen rosters during open cases).",
     )
 
     # ---- SECTION 4 ----
@@ -693,7 +693,7 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
     err = facts["err"]
     _p(
         doc,
-        f"Explainability & Error Analysis: Out-of-fold TreeExplainer rankings on seed-42 E4c identify call_block_ratio (mean |SHAP| = 0.2833, Spearman r = +0.874), n_loops_with_call (0.2061; E[SHAP | >0] = +1.052 vs -0.114), n_blocks_with_call (0.1707), and unresolved_jump_ratio (0.1520, Spearman r = -0.897) among top F-GSEM attributions, passing our domain sanity check (has_loop_with_call mean SHAP = +0.3191 when present vs -0.0305 when absent). Across 7,446 contracts, 526 (7.06%) exceed unresolved_jump_ratio > 0.50 (below the 50% Risk R4 threshold). Seed-42 E4c produces TP={xai['total_tp_seed42']}, FP={xai['total_fp_seed42']}, TN={xai['total_tn_seed42']}, FN={xai['total_fn_seed42']}; inspecting top-12 FP + top-12 FN highest-margin failures shows FPs concentrate in benign payout/distributor loops (e.g. xspide_02699) and mixed-label near-clone clusters ({xai['fp_mixed_cluster_count']} FPs, {xai['fn_mixed_cluster_count']} FNs overall), while FNs lack static loop+CALL motifs.",
+        f"Explainability & Error Analysis: Out-of-fold TreeExplainer rankings on seed-42 E4c identify call_block_ratio (mean |SHAP| = 0.2833, Spearman r = +0.874), n_loops_with_call (0.2061; E[SHAP | >0] = +1.052 vs -0.114), n_blocks_with_call (0.1707), and unresolved_jump_ratio (0.1520, Spearman r = -0.897) among top F-GSEM attributions, passing our directional sanity check (has_loop_with_call mean SHAP = +0.3191 when present vs -0.0305 when absent; note that has_loop_with_call is a static CALL-in-SCC structural heuristic rather than proof of a Ponzi payout loop). Across 7,446 contracts, 526 (7.06%) exceed unresolved_jump_ratio > 0.50 (below the 50% Risk R4 threshold). Seed-42 E4c produces TP={xai['total_tp_seed42']}, FP={xai['total_fp_seed42']}, TN={xai['total_tn_seed42']}, FN={xai['total_fn_seed42']}; inspecting top-12 FP + top-12 FN highest-margin failures shows FPs concentrate in benign distributor loops (e.g. xspide_02699) and mixed-label near-clone clusters ({xai['fp_mixed_cluster_count']} FPs, {xai['fn_mixed_cluster_count']} FNs overall), while FNs lack static loop+CALL motifs.",
     )
     _two_figures(
         doc,
@@ -744,7 +744,7 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
     t8_sep = e5_sum["live_networks"]["sepolia"]["T8_sepolia_verify_evidence"]
     _p(
         doc,
-        f"Gas, Fee & Latency Findings: Cancun PyEVM results reveal a critical negative cost result: storing the 10-field Case struct plus two cold attestations costs {int(py_d1['gas_used']):,} gas in D1, exceeding the pre-registered 250,000-gas single-case threshold by 70.98%. D2 trims 31.06% ({int(py_d2['gas_used']):,} gas), while D3 Merkle batching achieves O(1) batch gas (~357,453 total regardless of N), driving amortized cost down to {py_d3_100['gas_per_case']:.2f} gas/case at N=100 (PASS <= 10k) and 357.46 gas/case at N=1,000. Note that Sepolia's Glamsterdam/EIP-8037 state-creation repricing raises live state-write gas (~7.37M deploy, 693,762 register_case), while Arbitrum Sepolia receipts reflect $0.016278 for D1 and $0.000136/case for D3 (reference-only due to gasUsedForL1 = 0x0 on testnet). Across n=30 sequential attestations per testnet, Sepolia confirms in median {lat_sep['median_blocks']:.2f} block / {lat_sep['median_seconds']:.3f}s (p95 = {lat_sep['p95_seconds']:.3f}s, PASS <= 2 blocks) and Arbitrum Sepolia confirms in {lat_arb['median_seconds']:.3f}s (p95 = {lat_arb['p95_seconds']:.3f}s). Live Sepolia receipts confirm T1/T6 reverts (all 5 status=0, e.g., owner attest tx {sec_sep['T6_owner_attest_revert']['tx_hash'][:14]}..., main D1 state untouched) and T8 tamper rejection ({t8_sep['verify_exact_onchain']} vs {t8_sep['verify_tampered_onchain']}). Qualitative architecture comparison against ProvAuditChain [4] shows X-SPIDE-G uniquely contributes Vyper k-of-n quorum separation, EIP-170 modular batching, and client-side zero-server-key signing.",
+        f"Gas, Fee & Latency Findings: Cancun PyEVM results reveal a critical negative cost result: storing the 10-field Case struct plus two cold attestations costs {int(py_d1['gas_used']):,} gas in D1, exceeding the pre-registered 250,000-gas single-case threshold by 70.98%. D2 trims 31.06% ({int(py_d2['gas_used']):,} gas), while D3 Merkle batching achieves O(1) batch gas (~357,453 total regardless of N), driving amortized cost down to {py_d3_100['gas_per_case']:.2f} gas/case at N=100 (PASS <= 10k) and 357.46 gas/case at N=1,000. Note that Sepolia's Glamsterdam/EIP-8037 state-creation repricing raises live state-write gas (~7.37M deploy, 693,762 register_case), while Arbitrum Sepolia receipts reflect $0.016278 for D1 and $0.000136/case for D3 (reference-only due to gasUsedForL1 = 0x0 on testnet). Across n=30 sequential D1.attest receipt-confirmation measurements per testnet, Sepolia confirms in median {lat_sep['median_blocks']:.2f} block / {lat_sep['median_seconds']:.3f}s (p95 = {lat_sep['p95_seconds']:.3f}s, PASS <= 2 blocks) and Arbitrum Sepolia confirms in {lat_arb['median_seconds']:.3f}s (p95 = {lat_arb['p95_seconds']:.3f}s). Live Sepolia receipts confirm T1/T6 reverts (all 5 status=0, e.g., owner attest tx {sec_sep['T6_owner_attest_revert']['tx_hash'][:14]}..., main D1 state untouched) and T8 tamper rejection ({t8_sep['verify_exact_onchain']} vs {t8_sep['verify_tampered_onchain']}). Qualitative architecture comparison against ProvAuditChain [4] shows X-SPIDE-G uniquely contributes Vyper k-of-n quorum separation, EIP-170 modular batching, and client-side zero-server-key signing.",
     )
     _figure(
         doc,
@@ -849,9 +849,12 @@ def build_final_report_docx(out_docx: Path, out_pdf: Path | None = None) -> Path
 
 
 def main() -> None:
+    out_dir = REPO_ROOT / "lab" / "final report"
+    if not out_dir.exists():
+        out_dir = REPO_ROOT
     build_final_report_docx(
-        REPO_ROOT / "4_DICTATOR_IS355_Final_Report.docx",
-        REPO_ROOT / "4_DICTATOR_IS355_Final_Report.pdf",
+        out_dir / "4_DICTATOR_IS355_Final_Report.docx",
+        out_dir / "4_DICTATOR_IS355_Final_Report.pdf",
     )
 
 

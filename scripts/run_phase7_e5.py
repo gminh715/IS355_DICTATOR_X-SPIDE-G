@@ -714,8 +714,22 @@ def _spot_check_and_latency_network(
             assert len(tampered_bytes) == len(ev_raw)
             assert sum(a != b for a, b in zip(ev_raw, tampered_bytes)) == 1
             tampered_hash = keccak(tampered_bytes)
-            ok_local, _ = verify_evidence_payload(ev_raw, "0x" + eh.hex())
-            bad_local, _ = verify_evidence_payload(tampered_bytes, "0x" + eh.hex())
+            ok_local, _ = verify_evidence_payload(
+                ev_raw,
+                "0x" + eh.hex(),
+                expected_case_id_hex="0x" + cid.hex(),
+                expected_subject=sub_addr,
+                expected_subject_chain_id=1,
+                expected_model_version_hash_hex="0x" + m_hash.hex(),
+            )
+            bad_local, _ = verify_evidence_payload(
+                tampered_bytes,
+                "0x" + eh.hex(),
+                expected_case_id_hex="0x" + cid.hex(),
+                expected_subject=sub_addr,
+                expected_subject_chain_id=1,
+                expected_model_version_hash_hex="0x" + m_hash.hex(),
+            )
             _ensure_rpc_synced(w3, network, contract_address=inst.address)
             ok_chain = False
             for _ in range(5):

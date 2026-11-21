@@ -111,4 +111,5 @@ def case_id(
    - Fetch raw bytes from `evidence_uri` (or Git mirror / user upload).
    - Compute `h = keccak256(raw_bytes)`.
    - Verify `h == onchain_case.evidence_hash` AND `contract.verify_evidence(case_id, h) == True` AND `shap_digest` matches `shap_top_k`.
-   - Any 1-byte modification flips `verify_evidence` to `False` and triggers `❌ TAMPERED / HASH MISMATCH`.
+   - Cross-check all identity bindings between the JSON payload and the on-chain `Case` struct: `subject_address == onchain_case.subject`, `source_chain_id == onchain_case.subject_chain_id`, `model_version_hash == onchain_case.model_version_hash`, and `case_id(source_chain_id, subject_address, model_version_hash, run_id) == case_id`.
+   - Any 1-byte modification or identity mismatch triggers `❌ TAMPERED / MISMATCH`.

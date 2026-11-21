@@ -81,7 +81,7 @@ def build_traceability_rows(repo_root: Path) -> list[dict[str, Any]]:
     e0_grid = e0[e0["run_id"] == "E0_random5fold_99feats_gridbest_mean"].iloc[0]
     add("Sec 6.1 (RQ1)", "RQ1-01", "E0 5-fold random (99 feats, GridSearchCV)", f"PR-AUC={e0_grid['PR-AUC']:.4f}, ROC-AUC={e0_grid['ROC-AUC']:.4f}, F1={e0_grid['F1']:.4f}", "results/E0_reproduction.csv", "src/models/e0_repro.py", "S_full_E0_random seed=42", "phase2")
     add("Sec 6.1 (RQ1)", "RQ1-02", "E1 5x5 group_near baseline (99 feats)", f"PR-AUC={mc.loc['E1','PR_AUC_mean']:.4f} +/- {mc.loc['E1','PR_AUC_std']:.4f}, F1={mc.loc['E1','F1_mean']:.4f} +/- {mc.loc['E1','F1_std']:.4f}", "results/model_comparison.csv", "src/models/run_phase2.py", "25 folds (seeds 42..46 x 5)", "phase2")
-    add("Sec 6.1 (RQ1)", "RQ1-03", "E0 -> E1 clone-leakage drop", f"Delta PR-AUC={mc.loc['E1','PR_AUC_mean']-e0_grid['PR-AUC']:+.4f}, Delta F1={mc.loc['E1','F1_mean']-e0_grid['F1']:+.4f}", "results/E0_reproduction.csv; results/model_comparison.csv", "src/models/run_phase2.py", "E1 vs E0_random5fold_99feats_gridbest_mean", "phase2")
+    add("Sec 6.1 (RQ1)", "RQ1-03", "E0 -> E1 combined protocol & clone-grouping shift", f"Delta PR-AUC={mc.loc['E1','PR_AUC_mean']-e0_grid['PR-AUC']:+.4f}, Delta F1={mc.loc['E1','F1_mean']-e0_grid['F1']:+.4f}", "results/E0_reproduction.csv; results/model_comparison.csv", "src/models/run_phase2.py", "E1 vs E0_random5fold_99feats_gridbest_mean", "phase2")
     add("Sec 6.1 (RQ1)", "RQ1-04", "E2 in-fold RFE over 99 features", f"PR-AUC={mc.loc['E2','PR_AUC_mean']:.4f} +/- {mc.loc['E2','PR_AUC_std']:.4f}, feats={mc.loc['E2','n_features']}", "results/model_comparison.csv", "src/models/run_phase2.py", "RFECV(step=0.1) inside fold", "phase2")
     dm = card["demo_fold_metrics"]
     add("Sec 5/6 (Model)", "MOD-01", "Frozen models/baseline_v1 demo fold", f"PR-AUC={dm['pr_auc']:.4f}, F1={dm['f1']:.4f}, tau*={dm['threshold']:.6f}, hash={card['artifacts']['model_version_hash'][:18]}...", "models/baseline_v1/model_card.json", "src/models/run_phase2.py", "S_code_group_near_seed42_fold0", "phase2")
@@ -131,7 +131,7 @@ def build_traceability_rows(repo_root: Path) -> list[dict[str, Any]]:
 
     lat_sep = e5_sum["latency_summary"]["sepolia"]
     lat_arb = e5_sum["latency_summary"]["arbitrum-sepolia"]
-    add("Sec 6.3 (RQ3)", "RQ3-04", "Live confirmation latency (n=30 attest txs each)", f"Sepolia median={lat_sep['median_seconds']:.3f}s / {lat_sep['median_blocks']:.2f} blk (p95={lat_sep['p95_seconds']:.3f}s) PASS; Arb-Sep median={lat_arb['median_seconds']:.3f}s / {lat_arb['median_blocks']:.1f} L2 blk", "results/E5_summary.json; results/E5_latency.csv", "scripts/run_phase7_e5.py", "Sepolia 11155111 & Arb-Sep 421614", "phase7")
+    add("Sec 6.3 (RQ3)", "RQ3-04", "Live D1.attest receipt confirmation latency (n=30 txs each)", f"Sepolia median={lat_sep['median_seconds']:.3f}s / {lat_sep['median_blocks']:.2f} blk (p95={lat_sep['p95_seconds']:.3f}s) PASS; Arb-Sep median={lat_arb['median_seconds']:.3f}s / {lat_arb['median_blocks']:.1f} L2 blk", "results/E5_summary.json; results/E5_latency.csv", "scripts/run_phase7_e5.py", "Sepolia 11155111 & Arb-Sep 421614", "phase7")
 
     sec_sep = e5_sum["live_networks"]["sepolia"]["security_on_main_d1"]
     t8_sep = e5_sum["live_networks"]["sepolia"]["T8_sepolia_verify_evidence"]

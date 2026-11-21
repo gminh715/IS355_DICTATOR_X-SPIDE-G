@@ -433,7 +433,7 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         ]),
         (3.62, "LAYER 2: CANONICAL EVIDENCE", BLUE_ACCENT, [
             "Deterministic UTF-8 Sorted JSON",
-            "6-Decimal Fixed Float Serialization",
+            "6-Decimal Fixed String Serialization",
             "ABI case_id + keccak256 evidence_hash",
             "IPFS CIDv1 + evidence/<id>.json Mirror",
         ]),
@@ -447,7 +447,7 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
             "4-Page Streamlit Analysis UI",
             "Client ethers.js v6 MetaMask Signer",
             "Anvil (31337) Dev Keys Gated Strictly",
-            "Public view verify_evidence(case, hash)",
+            "Verify Hash + Subject/Chain/Model/CaseID",
         ]),
     ]
     for bx, btitle, col, lines in boxes:
@@ -482,7 +482,7 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         [
             ("No On-Chain ML", "LightGBM runs off-chain; EVM checks hashes & quorum votes."),
             ("No Unbounded On-Chain JSON", "Only 32-byte keccak256 hashes + URI strings stored on-chain."),
-            ("Owner Testnet Limit", "Deployments use EOA (owner_type='eoa_demo_limit'); production requires Gnosis Safe."),
+            ("Owner & Quorum Limits", "EOA owner_type='eoa_demo_limit'; production needs Safe + timelock, k > n/2, frozen roster on open cases."),
         ],
         fill=SOFT_ORANGE,
         border=ORANGE,
@@ -543,7 +543,7 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
 
     # Slide 5: RQ1 Baseline Reproduction & Clone Leakage
     s5 = _new_slide(prs)
-    _header_footer(s5, "4. RQ1: Baseline Reproduction & Clone-Leakage Impact (E0–E2)", "Quarantining near-clones drops PR-AUC by -0.0382 and F1 by -0.0471; RFE gives zero gain", 5, total)
+    _header_footer(s5, "4. RQ1: Baseline Reproduction & Clone-Leakage Impact (E0–E2)", "Moving from random 5-fold (E0) to grouped 5x5 nested CV (E1) shifts PR-AUC by -0.0382 (S1 isolates -0.0283); RFE gives zero gain", 5, total)
     _add_table(
         s5,
         0.45,
@@ -570,7 +570,7 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         2.18,
         "KEY RQ1 FINDING: RANDOM SPLITS OVERSTATE GENERALIZATION",
         [
-            ("E0 -> E1 Drop", "-0.0382 PR-AUC (0.9149 -> 0.8767) and -0.0471 F1 (0.8589 -> 0.8118)."),
+            ("E0 -> E1 & S1 Isolation", "-0.0382 PR-AUC combined shift (0.9149 -> 0.8767); controlled S1 group_exact -> group_near isolates -0.0283 PR-AUC (-0.0261 F1)."),
             ("Clean-Clone Parity Check", "Refitting baseline_v1 in-fold reproduces 0.895561 PR-AUC with max_abs_proba_diff = 0.0."),
         ],
         fill=SOFT_BLUE,
@@ -586,7 +586,7 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         2.18,
         "E2 NESTED RFECV RESULT",
         [
-            ("No Meaningful Improvement", "Pruning to 71.4 [39-99] features yields Delta PR-AUC = +0.00003 (p_Holm = 1.00)."),
+            ("No Meaningful Improvement", "Pruning to 71.4 [39-99] features yields Delta PR-AUC = +0.00003 (p_Holm,NB = 1.00)."),
             ("Conclusion", "Retain full 99 baseline features and strictly enforce S_code group_near for RQ2."),
         ],
         accent=NAVY,
@@ -606,7 +606,7 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         [
             ("Opcode Family Grouping", "PUSH1..32 -> PUSH, DUP1..16 -> DUP, SWAP1..16 -> SWAP, LOG0..4 -> LOG."),
             ("Leak-Free Vectorizer", "BigramTopKVectorizer(top_k=200) fitted strictly inside each training fold."),
-            ("Intuition", "Captures dispatcher and guard idioms (e.g., CALLVALUE -> ISZERO -> JUMPI, SLOAD -> CALL)."),
+            ("Intuition", "Captures dispatcher and guard idioms (e.g., CALLVALUE -> DUP, DUP -> REVERT, SLOAD -> LT)."),
         ],
         accent=GREEN,
         font_size=11.0,
@@ -619,8 +619,8 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         3.40,
         "F-GSTAT (16 GRAPH STATS)",
         [
-            ("Opcode Multigraph", "Nodes = normalized opcodes; directed edges = consecutive transitions."),
-            ("Features (16)", "Nodes, edges, density, reciprocity, mean out/in degree & weighted strength, entropy, top-1 out/in ratio, self-loop & /L ratios."),
+            ("Transition Graph", "Nodes = normalized opcodes; weighted directed edges = consecutive transitions."),
+            ("Features (16)", "Nodes, edges, density (|E|/|V|^2), total transitions, mean/max weighted in & out degree, transition entropy, self-loop & 6 /L ratios."),
             ("Role", "Global graph summary baseline without sequential local patterns."),
         ],
         accent=NAVY,
@@ -635,7 +635,7 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         "F-GSEM (15 STATIC CFG FEATS)",
         [
             ("Stack-Local CFG", "Basic blocks + JUMP/JUMPI targets via local PUSH stack propagation."),
-            ("Semantic Signals", "n_blocks, n_cfg_edges, cyclomatic, n_scc_cycles, has_loop_with_call, n_loops_with_call, sstore loops, callvalue->call, call_block_ratio."),
+            ("Semantic Signals", "n_blocks, n_cfg_edges, cyclomatic (|E|-|V|+2, negative when P>1), n_scc_cycles, has_loop_with_call, n_loops_with_call, sstore loops, callvalue->call, call_block_ratio."),
             ("Audit Signals", "unresolved_jump_ratio, selfdestruct reachability, opcode PageRank (CALL, SSTORE)."),
         ],
         accent=ORANGE,
@@ -689,9 +689,9 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         2.22,
         "PRE-REGISTERED STATISTICAL PROTOCOL (m=8 HOLM FAMILY, df=24)",
         [
-            ("E4b vs E1 (Confirmed)", "Delta = +0.0227, 95% NB CI [+0.0096, +0.0358], NB t = +3.57, p_Holm = 4.77e-07 (clears MDE >= 0.02)."),
-            ("E4c vs E1 (Null)", "Delta = +0.0058, 95% NB CI [-0.0037, +0.0152] crosses 0 -> Negative structural result for scalar F-GSEM."),
-            ("E4d vs E4b (Null)", "Adding F-GSEM onto F-BIGRAM adds +0.0016 [-0.0075, +0.0107], p_Holm = 1.00 -> No marginal utility."),
+            ("E4b vs E1 (Confirmed)", "Delta = +0.0227, 95% NB CI [+0.0096, +0.0358], NB t = +3.57, p_Holm,NB = 9.27e-03 (p_Holm,W = 4.77e-07; clears MDE >= 0.02)."),
+            ("E4c vs E1 (Null)", "Delta = +0.0058, 95% NB CI [-0.0037, +0.0152] crosses 0 (p_Holm,NB = 0.880) -> Negative structural result for scalar F-GSEM."),
+            ("E4d vs E4b (Null)", "Adding F-GSEM onto F-BIGRAM adds +0.0016 [-0.0075, +0.0107], p_Holm,NB = 1.00 -> No marginal utility."),
         ],
         fill=SOFT_BLUE,
         border=BLUE_ACCENT,
@@ -751,7 +751,7 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
 
     # Slide 9: XAI & Error Modes
     s9 = _new_slide(prs)
-    _header_footer(s9, "8. Explainability (OOF SHAP) & Structural Error Audit", "Domain-faithful F-GSEM attributions clarify why benign payout loops cause False Positives", 9, total)
+    _header_footer(s9, "8. Explainability (OOF SHAP) & Structural Error Audit", "F-GSEM attributions in E4c & structural error audit (CALL-in-SCC heuristic vs benign loops)", 9, total)
     _add_picture_fit(s9, REPO_ROOT / "figures" / "shap_beeswarm_E4c.png", 0.45, 1.18, 4.25, 3.60)
     _add_picture_fit(s9, REPO_ROOT / "figures" / "cfg_tp.png", 4.88, 1.18, 3.90, 3.60)
     _add_card(
@@ -764,7 +764,7 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         [
             ("call_block_ratio", "mean |SHAP| = 0.2833, Spearman r = +0.874."),
             ("n_loops_with_call", "mean |SHAP| = 0.2061 (SHAP +1.052 when >0 vs -0.114)."),
-            ("n_blocks_with_call", "mean |SHAP| = 0.1707; has_loop_with_call (+0.3191 vs -0.0305)."),
+            ("n_blocks_with_call", "mean |SHAP| = 0.1707; has_loop_with_call (+0.3191 vs -0.0305; static CALL-in-SCC heuristic)."),
             ("unresolved_jump_ratio", "mean |SHAP| = 0.1520, Spearman r = -0.897; 526/7,446 (7.06%) > 0.50 (clears Risk R4 <50%)."),
         ],
         accent=NAVY,
@@ -778,8 +778,8 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         1.98,
         "ERROR ANALYSIS ON SEED-42 OOF E4c (TP=685, FP=125, TN=6,441, FN=195; TOP-24 AUDIT SAMPLE)",
         [
-            ("False Positives (FP=125)", "Legitimate reward/airdrop payout distributors containing CALL-inside-loop SCCs (e.g., xspide_06872, xspide_02699) + 14 FPs inside mixed-label clone clusters."),
-            ("False Negatives (FN=195)", "Minimal/acyclic dispatcher Ponzi wrappers lacking static loop+CALL motifs (e.g., xspide_04097) + 38 FNs inside mixed-label clone clusters."),
+            ("False Positives (FP=125)", "Legitimate reward/airdrop distributors containing CALL-inside-loop SCCs (confirming CALL-in-SCC is a heuristic, not proof of Ponzi payout) + 14 FPs inside mixed-label clone clusters."),
+            ("False Negatives (FN=195)", "Minimal/acyclic pull-withdrawal Ponzi wrappers lacking static loop+CALL motifs (e.g., xspide_04097) + 38 FNs inside mixed-label clone clusters."),
         ],
         fill=SOFT_BLUE,
         border=BLUE_ACCENT,
@@ -815,9 +815,9 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         3.02,
         "CANONICAL EVIDENCE PIPELINE (PHASE 6)",
         [
-            ("Canonical JSON (schema 1.0.0)", "Sorted UTF-8 keys, compact separators, fixed 6-decimal numeric formatting, embedded model_hash & shap_digest."),
-            ("Cryptographic Identifiers", "evidence_hash = keccak256(canonical_bytes); case_id = keccak256(abi.encode(address, contract_id, model_version))."),
-            ("Dual Availability", "IPFS CIDv1 raw-block (bafk...) + persistent local Git mirror evidence/<case_id>.json."),
+            ("Canonical JSON (schema 1.0)", "Sorted UTF-8 keys, compact separators, fixed 6-decimal numeric strings, embedded model_version_hash & shap_digest."),
+            ("Cryptographic Identifiers", "evidence_hash = keccak256(canonical_bytes); case_id = keccak256(abi.encode(chain_id, subject, model_version_hash, run_id))."),
+            ("Dual Availability & Full Verifier", "IPFS CIDv1 raw-block (bafk...) + Git mirror evidence/<case_id>.json; verifier cross-checks hash + subject, chain_id, model_version_hash & case_id."),
         ],
         accent=NAVY,
         font_size=11.0,
@@ -888,9 +888,9 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         5.15,
         12.43,
         1.80,
-        "LIVE TESTNET LATENCY (n=30 EACH) & SEPOLIA SECURITY REVERT PROOFS",
+        "LIVE TESTNET RECEIPT LATENCY (D1.attest, n=30 EACH) & SEPOLIA SECURITY PROOFS",
         [
-            ("Confirmation Latency (RQ3-04)", "Sepolia: median 10.357 s / 1.00 block, p95 = 11.217 s (PASS <= 2 blocks). Arbitrum Sepolia: median 1.226 s / 4.0 L2 blocks, p95 = 1.675 s."),
+            ("Receipt Inclusion Latency (RQ3-04)", "D1.attest (n=30): Sepolia median 10.357 s / 1.00 block, p95 = 11.217 s (PASS <= 2 blocks). Arbitrum Sepolia median 1.226 s / 4.0 L2 blocks, p95 = 1.675 s."),
             ("Live Sepolia Proofs (RQ3-05)", "5/5 T1/T6 revert checks verified status=0 (e.g., owner attest tx 0x56764e897eec...); T8 verify_evidence exact=True & 1-byte tampered=False."),
             ("Accounting Note (*)", "Sepolia Glamsterdam/EIP-8037 reprices state creation (~693k register_case); Arbitrum Sepolia gasUsedForL1=0x0 (reference only)."),
         ],
@@ -911,8 +911,8 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         2.75,
         "NEGATIVE RESULT 1: WHY F-GSEM LOST TO F-BIGRAM",
         [
-            ("Root Cause", "Solidity 0.4-0.5 dynamic dispatch & loop exits route JUMP/JUMPI via stack/memory pointers: median 19.18% (and 526/7,446 > 50%) jumps remain unresolved statically, fragmenting SCC loop back-edges."),
-            ("Why Bigrams Won", "F-BIGRAM preserves micro-idioms (CALLVALUE->ISZERO->JUMPI) losslessly, achieving +0.0227 PR-AUC (and 0.9013 code-only)."),
+            ("Two Plausible Causes", "(1) F-GSEM compresses the CFG into 15 coarse scalar summaries vs 200 fine-grained transitions in F-BIGRAM; (2) Solidity 0.4-0.5 indirect jumps (median 19.18%, 7.06% > 50% unresolved) can fragment static loop back-edges."),
+            ("Why Bigrams Won", "F-BIGRAM preserves micro-idioms (CALLVALUE->DUP, DUP->REVERT, SLOAD->LT), achieving +0.0227 PR-AUC (and 0.9013 code-only)."),
         ],
         fill=SOFT_RED,
         border=RED,
@@ -943,10 +943,10 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         2.80,
         "THREATS TO VALIDITY & FUTURE WORK",
         [
-            ("Internal Label Noise", "10 exact-clone and 24 near-clone groups carry mixed Ponzi/non-Ponzi labels (causing 14 FPs + 38 FNs in E4c)."),
-            ("Construct & Testnet Limits", "Static disassembly skips symbolic execution; live deployments currently use EOA owners (eoa_demo_limit), Arb-Sepolia L1 gas=0x0, Sepolia EIP-8037."),
+            ("Mixed-Label Clone Clusters", "10 exact-clone and 24 near-clone groups carry mixed Ponzi/non-Ponzi labels (14 FPs + 38 FNs in E4c), reflecting up to 10% opcode variation in J>=0.90 clusters or dormant vs active post-deployment behavior."),
+            ("Construct & Governance Limits", "Static disassembly skips symbolic execution (cyclomatic = |E|-|V|+2 < 0 when P>1); global threshold/auditor rotation and approve>=k precedence require Safe + timelock, k > n/2, and frozen rosters during open cases."),
             ("Temporal & External Limits", "Missing block_number prevents S3 temporal holdout on modern proxy/diamond contracts; 8k subset bias (Risk R2); PG only 10 independent Ponzis (Risk R6)."),
-            ("Roadmap", "Migrate owners to 2-of-3 Gnosis Safe, use symbolic IR decompilation (Gigahorse/Vandal), pin IPFS via Pinata/Web3.Storage, and test EIP-712 vote aggregation."),
+            ("Roadmap", "Migrate owners to 2-of-3 Gnosis Safe + timelock, use symbolic IR decompilation (Gigahorse/Vandal), pin IPFS via Pinata/Web3.Storage, and test EIP-712 vote aggregation."),
         ],
         accent=NAVY,
         font_size=11.0,
@@ -1009,7 +1009,7 @@ def build_presentation(out_pptx: Path, out_pdf: Path | None = None) -> tuple[Pat
         5.58,
         11.83,
         1.20,
-        "X-SPIDE-G demonstrates that clone-aware evaluation cuts illusory Ponzi detection gains (-0.0382 PR-AUC), explicit opcode bigrams significantly outperform baseline features (+0.0227 PR-AUC, p_Holm = 4.77e-07) where scalar static CFG features plateau, and verified Vyper k-of-n Merkle batching anchors explainable audit evidence at 3,574.53 gas/case (< $0.001 at L1 reference gas) with zero server-side key exposure.",
+        "X-SPIDE-G demonstrates that moving to clone-grouped nested evaluation reduces PR-AUC by -0.0382 (-0.0283 isolated in S1), explicit opcode bigrams significantly outperform baseline features (+0.0227 PR-AUC, p_Holm,NB = 9.27e-03, p_Holm,W = 4.77e-07) where 15 scalar static CFG features plateau, and verified Vyper k-of-n Merkle batching anchors explainable audit evidence at 3,574.53 gas/case (< $0.001 at L1 reference gas) with zero server-side key exposure.",
         font_size=12.5,
         color=WHITE,
     )
@@ -1210,13 +1210,13 @@ def build_demo_video(out_mp4: Path) -> Path:
         ],
     )
     _video_frame(
-        12, "STEP 9", "DApp Page 4: Hash Integrity Proof -> ✅ VERIFIED & Events",
-        "Loading the canonical JSON artifact recomputes its keccak256 digest and queries D1.verify_evidence(case_id, digest). The smart contract returns True (green VERIFIED badge), accompanied by the full chronological CaseRegistered and Attested event trail.",
+        12, "STEP 9", "DApp Page 4: Hash & Identity Proof -> ✅ VERIFIED & Events",
+        "Loading the canonical JSON artifact recomputes its keccak256 digest, queries D1.verify_evidence(case_id, digest), and cross-checks subject, chain_id, model_version_hash, and case_id against the on-chain Case record. The verifier returns True (green VERIFIED badge), accompanied by the full chronological CaseRegistered and Attested event trail.",
         img_path=shots / "08_page4_verified_events.png",
         card_title="✅ INTEGRITY VERIFIED",
         card_lines=[
             "On-Chain Hash == Recomputed Canonical keccak256 Digest.",
-            "Contract Call: verify_evidence(...) -> True.",
+            "Identity Match: subject, chain_id, model_version_hash & case_id verified.",
             "Event Log: Immutable CaseRegistered + 2x Attested rows confirmed.",
         ],
         accent=GREEN,
@@ -1235,13 +1235,13 @@ def build_demo_video(out_mp4: Path) -> Path:
     )
     _video_frame(
         14, "CLOSING", "Empirical Summary: Batch Scaling (D3) & Final Repository (v1.0-final)",
-        "To summarize: while single-case D1 storage costs 427,461 Cancun gas (reported honestly as FAIL against our 250k limit), D3 Merkle batching amortizes on-chain anchoring to 3,574.53 gas per contract at N=100 (PASS), confirming in 1 block on Sepolia and 1.23 seconds on Arbitrum Sepolia. Thank you!",
+        "To summarize: while single-case D1 storage costs 427,461 Cancun gas (reported honestly as FAIL against our 250k limit), D3 Merkle batching amortizes on-chain anchoring to 3,574.53 gas per contract at N=100 (PASS), while D1.attest confirms receipts in 1 block on Sepolia and 1.23 seconds on Arbitrum Sepolia. Thank you!",
         img_path=REPO_ROOT / "figures" / "gas_vs_batch.png",
         card_title="X-SPIDE-G KEY OUTCOMES",
         card_lines=[
-            "RQ1: Near-clone quarantine removes -0.0382 PR-AUC leakage.",
-            "RQ2: F-BIGRAM Confirmed (+0.0227 PR-AUC); F-GSEM Null (+0.0058).",
-            "RQ3: D3 N=100 = 3,574.53 gas/case (PASS); Arb-Sepolia 1.226 s finality.",
+            "RQ1: E0->E1 shifts PR-AUC by -0.0382 (S1 isolates -0.0283 near-clone effect).",
+            "RQ2: F-BIGRAM Confirmed (+0.0227 PR-AUC, p_Holm,NB=0.0093); F-GSEM Null (+0.0058).",
+            "RQ3: D3 N=100 = 3,574.53 gas/case (PASS); D1.attest 1.226 s Arb-Sepolia receipt.",
             "Reproduce: python -m scripts.run_all --mode verify  (Tag: v1.0-final)",
         ],
         accent=ORANGE,
@@ -1297,11 +1297,22 @@ def build_demo_video(out_mp4: Path) -> Path:
 
 
 def main() -> None:
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Build Phase 8 Presentation PPTX/PDF and optional Demo Video MP4.")
+    parser.add_argument("--skip-video", action="store_true", help="Skip re-rendering the 214s MP4 video via PowerPoint COM.")
+    args = parser.parse_args()
+
+    out_dir = REPO_ROOT / "lab" / "final report"
+    if not out_dir.exists():
+        out_dir = REPO_ROOT
+
     build_presentation(
-        REPO_ROOT / "4_DICTATOR_IS355_Final_Presentation.pptx",
-        REPO_ROOT / "4_DICTATOR_IS355_Final_Presentation.pdf",
+        out_dir / "4_DICTATOR_IS355_Final_Presentation.pptx",
+        out_dir / "4_DICTATOR_IS355_Final_Presentation.pdf",
     )
-    build_demo_video(REPO_ROOT / "demo" / "X-SPIDE-G_demo.mp4")
+    if not args.skip_video:
+        build_demo_video(REPO_ROOT / "demo" / "X-SPIDE-G_demo.mp4")
 
 
 if __name__ == "__main__":

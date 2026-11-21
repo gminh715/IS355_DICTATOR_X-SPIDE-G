@@ -64,7 +64,12 @@
       "spearman_val_vs_shap": 0.8742882222541165,
       "spearman_pval": 0.0,
       "mean_shap_when_gt0": 0.11571925709703236,
+      "mean_shap_when_le0": -0.5357804955126744,
       "mean_shap_when_eq0": -0.5357804955126744,
+      "mean_shap_when_lt0": NaN,
+      "frac_gt0": 0.8538812785388128,
+      "frac_eq0": 0.1461187214611872,
+      "frac_lt0": 0.0,
       "frac_nonzero": 0.8538812785388128
     },
     {
@@ -73,7 +78,12 @@
       "spearman_val_vs_shap": 0.5153667356739224,
       "spearman_pval": 0.0,
       "mean_shap_when_gt0": 1.052036526172316,
+      "mean_shap_when_le0": -0.11376167836648955,
       "mean_shap_when_eq0": -0.11376167836648955,
+      "mean_shap_when_lt0": NaN,
+      "frac_gt0": 0.09844211657265646,
+      "frac_eq0": 0.9015578834273436,
+      "frac_lt0": 0.0,
       "frac_nonzero": 0.09844211657265646
     },
     {
@@ -82,7 +92,12 @@
       "spearman_val_vs_shap": 0.46404974190758236,
       "spearman_pval": 0.0,
       "mean_shap_when_gt0": 0.02536646204820725,
+      "mean_shap_when_le0": -0.20800019919091542,
       "mean_shap_when_eq0": -0.20800019919091542,
+      "mean_shap_when_lt0": NaN,
+      "frac_gt0": 0.8538812785388128,
+      "frac_eq0": 0.1461187214611872,
+      "frac_lt0": 0.0,
       "frac_nonzero": 0.8538812785388128
     },
     {
@@ -91,7 +106,12 @@
       "spearman_val_vs_shap": -0.897208525372268,
       "spearman_pval": 0.0,
       "mean_shap_when_gt0": 0.010143848867914742,
+      "mean_shap_when_le0": 0.34192359074174655,
       "mean_shap_when_eq0": 0.34192359074174655,
+      "mean_shap_when_lt0": NaN,
+      "frac_gt0": 0.995030889067956,
+      "frac_eq0": 0.00496911093204405,
+      "frac_lt0": 0.0,
       "frac_nonzero": 0.995030889067956
     },
     {
@@ -100,7 +120,12 @@
       "spearman_val_vs_shap": 0.705428429050542,
       "spearman_pval": 0.0,
       "mean_shap_when_gt0": 0.014942750036192338,
+      "mean_shap_when_le0": -0.24987151300095392,
       "mean_shap_when_eq0": -0.24987151300095392,
+      "mean_shap_when_lt0": NaN,
+      "frac_gt0": 0.9542035992479183,
+      "frac_eq0": 0.045796400752081655,
+      "frac_lt0": 0.0,
       "frac_nonzero": 0.9542035992479183
     },
     {
@@ -109,7 +134,12 @@
       "spearman_val_vs_shap": 0.5729194771767263,
       "spearman_pval": 0.0,
       "mean_shap_when_gt0": 0.02945281803306103,
+      "mean_shap_when_le0": -0.17852785154861822,
       "mean_shap_when_eq0": -0.17852785154861822,
+      "mean_shap_when_lt0": NaN,
+      "frac_gt0": 0.8538812785388128,
+      "frac_eq0": 0.1461187214611872,
+      "frac_lt0": 0.0,
       "frac_nonzero": 0.8538812785388128
     },
     {
@@ -118,8 +148,13 @@
       "spearman_val_vs_shap": -0.4162449781038896,
       "spearman_pval": 6.2210024225267e-310,
       "mean_shap_when_gt0": -0.023762785114000436,
-      "mean_shap_when_eq0": 0.026577866389561854,
-      "frac_nonzero": 0.4202256244963739
+      "mean_shap_when_le0": 0.026577866389561854,
+      "mean_shap_when_eq0": -0.02651005512618149,
+      "mean_shap_when_lt0": 0.029855059773834253,
+      "frac_gt0": 0.4202256244963739,
+      "frac_eq0": 0.033709374160623154,
+      "frac_lt0": 0.546065001343003,
+      "frac_nonzero": 0.9662906258393769
     },
     {
       "feature": "has_loop_with_call",
@@ -127,7 +162,12 @@
       "spearman_val_vs_shap": 0.514907934295866,
       "spearman_pval": 0.0,
       "mean_shap_when_gt0": 0.31909708965725997,
+      "mean_shap_when_le0": -0.03046522448709112,
       "mean_shap_when_eq0": -0.03046522448709112,
+      "mean_shap_when_lt0": NaN,
+      "frac_gt0": 0.09844211657265646,
+      "frac_eq0": 0.9015578834273436,
+      "frac_lt0": 0.0,
       "frac_nonzero": 0.09844211657265646
     },
     {
@@ -136,7 +176,12 @@
       "spearman_val_vs_shap": 0.15126354745672274,
       "spearman_pval": 2.3379351797547225e-39,
       "mean_shap_when_gt0": 0.005122576002869263,
+      "mean_shap_when_le0": NaN,
       "mean_shap_when_eq0": NaN,
+      "mean_shap_when_lt0": NaN,
+      "frac_gt0": 1.0,
+      "frac_eq0": 0.0,
+      "frac_lt0": 0.0,
       "frac_nonzero": 1.0
     },
     {
@@ -145,7 +190,12 @@
       "spearman_val_vs_shap": 0.11999171180769777,
       "spearman_pval": 2.7555899458824995e-25,
       "mean_shap_when_gt0": 0.0035007930128285983,
+      "mean_shap_when_le0": 0.007627288121400523,
       "mean_shap_when_eq0": 0.007627288121400523,
+      "mean_shap_when_lt0": NaN,
+      "frac_gt0": 0.9998656997045393,
+      "frac_eq0": 0.00013430029546065002,
+      "frac_lt0": 0.0,
       "frac_nonzero": 0.9998656997045393
     },
     {
@@ -154,7 +204,12 @@
       "spearman_val_vs_shap": 0.7128670489309865,
       "spearman_pval": 0.0,
       "mean_shap_when_gt0": 0.05803418715297776,
+      "mean_shap_when_le0": -0.025668624341335065,
       "mean_shap_when_eq0": -0.025668624341335065,
+      "mean_shap_when_lt0": NaN,
+      "frac_gt0": 0.34219715283373625,
+      "frac_eq0": 0.6578028471662638,
+      "frac_lt0": 0.0,
       "frac_nonzero": 0.34219715283373625
     },
     {
@@ -163,7 +218,12 @@
       "spearman_val_vs_shap": -0.41228919485233056,
       "spearman_pval": 1.561386583354689e-303,
       "mean_shap_when_gt0": -0.006895217796617592,
+      "mean_shap_when_le0": 0.019291415715345955,
       "mean_shap_when_eq0": 0.019291415715345955,
+      "mean_shap_when_lt0": NaN,
+      "frac_gt0": 0.7495299489658878,
+      "frac_eq0": 0.2504700510341123,
+      "frac_lt0": 0.0,
       "frac_nonzero": 0.7495299489658878
     },
     {
@@ -172,7 +232,12 @@
       "spearman_val_vs_shap": 0.3587035524228655,
       "spearman_pval": 5.943568756997879e-225,
       "mean_shap_when_gt0": 0.003329068607262388,
+      "mean_shap_when_le0": -0.0047037470123892635,
       "mean_shap_when_eq0": -0.0047037470123892635,
+      "mean_shap_when_lt0": NaN,
+      "frac_gt0": 0.6363147998925598,
+      "frac_eq0": 0.3636852001074402,
+      "frac_lt0": 0.0,
       "frac_nonzero": 0.6363147998925598
     },
     {
@@ -181,7 +246,12 @@
       "spearman_val_vs_shap": 0.3733549528535111,
       "spearman_pval": 5.439429308342393e-245,
       "mean_shap_when_gt0": 0.00926074566188504,
+      "mean_shap_when_le0": -0.000865278832836121,
       "mean_shap_when_eq0": -0.000865278832836121,
+      "mean_shap_when_lt0": NaN,
+      "frac_gt0": 0.0907869997313994,
+      "frac_eq0": 0.9092130002686006,
+      "frac_lt0": 0.0,
       "frac_nonzero": 0.0907869997313994
     },
     {
@@ -190,7 +260,12 @@
       "spearman_val_vs_shap": -0.13005659944721243,
       "spearman_pval": 1.874937854686179e-29,
       "mean_shap_when_gt0": -0.004298157986416632,
+      "mean_shap_when_le0": 0.00035586100320744593,
       "mean_shap_when_eq0": 0.00035586100320744593,
+      "mean_shap_when_lt0": NaN,
+      "frac_gt0": 0.0730593607305936,
+      "frac_eq0": 0.9269406392694064,
+      "frac_lt0": 0.0,
       "frac_nonzero": 0.0730593607305936
     }
   ]

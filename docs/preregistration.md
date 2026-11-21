@@ -83,7 +83,7 @@ Across the **25 paired folds** ($r = 5$ repeats $\times k = 5$ folds, $N_{\text{
 - **Nadeau–Bengio Corrected Resampled $t$-Test:** Accounts for overlapping training sets across repeated CV folds:
   $$\bar{\Delta} = \frac{1}{J} \sum_{i=1}^{J} \Delta_i, \quad \hat{\sigma}_{\text{NB}}^2 = \left(\frac{1}{J} + \frac{n_{\text{test}}}{n_{\text{train}}}\right) s_\Delta^2, \quad \text{CI}_{95\%} = \bar{\Delta} \pm t_{0.975,\, J-1} \cdot \hat{\sigma}_{\text{NB}}$$
   where $J = 25$, $s_\Delta^2$ is the sample variance across the 25 fold deltas, and $\frac{n_{\text{test}}}{n_{\text{train}}}$ is computed per fold (approx. $1/4$ for 5-fold CV).
-- **Wilcoxon Signed-Rank Test + Holm–Bonferroni Adjustment:** Paired non-parametric Wilcoxon signed-rank test across the 25 fold pairs, applying **Holm step-down adjustment** ($p_{\text{Holm}}$) across the 8 pre-registered family comparisons above.
+- **Holm–Bonferroni Step-Down Adjustment & Wilcoxon Diagnostic:** Apply **Holm step-down adjustment** across the 8 pre-registered family comparisons above directly to the Nadeau–Bengio two-sided $p$-values ($p_{\text{Holm}} \equiv p_{\text{Holm,NB}}$) so multiple-testing control accounts for training-fold overlap, while reporting paired non-parametric Wilcoxon signed-rank $p$-values ($p_{\text{Holm,W}}$) alongside as a secondary diagnostic.
 
 ### 4.3. Three-Way Conclusion Decision Rule (MDE = $\Delta\text{PR-AUC} \ge 0.02$)
 For every comparison $(A \text{ vs } B)$, the outcome **must** be classified strictly by these rules:

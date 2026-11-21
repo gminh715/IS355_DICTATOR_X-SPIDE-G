@@ -113,14 +113,28 @@ def run_demo(*, target_samples: list[str] | None = None, tamper_check: bool = Tr
             case_state = read_case(contract, cid_case)
             history = fetch_case_history(w3, contract, cid_case, from_block=0)
             raw_bytes, src = fetch_evidence_bytes(receipt.evidence_uri, case_id=cid_case)
-            ok_local, diag_ok = verify_evidence_payload(raw_bytes, case_state["evidence_hash"])
+            ok_local, diag_ok = verify_evidence_payload(
+                raw_bytes,
+                case_state["evidence_hash"],
+                expected_case_id_hex=cid_case,
+                expected_subject=case_state["subject"],
+                expected_subject_chain_id=case_state["subject_chain_id"],
+                expected_model_version_hash_hex=case_state["model_version_hash"],
+            )
             ok_onchain = verify_evidence_onchain(contract, cid_case, diag_ok["recomputed_hash"])
 
             tamper_result = None
             if tamper_check and idx == 0:
                 tampered = bytearray(raw_bytes)
                 tampered[-2] = ord("X") if tampered[-2] != ord("X") else ord("Y")
-                bad_local, diag_bad = verify_evidence_payload(bytes(tampered), case_state["evidence_hash"])
+                bad_local, diag_bad = verify_evidence_payload(
+                    bytes(tampered),
+                    case_state["evidence_hash"],
+                    expected_case_id_hex=cid_case,
+                    expected_subject=case_state["subject"],
+                    expected_subject_chain_id=case_state["subject_chain_id"],
+                    expected_model_version_hash_hex=case_state["model_version_hash"],
+                )
                 bad_onchain = verify_evidence_onchain(contract, cid_case, diag_bad["recomputed_hash"])
                 tamper_result = {
                     "tampered_hash": diag_bad["recomputed_hash"],
